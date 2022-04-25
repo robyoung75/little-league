@@ -1,0 +1,43 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.scheduleList__headerContainer {
+  padding-top: 0.5rem;
+  /* background: blue; */
+  position: sticky;
+  top: 0;
+
+  background: white;
+}
+
+table {
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th {
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid #a1aaad;
+  /* background-color: pink; */
+}
+@media only screen and (min-width: 992px) {
+  .scheduleList__headerContainer {
+    padding-top: 0;
+  }
+}
+@media only screen and (min-width: 1024px) {
+
+  th {
+    font-size: 0.6rem;
+  }
+}
+
+@media only screen and (min-width: 1200px) {
+  th {
+    font-size: 0.75rem;
+  }
+}

@@ -1,0 +1,23 @@
+.socialSchedule__row {
+  border-bottom: 1px solid #a1aaad;
+  width: 100%;
+}
+
+.socialSchedule__cell {
+  font-size: 0.65rem;
+  width: 20%;
+  height: 3rem;
+  padding: 0.5rem;
+}
+
+@media only screen and (min-width: 1024px) {
+  .socialSchedule__cell {
+    font-size: 0.5rem;
+  }
+}
+
+@media only screen and (min-width: 1200px) {
+  .socialSchedule__cell {
+    font-size: 0.65rem;
+  }
+}

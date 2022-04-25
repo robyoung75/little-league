@@ -1,0 +1,57 @@
+.sideNavbar__notActive {
+  transform: translateX(-100%);
+  transition: all 0.5s;
+  position: absolute;
+}
+
+.sideNavbar__active {
+  text-align: right;
+  transform: translateX(0);
+  transition: all 0.5s;
+  position: absolute;
+}
+
+.sideNavbar__icon {
+  position: absolute;
+  left: 0.25rem;
+}
+
+.sideNavbar__iconClose {
+  padding: 0.5rem;
+}
+
+.sideNavbar__content > p {
+  padding: 0.5rem 1rem;
+  font-size: 0.65rem;
+}
+
+.sideNavbar__content > p:hover {
+  background: #a1aaad;
+}
+
+.sideNavbar__content > h3 {
+  font-size: 0.75rem;
+  padding: 0 1rem 0.5rem 0;
+  border-bottom: 1px solid #a1aaad;
+  width: 100%;
+}
+
+.sideNavbar__link {
+  text-decoration: none;
+  color: inherit;
+}
+
+@media screen and (min-width: 768px) {
+  .sideNavbar__notActive {
+    top: 4rem;
+  }
+
+  .sideNavbar__active {
+    top: 4rem;
+  }
+  .sideNavbar__icon {
+    position: absolute;
+    left: 0.25rem;
+    top: 4rem;
+  }
+}

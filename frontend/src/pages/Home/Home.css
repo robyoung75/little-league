@@ -1,0 +1,124 @@
+.home {
+  background-image: url(../../assets/images/backgrounds/littleLeagueAtBat.jpg);
+  /* height: 600px; You must set a specified height */
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Do not repeat the image */
+  background-size: cover; /* Resize the background image to cover the entire container */
+  padding-top: 2rem;
+}
+
+.home__active {
+  opacity: 0.5;
+}
+
+.home__content {
+  display: flex;
+  flex-wrap: wrap;
+  /* justify-content: center; */
+  /* align-items: center; */
+  /* padding-top: 5rem; */
+  padding-bottom: 5rem;
+}
+
+.home__header {
+  display: flex;
+  flex-direction: column;
+  padding: 5rem 3rem 0 3rem;
+  /* background: red; */
+}
+
+.home__bottom {
+  display: flex;
+  flex-wrap: wrap;
+  padding-top: 3rem;
+}
+
+.home__contentBox {
+  display: flex;
+}
+
+.home__bottomRight {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.home__image {
+  margin: 1rem;
+  
+}
+
+.home__image > h1 {
+  font-size: 1.5rem;
+  color: #fff;
+  opacity: 0.9;
+  margin-bottom: 1rem;
+}
+
+.home__header > h1 {
+  color: #fff;
+  opacity: 0.9;
+}
+
+.home__featuresList {
+  list-style-type: none;
+}
+
+.home__btn {
+  background-color: #007bff;
+  width: 40%;
+  margin-top: 2rem;
+  color: #fff;
+}
+
+.home__btnTextBox {
+  background-color: #007bff;
+  width: 40%;
+  margin-top: 2rem;
+  color: #fff;
+}
+
+.home__btnLink {
+  text-decoration: none;
+  color: inherit;
+}
+
+@media screen and (min-width: 768px) {
+
+  .home__header {
+    padding: 1rem 3rem;
+    /* background: red; */
+  }
+  .home__bottom {
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: flex-start;
+    
+  }
+  .home__bottomRight {
+    width: 40%;
+  }
+
+  .home__image {
+    width: 50%;
+  }
+
+  .home__btn {
+    width: 20%;
+  }
+
+  .home__btnTextBox {
+    width: 50%;
+  }
+}
+
+@media only screen and (min-width: 992px) {
+  .home__btnTextBox {
+    width: 35%;
+  }
+}
+
+@media only screen and (min-width: 1100px) {
+  .home__btnTextBox {
+    width: 30%;
+  }
+}

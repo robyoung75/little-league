@@ -1,0 +1,9 @@
+.userSignIn {
+    display: flex;
+    /* background: red; */
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    height: 100vh;
+   
+}

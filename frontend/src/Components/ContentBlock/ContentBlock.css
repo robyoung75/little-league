@@ -1,0 +1,56 @@
+.contentBlock {
+  display: flex;
+  flex-direction: column;
+  margin: 1rem;
+  width: 100%;
+
+  /* padding: 1rem; */
+
+  /* From https://css.glass */
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 0.25rem;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.contentBlock__header > h1 {
+  font-size: 1.5rem;
+  color: #343a40;
+  border-bottom: 1px solid #cdcdcd;
+  /* margin-bottom: 1rem; */
+  padding: 1rem;
+}
+
+.contentBlock__header > h3 {
+  font-size: 1rem;
+  color: #343a40;
+  /* margin-bottom: 1rem; */
+  padding: 1rem 1rem 0 1rem;
+}
+
+.contentBlock__content {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.75rem;
+  color: #343a40;
+  padding: 1rem;
+}
+
+@media screen and (min-width: 768px) {
+  .contentBlock {
+    height: 100%;
+    /* min-height: 200px; */
+  }
+
+  .contentBlock__content {
+    margin-bottom: 3rem;
+  }
+
+  .contentBlock__btn {
+    position: absolute;
+    bottom: 1rem;
+    width: 100%;
+  }
+}

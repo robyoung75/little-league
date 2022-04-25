@@ -1,0 +1,27 @@
+.playersSignUp {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+    padding-top: 2rem;
+  }
+  
+  .playersSignUp__left {
+    width: 100%;
+  }
+  
+  .playersSignUp__right {
+    width: 100%;
+  }
+  
+  @media only screen and (min-width: 992px) {
+    .playersSignUp {
+      flex-wrap: nowrap;
+    }
+  
+    .playersSignUp__left {
+      width: 40%;
+      border-right: 1px solid #a1aaad;
+      height: 100vh;
+    }
+  }
+  

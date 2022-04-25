@@ -1,0 +1,159 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.navbar {
+  /* top: 0;
+  position: sticky;
+  overflow: hidden;
+  z-index: 2;
+  width: 100%; */
+}
+
+.navbar__header {
+  height: 3rem;
+  z-index: 4;
+  border-bottom: 1px solid #a1aaad;
+  visibility: visible;
+  position: sticky;
+  top: 0;
+  overflow: hidden;
+}
+
+.navbar__hamburger {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  cursor: pointer;
+  z-index: 4;
+  visibility: visible;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.navbar__dropdown {
+  position: absolute;
+  width: 100%;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-100%);
+  transition: all 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.navbar__dropdownActive {
+  position: absolute;
+  width: 100%;
+  transform: translateY(0);
+  transition: all 0.3s;
+  padding-top: 3rem;
+  z-index: 3;
+}
+
+.navbar__list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  list-style-type: none;
+  margin: 0;
+  padding: 3rem 0;
+}
+
+.navbar__listRight {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.navbar__listLeft {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+
+}
+.navbar__listItem {
+  width: 100%;
+  padding: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.navbar__imageContainer {
+  display: flex;
+  justify-content: center;
+}
+
+.navbar__listItemImage {
+  position: fixed;
+  top: 0.5rem;
+  z-index: 4;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+}
+
+.navbar__listLink {
+  text-decoration: none;
+  color: inherit;
+  padding: 0 1rem;
+}
+
+.navbar__listLink:hover,
+.navbar__listLink:focus,
+.navbar__listLink:active,
+.navbar__listLink:visited {
+  transform: scale(1.07);
+}
+
+@media screen and (min-width: 768px) {
+  .navbar__header {
+    display: none;
+  }
+  .navbar__hamburger {
+    display: none;
+  }
+  .navbar__dropdown {
+    visibility: visible;
+    transition: none;
+    top: 4rem;
+    height: 4rem;
+    opacity: 1;
+    border-bottom: 1px solid #a1aaad;
+    position: sticky;
+    z-index: 4;
+    overflow: hidden;
+  }
+  .navbar__dropdownActive {
+    display: none;
+    transition: none;
+  }
+  .navbar__list {
+    width: 100%;
+    flex-wrap: nowrap;
+    padding: 0;
+  }
+
+  .navbar__listRight {
+    
+    width: 50%;
+    flex-wrap: nowrap;
+    
+    
+  }
+  
+  .navbar__listLeft {
+    
+    width: 50%;
+    flex-wrap: nowrap;
+  }
+  .navbar__listItemImage {
+    top: 1.5rem;
+  }
+}

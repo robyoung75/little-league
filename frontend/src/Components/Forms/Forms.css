@@ -1,0 +1,308 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* FORMS */
+
+.adminForm,
+.teamForm,
+.playersForm,
+.coachesForm,
+.scheduleForm,
+.completedForms,
+.signIn {
+  width: 100%;
+}
+
+.formContainer {
+  display: flex;
+  padding: 1rem;
+  width: 100%;
+}
+
+.flexColumn {
+  flex-direction: column;
+}
+
+.form__errors {
+  font-size: 0.65rem;
+  color: #ff0000;
+}
+
+.form > h3 {
+  padding: 0.5rem;
+  font-size: 0.65rem;
+}
+
+.form > p {
+  font-size: 0.5rem;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+  padding: 0.2rem;
+}
+
+input[id="showPassword"] {
+  width: 1rem;
+  height: 1rem;
+  margin-left: 20px;
+}
+
+input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+label {
+  font-size: 0.75rem;
+  padding: 0.25rem 0;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  padding: 1rem 0;
+}
+
+/* IMG FILES */
+
+input[type="file"] {
+  opacity: 0;
+  z-index: -1;
+  display: none;
+  position: relative;
+}
+
+.imgFileInput__select,
+.imgFileInput__label {
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
+.imageUploadContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 1rem 0;
+  height: 2rem;
+  border-radius: 0.25rem;
+  transition: ease-out 0.5s;
+}
+
+.imgFileInput__imgContainer {
+  background: #ffffff;
+}
+
+.imgFileInput__img {
+  width: 40px;
+  height: auto;
+  margin-left: 0.5rem;
+}
+
+/* FORMS PREVIEWS */
+
+.formPreview {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.previewContainer {
+  margin: 1rem;
+  /* border: 1px solid #a1aaad; */
+}
+
+/* FORMS PREVIEWS TABLES */
+
+.formPreview__table {
+  border-collapse: collapse;
+  text-align: left;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.formPreview__tr {
+  border-bottom: 0.5px solid #a1aaad;
+}
+
+.formPreview__th {
+  font-size: 0.45rem;
+  padding: 0.15rem;
+}
+
+.images > h3 {
+  font-size: 0.65rem;
+}
+
+.formPreview__td {
+  font-size: 0.45rem;
+  height: 3rem;
+  padding: 0.15rem;
+}
+
+.formPreview__contentColor {
+  width: 100%;
+  height: 2rem;
+}
+
+.formPreview__btns {
+  margin: 0.75rem 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.formPreview__contentImg {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0.5rem 0;
+}
+
+.formPreview__contentImg > h3 {
+  font-size: 0.65rem;
+  padding-left: 0.25rem;
+}
+
+.formImgPreview {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.formDelete {
+  font-size: 0.5rem;
+  border: none;
+  padding: 0.5rem 0.25rem;
+  border-radius: 0.25rem;
+  transition: ease-out 0.5s;
+  width: 100%;
+  cursor: pointer;
+}
+
+.playersFormPreview__imgs {
+  margin-top: 2rem;
+}
+
+/* FORM REQUIREMENTS */
+
+.requirements > h3 {
+  padding: 1rem 0 0.5rem 0;
+}
+
+.requirements__link {
+  text-decoration: none;
+  color: #fff;
+}
+
+.requirements__btn {
+  background-color: #007bff;
+  width: 40%;
+  margin-top: 2rem;
+  color: #fff;
+}
+
+.requirements__btn:hover {
+  background-color: #a1aaad;
+}
+
+.requirements > ul {
+  list-style-type: none;
+}
+
+/* SIGNIN FORM */
+
+.signIn {
+  background: #e0e0e0;
+  box-shadow: 20px 20px 60px #bebebe, -20px -20px 60px #ffffff;
+  top: 10rem;
+
+  
+}
+
+.signIn__header {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+.signIn__form {
+  display: flex;
+  flex-direction: column;
+  /* background-color: pink; */
+  /* padding: 1rem; */
+  min-height: 300px;
+  padding-top: 3rem;
+  /* justify-content: center; */
+  border: 1px solid #a1aaad;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  position: relative;
+}
+
+.signIn__btn {
+
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 1rem;
+  
+}
+
+@media screen and (min-width: 768px) {
+  .signIn {
+    width: 50%;
+  }
+}
+
+@media only screen and (min-width: 992px) {
+  .playersForm {
+    overflow-y: scroll;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+    height: 700px;
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .playersForm::-webkit-scrollbar {
+    display: none;
+  }
+
+  .formPreview__contentImg > h3 {
+    font-size: 0.75rem;
+  }
+
+  .formPreview__td {
+    font-size: 0.75rem;
+  }
+
+  .formPreview__th {
+    font-size: 0.75rem;
+  }
+
+  .images > h3 {
+    font-size: 0.75rem;
+  }
+
+  .form > h3 {
+    font-size: 0.75rem;
+  }
+
+  .formDelete {
+    font-size: 0.75rem;
+    padding: 0.5rem;
+  }
+
+  .signIn {
+    width: 30%;
+  }
+}

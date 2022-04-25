@@ -1,0 +1,9 @@
+.imgCarousel {
+  margin-bottom: 0.5rem;
+}
+
+@media screen and (min-width: 768px) {
+  .imgCarousel {
+    margin-top: -3rem;
+  }
+}

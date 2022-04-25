@@ -1,0 +1,30 @@
+.avatar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 2.75rem;
+  width: 2.75rem;
+  background: #a1aaad;
+  border-radius: 50%;
+  border: 2px solid #a1aaad;
+  color: #ffffff;
+}
+
+.avatar__img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+  
+  }
+
+.avatar__badge {
+    position: absolute;
+    display: block;
+    top: 0;
+    left: 2px;
+    width: .75rem;
+    height: .75rem;
+    background: #08FF08;
+    border-radius: 50%;
+    border: 1px solid #a1aaad;
+}

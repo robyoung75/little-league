@@ -1,0 +1,84 @@
+.postInput {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.postInput__avatar {
+  position: absolute;
+  top: 0.4rem;
+  left: 0.4rem;
+}
+
+.postInput__header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 3.5rem;
+  border-bottom: 1px solid #a1aaad;
+  padding: 0 0.5rem;
+}
+
+.postInput__input {
+  position: absolute;
+  left: 3.5rem;
+  width: 35%;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.65rem;
+}
+
+.postInput__btns {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 50%;
+  /* background: pink; */
+}
+
+.postInput__btn {
+  width: 45%;
+  margin: 0 0.25rem;
+}
+
+.btn {
+  font-size: 0.65rem;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  margin: 0.25rem;
+  transition: ease-out 1s;
+  width: 100%;
+
+}
+
+@media screen and (min-width: 768px) {
+  .postInput__input {
+    width: 60%;
+    font-size: 0.75rem;
+  }
+  .postInput__btns {
+    width: 30%;
+    /* background: pink; */
+    
+  }
+
+  .btn {
+    font-size: 0.75rem;
+  }
+}
+
+@media only screen and (min-width: 1024px) {
+  .postInput {
+    margin: 0 0.5rem 0.5rem 0.5rem;
+  }
+
+  .postInput__input {
+    width: 50%;
+  }
+
+  .postInput__btns {
+    width: 40%;
+  }
+}

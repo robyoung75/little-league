@@ -1,0 +1,8 @@
+.imgContainer {
+    display: flex;
+    width: 100%;
+}
+
+.imgContainer__image {
+    width: 100%;
+}

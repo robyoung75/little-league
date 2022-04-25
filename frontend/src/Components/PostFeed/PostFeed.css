@@ -1,0 +1,67 @@
+.postImage {
+  display: flex;
+  flex-direction: column;
+
+  margin-bottom: 0.5rem;
+}
+
+.postImage__header {
+  display: flex;
+  align-items: center;
+  height: 3.5rem;
+  border-bottom: 1px solid #a1aaad;
+  padding: .5rem;
+}
+
+.postImage__info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0 0.25rem;
+}
+
+.postImage__info > span {
+  font-size: 0.75rem;
+}
+
+.postImage__img {
+  width: 100%;
+  height: auto;
+}
+
+.postFeed {
+  display: flex;
+  flex-direction: column;
+}
+
+.postFeed__avatar {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.postFeed__avatar > span {
+  margin-left: 1rem;
+  font-size: 0.75rem;
+}
+
+.postImage__btnContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* background: red; */
+}
+
+.postImage__btn {
+  width: 30%;
+}
+
+@media only screen and (min-width: 1024px) {
+  .postImage {
+    margin-bottom: 0.5rem;
+  }
+  .postFeed {
+    margin: 0 0.5rem;
+  }
+}

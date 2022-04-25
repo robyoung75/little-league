@@ -1,0 +1,21 @@
+.mobileCalendar__table {
+  width: 100%;
+}
+
+.gameDay__row {
+  border-bottom: 1px solid #a1aaad;
+  width: 100%;
+}
+
+.gameDay__cell {
+  font-size: 0.65rem;
+  width: 20%;
+  height: 3rem;
+  padding: 0.5rem;
+}
+
+@media screen and (min-width: 768px) {
+  .mobileCalendar {
+    display: none;
+  }
+}
