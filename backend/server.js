@@ -1,12 +1,18 @@
+// import epress server
 import express from "express";
+// import mongoose for my schemas
 import mongoose from "mongoose";
+// import cors for cross origin
 import Cors from "cors";
+// import donenv for my environment file, for passwords and other secure information
 import dotenv from "dotenv";
+// impor cookiParse to pars data to json format
 import cookieParser from "cookie-parser";
 
 // import routes
 import { authRoute } from "./routes/authRoutes.js";
 
+// configure dotenv file
 dotenv.config();
 
 // configure app
@@ -32,6 +38,7 @@ mongoose.connect(connection_url, {
   useUnifiedTopology: true,
 });
 
+// mongo db connection
 const db_connection = mongoose.connection;
 
 db_connection.once("open", () => {

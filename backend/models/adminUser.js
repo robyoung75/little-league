@@ -33,19 +33,21 @@ const AdminSchema = new Schema({
     maxlength: 1024,
     minlength: [6, `Minimum password length 6 characters`],
   },
+  admin: {
+    type: String,
+  },
   date: {
     type: Date,
     default: Date.now,
   },
 });
 
-
 // mongoose middleware
 
 // this function will fire after a doc is saved to the database
 AdminSchema.post("save", function (doc, next) {
-    console.log("A new user was saved", doc);
-    next();
-  });
+  console.log("A new user was saved", doc);
+  next();
+});
 
-  export default mongoose.model("admin", AdminSchema)
+export default mongoose.model("admin", AdminSchema);
