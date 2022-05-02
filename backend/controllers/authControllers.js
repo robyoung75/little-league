@@ -1,12 +1,11 @@
-// import schemas
+// import model schemas from models/...
 import AdminSchema from "../models/adminUser.js";
 
-// import errors functions
+// import errors functions from errors/errors.js
 import { handleErrors } from "../errors/errors.js";
 
-// import jsonwebtoken
-import { createToken, maxAge } from "./createJWT.js";
-import jwt from "jsonwebtoken";
+// import jsonwebtoken functions from createJWT.js
+import { createJwtToken, maxAge, verifyJwtToken } from "./createJWT.js";
 
 // create admin user
 const adminUser_post = async (req, res) => {
@@ -24,11 +23,10 @@ const adminUser_post = async (req, res) => {
     });
 
     // create a jwt token
-    const token = createToken(newAdmin._id);
+    const token = createJwtToken(newAdmin._id);
     console.log(token);
-    const verifyToken = jwt.verify(token, process.env.TOKEN_SECRET);
-    console.log(verifyToken);
-
+    verifyJwtToken(token, process.env.TOKEN_SECRET)
+   
     // send token as a cookie
     res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
 
