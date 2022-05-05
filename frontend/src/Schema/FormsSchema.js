@@ -4,6 +4,7 @@ export const adminSchema = yup.object({
   firstName: yup.string().min(2).required(),
   lastName: yup.string().min(3).required(),
   email: yup.string().email().required(),
+  teamUserName: yup.string().min(6).required("please enter a minimum of six characters for the team user name"),
   password: yup.string().min(6).required(),
   password_confirm: yup
     .string()

@@ -12,6 +12,7 @@ function AdminFormPreview({ adminData }) {
               <th className="formPreview__th">First name</th>
               <th className="formPreview__th">Last name</th>
               <th className="formPreview__th">Email</th>
+              <th className="formPreview__th">Team user name</th>
               <th className="formPreview__th">Password</th>
             </tr>
           </thead>
@@ -30,6 +31,11 @@ function AdminFormPreview({ adminData }) {
               <td className="formPreview__td">
                 <div className="formPreview__content">
                   {adminData && adminData.email}
+                </div>
+              </td>
+              <td className="formPreview__td">
+                <div className="formPreview__content">
+                  {adminData && adminData.teamUserName}
                 </div>
               </td>
               <td className="formPreview__td">

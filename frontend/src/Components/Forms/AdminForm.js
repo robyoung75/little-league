@@ -79,6 +79,17 @@ function AdminForm({ setNewAdminData, newAdminData }) {
         {errors.email && (
           <span className="form__errors">{errors.email.message}</span>
         )}
+        <label htmlFor="teamUserName">Team User name:</label>
+        <input
+          type="text"
+          id="teamUserName"
+          name="teamUserName"
+          aria-describedby="teamUserName"
+          {...register("teamUserName")}
+        />
+        {errors.teamUserName && (
+          <span className="form__errors">{errors.teamUserName.message}</span>
+        )}
         <label htmlFor="password">Password:</label>
         <input
           type={checked ? "text" : "password"}
