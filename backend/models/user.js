@@ -27,14 +27,14 @@ const UserSchema = new Schema({
     lowercase: true,
     validate: [isEmail, "Please enter a valid email"],
   },
-  teamName: {
+  teamUserName: {
     type: String,
-    required: [true, "Please enter a minimum six character team user name"],
-    unique: true,
+    required: [true, "Please enter a valid team user name provided from your website administrator"],
     lowercase: true,
-    minlength: 3,
+    minlength: 6,
     maxlength: 20,
   },
+
   password: {
     type: String,
     required: [true, `Please enter your password`],

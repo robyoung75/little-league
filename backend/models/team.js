@@ -21,6 +21,10 @@ const TeamSchema = new Schema({
     minlength: 7,
     required: [true, "Please select a secondary color"],
   },
+  teamId: {
+    type: String,
+    required: [true, "You do not have an account administrator"],
+  },
   date: {
     type: Date,
     default: Date.now,

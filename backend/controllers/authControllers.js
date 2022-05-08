@@ -8,17 +8,20 @@ import { handleErrors } from "../errors/errors.js";
 // import jsonwebtoken functions from createJWT.js
 import { createJwtToken, maxAge } from "./createJWT.js";
 import team from "../models/team.js";
+import aminUser from "../models/aminUser.js";
 
 // create admin user
 const adminUser_post = async (req, res) => {
   // req body
-  const { firstName, lastName, email, teamName, password } = req.body;
+  const { firstName, lastName, email, teamName, teamUserName, password } =
+    req.body;
 
   const adminUser = {
     firstName,
     lastName,
     email,
     teamName,
+    teamUserName,
     password,
     admin: true,
   };
@@ -40,6 +43,7 @@ const adminUser_post = async (req, res) => {
       adminLastName: newAdmin.lastName,
       adminEmail: newAdmin.email,
       teamName: newAdmin.teamName,
+      teamUserName: newAdmin.teamUserName,
       adminPassword: newAdmin.password,
       admin: newAdmin.admin,
     };
@@ -54,20 +58,22 @@ const adminUser_post = async (req, res) => {
 };
 
 const createUser_post = async (req, res) => {
-  const { firstName, lastName, email, password, teamName } = req.body;
+  const { firstName, lastName, email, password, teamName, teamUserName } =
+    req.body;
   console.log(teamName);
-  const adminUser = await AdminUserSchema.findOne({teamName});
+  const adminUser = await AdminUserSchema.findOne({ teamUserName });
   console.log(adminUser);
 
   try {
-    if (adminUser && teamName === adminUser.teamName) {
+    if (adminUser && teamUserName === adminUser.teamUserName) {
       const user = {
         firstName,
         lastName,
         email,
         password,
         teamName: adminUser.teamName,
-        teamId: adminUser._id
+        teamUserName: adminUser.teamUserName,
+        teamId: adminUser._id,
       };
       const newUser = UserSchema.create(user);
 
@@ -78,13 +84,19 @@ const createUser_post = async (req, res) => {
       // send token as a cookie
       res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
 
+      // response
       const response = {
-        email: newUser.email,
-        password: newUser.password,
-        teamName: newUser.teamName,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        password: user.password,
+        teamName: adminUser.teamName,
+        teamUserName: adminUser.teamUserName,
+        teamId: adminUser._id,
       };
 
-      res.status(200).json(response);
+      // send newUser resposne
+      res.status(200).send(response);
     }
   } catch (error) {
     const errors = handleErrors(error);

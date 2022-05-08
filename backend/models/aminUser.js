@@ -35,6 +35,14 @@ const AdminUserSchema = new Schema({
     minlength: 3,
     maxlength: 20,
   },
+  teamUserName: {
+    type: String,
+    required: [true, "Please enter a unique team user name"],
+    unique: true,
+    lowercase: true,
+    minlength: 6,
+    maxlength: 20,
+  },
   password: {
     type: String,
     required: [true, `Please enter your password`],
