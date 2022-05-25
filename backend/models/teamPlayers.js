@@ -10,6 +10,14 @@ const TeamPlayersSchema = new Schema({
     type: String,
     required: true,
   },
+  teamUserName: {
+    type: String,
+    required: true
+  },
+  teamName: {
+    type: String,
+    required: true
+  },
   players: [PlayerSchema],
 });
 

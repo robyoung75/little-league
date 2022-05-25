@@ -8,6 +8,7 @@ import { teamSchema } from "../../Schema/FormsSchema";
 import { ThemedButton } from "../../utils/ThemedComponents";
 import { useStateValue } from "../../Context/stateProvider";
 import { useNavigate } from "react-router-dom";
+import { adminTeamPost } from "../../assets/requests";
 
 //  eventHandlers
 import {
@@ -29,6 +30,7 @@ function TeamForm({ newTeamData, setNewTeamData }) {
     initialState.secondaryColor
   );
   const [logoPreview, setLogoPreview] = useState(null);
+  const [imgFile, setImgFile] = useState(null);
   const [{ theme }] = useStateValue();
   const [mouseOver, setMouseOver] = useState(false);
   const [mouseOverFile, setMouseOverFile] = useState(false);
@@ -42,37 +44,30 @@ function TeamForm({ newTeamData, setNewTeamData }) {
     formState: { errors, isSubmitSuccessful },
   } = useForm({ resolver: yupResolver(teamSchema) });
 
-  const formSubmit = (data) => {
+  const formSubmit = async (data) => {
     if (isSubmitSuccessful) {
-      data.teamLogo = logoPreview;
-      data.primaryColor = primaryColor;
-      data.secondaryColor = secondaryColor;
-
+      let formData = new FormData();
+      formData.append("teamLogo", imgFile);
+      formData.append("primaryColor", data.primaryColor);
+      formData.append("secondaryColor", data.secondaryColor);
+      await adminTeamPost(formData);
+      // localStorage.clear();
       localStorage.setItem("team data", JSON.stringify(data));
       newTeamData ? setNewTeamData(false) : setNewTeamData(true);
       setLogoPreview(null);
+      setImgFile(null);
       reset();
     }
   };
 
   return (
     <div className="teamForm form">
-      <h3>Team Form</h3>
+   
+      <h3>Team Form: Team Name Here</h3>
       <form
         className="teamForm__form formContainer flexColumn"
         onSubmit={handleSubmit(formSubmit)}
       >
-        <label htmlFor="tname">Team name:</label>
-        <input
-          type="text"
-          id="tname"
-          name="tname"
-          aria-describedby="userFirstName"
-          {...register("teamName")}
-        />
-        {errors.teamName && (
-          <span className="form__errors">{errors.teamName.message}</span>
-        )}
         <label htmlFor="primaryColor">Select your primary color</label>
         <input
           type="color"
@@ -100,7 +95,10 @@ function TeamForm({ newTeamData, setNewTeamData }) {
           name="teamLogo"
           htmlFor="teamLogo"
           title="Select team logo image"
-          onChange={(e) => handleImgPreview(e, setLogoPreview, imgURL)}
+          onChange={(e) => (
+            handleImgPreview(e, setLogoPreview, imgURL),
+            setImgFile(e.target.files[0])
+          )}
           onClick={(e) => handleImgCancel(e, setLogoPreview)}
           preview={logoPreview}
           alt="team logo"

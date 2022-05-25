@@ -233,6 +233,7 @@ const months = [
 //  IMAGE HANDLING
 // returns a URL for an uploaded image
 const imgURL = (imageFile) => {
+
   return URL.createObjectURL(imageFile.target.files[0]);
 };
 

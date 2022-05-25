@@ -7,6 +7,10 @@ import "./Navbar.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faX } from "@fortawesome/free-solid-svg-icons";
 
+import { authUserSignOut } from "../../assets/requests";
+
+import { handleUserAuthentication } from "../../assets/eventHandlers";
+
 function Navbar({ isActive, setActive, mobile, signedIn, setSignedIn }) {
   const [{ theme, teamData }] = useStateValue();
 
@@ -25,6 +29,19 @@ function Navbar({ isActive, setActive, mobile, signedIn, setSignedIn }) {
   const handleCloseMobileNav = (e) => {
     if (isActive === true) {
       setActive(false);
+    }
+  };
+
+  const handleAuthentication = async (e) => {
+    e.preventDefault();
+
+    if (signedIn) {
+      setSignedIn(false);
+      await authUserSignOut();
+    }
+
+    if (!signedIn) {
+      setSignedIn(true);
     }
   };
 
@@ -90,7 +107,18 @@ function Navbar({ isActive, setActive, mobile, signedIn, setSignedIn }) {
                 style={theme.style}
               >
                 {signedIn === true ? (
-                  <span onClick={(e) => setSignedIn(false)}>Sign out</span>
+                  <span
+                    onClick={(e) =>
+                      handleUserAuthentication(
+                        e,
+                        signedIn,
+                        setSignedIn,
+                        authUserSignOut
+                      )
+                    }
+                  >
+                    Sign out
+                  </span>
                 ) : (
                   <span>Sign in</span>
                 )}

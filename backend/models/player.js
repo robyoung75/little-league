@@ -39,6 +39,7 @@ const PlayerSchema = new Schema({
     type: String,
     required: true,
   },
+
 });
 
 export default PlayerSchema;

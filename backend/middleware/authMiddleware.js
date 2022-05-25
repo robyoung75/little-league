@@ -11,8 +11,8 @@ const requiresAuth = (req, res, next) => {
     req.userId = auth;
     next();
   } else {
-    let error = new Error("unauthorized you must be an authorized user");
-    req.error = error;
+    let error = new Error("you must be signed in an authorized to proceed");
+    req.error = error.message;
     next();
   }
 };

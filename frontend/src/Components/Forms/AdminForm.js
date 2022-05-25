@@ -6,6 +6,7 @@ import "./Forms.css";
 import { ThemedButton } from "../../utils/ThemedComponents";
 import { useStateValue } from "../../Context/stateProvider";
 import { useNavigate } from "react-router-dom";
+import { adminUserPost, authUserSignOut } from "../../assets/requests";
 
 //  event handlers
 import {
@@ -30,14 +31,23 @@ function AdminForm({ setNewAdminData, newAdminData }) {
     formState: { errors, isSubmitSuccessful },
   } = useForm({ resolver: yupResolver(adminSchema) });
 
-  const formSubmit = (data) => {
+  const formSubmit = async (data) => {
     if (isSubmitSuccessful) {
+      console.log(data);
+      await adminUserPost(data);
       localStorage.setItem("admin data", JSON.stringify(data));
       newAdminData ? setNewAdminData(false) : setNewAdminData(true);
 
       reset();
     }
   };
+
+  const handleSignOut = (e) => {
+    console.log('signingout')
+    e.preventDefault();
+    authUserSignOut()
+    
+  }
 
   return (
     <div className="adminForm form">
@@ -79,6 +89,17 @@ function AdminForm({ setNewAdminData, newAdminData }) {
         {errors.email && (
           <span className="form__errors">{errors.email.message}</span>
         )}
+        <label htmlFor="teamName">Team name:</label>
+        <input
+          type="text"
+          id="teamName"
+          name="teamName"
+          aria-describedby="teamName"
+          {...register("teamName")}
+        />
+        {errors.teamName && (
+          <span className="form__errors">{errors.teamName.message}</span>
+        )}
         <label htmlFor="teamUserName">Team User name:</label>
         <input
           type="text"
@@ -90,12 +111,14 @@ function AdminForm({ setNewAdminData, newAdminData }) {
         {errors.teamUserName && (
           <span className="form__errors">{errors.teamUserName.message}</span>
         )}
+
         <label htmlFor="password">Password:</label>
         <input
           type={checked ? "text" : "password"}
           id="password"
           name="password"
           aria-describedby="userPassword"
+          autoComplete="on"
           {...register("password")}
         />
         {errors.password && (
@@ -107,6 +130,7 @@ function AdminForm({ setNewAdminData, newAdminData }) {
           id="confirmPassword"
           name="confirmPassword"
           aria-describedby="userConfirmPassword"
+          autoComplete="on"
           {...register("password_confirm")}
         />
         {errors.password_confirm && (
@@ -152,6 +176,7 @@ function AdminForm({ setNewAdminData, newAdminData }) {
           </ThemedButton>
         </div>
       </form>
+      <button onClick={handleSignOut}>sign out</button>
     </div>
   );
 }

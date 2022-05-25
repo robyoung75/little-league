@@ -25,6 +25,7 @@ export const handleErrors = (err) => {
 
   if (err.code === 11000) {
     errors.user = `${err.keyValue.email} already exists, user must be unique.`;
+    console.log(errors);
   }
 
   return errors;

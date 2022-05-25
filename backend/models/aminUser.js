@@ -30,7 +30,7 @@ const AdminUserSchema = new Schema({
   teamName: {
     type: String,
     required: [true, "Please enter a minimum six character team user name"],
-    unique: true,
+    
     lowercase: true,
     minlength: 3,
     maxlength: 20,
@@ -73,12 +73,20 @@ AdminUserSchema.pre("save", async (next) => {
 
 // this is a static method that can be used with the AdminUserSchema model
 AdminUserSchema.statics.login = async function (email, password) {
-  const user = await this.findOne({ email });
-
-  if (user) {
-    return user;
+  console.log({adminUserSchema_statics_login: [email, password] })
+  let authUser = {
+    auth: false
   }
-  throw Error("Incorrect password");
+   const user = await this.findOne({ email });
+
+  if (user && user.password === password) {
+    authUser.auth = true
+    if (authUser) {
+      return user;
+    }
+    throw Error("Incorrect password");
+  }
+  throw Error("This email does not exist");
 };
 
 export default mongoose.model("admin", AdminUserSchema);

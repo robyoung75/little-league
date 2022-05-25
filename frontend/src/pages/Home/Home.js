@@ -38,6 +38,7 @@ function Home({ isActive }) {
   );
 
   return (
+    
     <div className={isActive ? "home home__active" : "home"}>
       <div className="home__content">
         <div className="home__header">
@@ -65,6 +66,7 @@ function Home({ isActive }) {
           </div>
         </div>
       </div>
+      
     </div>
   );
 }

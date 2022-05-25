@@ -7,8 +7,6 @@ import { handleErrors } from "../errors/errors.js";
 
 // import jsonwebtoken functions from createJWT.js
 import { createJwtToken, maxAge } from "./createJWT.js";
-import team from "../models/team.js";
-import aminUser from "../models/aminUser.js";
 
 // create admin user
 const adminUser_post = async (req, res) => {
@@ -16,29 +14,23 @@ const adminUser_post = async (req, res) => {
   const { firstName, lastName, email, teamName, teamUserName, password } =
     req.body;
 
-  const adminUser = {
-    firstName,
-    lastName,
-    email,
-    teamName,
-    teamUserName,
-    password,
-    admin: true,
-  };
-
   try {
     // newAdmin user with mongoose user schema
-    const newAdmin = await AdminUserSchema.create(adminUser);
-
+    const newAdmin = await AdminUserSchema.create({
+      firstName,
+      lastName,
+      email,
+      teamName,
+      teamUserName,
+      password,
+    });
     // create a jwt token
     const token = createJwtToken(newAdmin._id);
-    console.log("token from authControllers adminUser", token);
-
+    console.log("authControllers adminUser token", token);
     // send token as a cookie
     res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
-
-    // response
-    const response = {
+    // send
+    res.status(201).json({
       adminFirstName: newAdmin.firstName,
       adminLastName: newAdmin.lastName,
       adminEmail: newAdmin.email,
@@ -46,23 +38,18 @@ const adminUser_post = async (req, res) => {
       teamUserName: newAdmin.teamUserName,
       adminPassword: newAdmin.password,
       admin: newAdmin.admin,
-    };
-
-    // send newAdminUser
-    console.log("newAdmin", response);
-    res.status(200).json(response);
+      adminUserId: newAdmin._id,
+    });
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });
   }
 };
-
 const createUser_post = async (req, res) => {
   const { firstName, lastName, email, password, teamName, teamUserName } =
     req.body;
-  console.log(teamName);
+
   const adminUser = await AdminUserSchema.findOne({ teamUserName });
-  console.log(adminUser);
 
   try {
     if (adminUser && teamUserName === adminUser.teamUserName) {
@@ -79,7 +66,6 @@ const createUser_post = async (req, res) => {
 
       // create a jwt token
       const token = createJwtToken(newUser._id);
-      console.log("token from authControllers newUser", token);
 
       // send token as a cookie
       res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
@@ -100,23 +86,31 @@ const createUser_post = async (req, res) => {
     }
   } catch (error) {
     const errors = handleErrors(error);
-    res.status(400).json({ errors });
+    console.log({ message: errors });
+    res.status(400).json({ message: errors });
   }
 };
 
 const signInUser_post = async (req, res) => {
   const { email, password } = req.body;
-  const authUser = await AdminUserSchema.login(email, password);
-  const token = createJwtToken(authUser._id);
-  // send token as a cookie
-  res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
-  res.status(200).json({
-    userId: authUser._id,
-    userEmail: authUser.email,
-  });
+  console.log({signInUser_post: [email, password]})
 
   try {
-  } catch (error) {}
+    const authUser = await AdminUserSchema.login(email, password);
+    if (authUser) {
+      // create jwt token
+      const token = createJwtToken(authUser._id);
+      console.log("jwt new admin user", token);
+      // send token as a cookie
+      res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
+      res.status(200).json({
+        userId: authUser._id,
+        userEmail: authUser.email,
+      });
+    }
+  } catch (error) {
+    console.log({signInUser_post: error})
+  }
 };
 
 const signOutUser_get = async (req, res) => {

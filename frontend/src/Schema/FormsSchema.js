@@ -4,7 +4,16 @@ export const adminSchema = yup.object({
   firstName: yup.string().min(2).required(),
   lastName: yup.string().min(3).required(),
   email: yup.string().email().required(),
-  teamUserName: yup.string().min(6).required("please enter a minimum of six characters for the team user name"),
+  teamName: yup
+    .string()
+    .min(3)
+    .required("please enter a minimum of three characters for team name"),
+  teamUserName: yup
+    .string()
+    .min(6)
+    .required(
+      "please enter a minimum of six characters for the team user name"
+    ),
   password: yup.string().min(6).required(),
   password_confirm: yup
     .string()
@@ -41,11 +50,10 @@ export const scheduleSchema = yup.object({
   uniform: yup.string(),
 });
 
-export const teamSchema = yup.object().shape({
-  teamName: yup.string().required("Team name is required"),
-});
+export const teamSchema = yup.object().shape({});
 
 export const signInSchema = yup.object().shape({
-  userName: yup.string().required("user name is required"),
-  userPassword: yup.string().required("user password is required")
-})
+  teamUserName: yup.string().required("user name is required"),
+  email: yup.string().email().required(),
+  password: yup.string().required("user password is required"),
+});

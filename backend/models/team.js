@@ -29,6 +29,10 @@ const TeamSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  teamLogo: {
+    type: String,
+    required: true
+  }
 });
 
 // mongoose middleware
