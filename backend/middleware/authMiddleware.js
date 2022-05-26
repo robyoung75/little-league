@@ -1,6 +1,7 @@
 // import verifyJwtToke from ../controllers/createJWT.js
 import { verifyJwtToken } from "../controllers/createJWT.js";
 
+
 const requiresAuth = (req, res, next) => {
   const token = req.cookies.jwt;
 
@@ -16,5 +17,7 @@ const requiresAuth = (req, res, next) => {
     next();
   }
 };
+
+
 
 export { requiresAuth };

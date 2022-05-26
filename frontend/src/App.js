@@ -48,7 +48,7 @@ function App() {
       });
       return signedIn;
     };
-    setAuthUser(user());
+    setAuthUser(user(userData.email));
   }, []);
 
   useEffect(() => {

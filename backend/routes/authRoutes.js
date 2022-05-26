@@ -8,8 +8,12 @@ import {
 } from "../controllers/authControllers.js";
 
 import {
+  authPlayers_post
+} from '../controllers/playersControllers.js'
+
+import {
   authTeam_post,
-  authPlayers_post,
+  
 } from "../controllers/teamControllers.js";
 
 import { cloudinaryUpload_post } from "../controllers/cloudinaryUpload.js";

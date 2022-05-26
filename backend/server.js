@@ -30,6 +30,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(cookieParser());
 app.use(morgan("dev"));
 
+
 const corsOptions = {
   origin: true,
   credentials: true,

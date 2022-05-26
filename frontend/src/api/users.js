@@ -3,10 +3,10 @@ import { ryker } from "./imagesData";
 
 const users = [
   {
-    firstName: "8righton",
+    firstName: "Brighton",
     lastName: "young",
     email: "byoung@gmail.com",
-    team: "colts",
+    teamName: "colts",
     teamId: "111111",    
     image: brighton,
   },
@@ -14,7 +14,7 @@ const users = [
     firstName: "ryker",
     lastName: "krekes",
     email: "rykerk@gmail.com",
-    team: "razorbacks",
+    teamName: "razorbacks",
     teamId: "111112",    
     image: ryker,
   },

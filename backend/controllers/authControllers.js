@@ -45,6 +45,7 @@ const adminUser_post = async (req, res) => {
     res.status(400).json({ errors });
   }
 };
+
 const createUser_post = async (req, res) => {
   const { firstName, lastName, email, password, teamName, teamUserName } =
     req.body;
@@ -91,6 +92,7 @@ const createUser_post = async (req, res) => {
   }
 };
 
+// user sign in
 const signInUser_post = async (req, res) => {
   const { email, password } = req.body;
   console.log({signInUser_post: [email, password]})
@@ -104,8 +106,12 @@ const signInUser_post = async (req, res) => {
       // send token as a cookie
       res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
       res.status(200).json({
-        userId: authUser._id,
+        teamId: authUser._id,
         userEmail: authUser.email,
+        firstName: authUser.firstName,
+        lastName: authUser.lastName,
+        teamName: authUser.teamName,
+        teamUserName: authUser.teamUserName
       });
     }
   } catch (error) {

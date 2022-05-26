@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import "./Forms.css";
+
 import ImgFileInput from "./ImgFileInput";
-import { imgURL } from "../../assets/functions";
+import { imgURL, handleFirstLetterCap} from "../../assets/functions";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { teamSchema } from "../../Schema/FormsSchema";
@@ -31,7 +32,7 @@ function TeamForm({ newTeamData, setNewTeamData }) {
   );
   const [logoPreview, setLogoPreview] = useState(null);
   const [imgFile, setImgFile] = useState(null);
-  const [{ theme }] = useStateValue();
+  const [{ theme, userData }] = useStateValue();
   const [mouseOver, setMouseOver] = useState(false);
   const [mouseOverFile, setMouseOverFile] = useState(false);
   const [mouseOverNext, setMouseOverNext] = useState(false);
@@ -62,8 +63,9 @@ function TeamForm({ newTeamData, setNewTeamData }) {
 
   return (
     <div className="teamForm form">
-   
-      <h3>Team Form: Team Name Here</h3>
+      <h3>
+        Team Form: {userData ? handleFirstLetterCap(userData.teamName) : null}
+      </h3>
       <form
         className="teamForm__form formContainer flexColumn"
         onSubmit={handleSubmit(formSubmit)}

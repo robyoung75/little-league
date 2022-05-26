@@ -262,6 +262,11 @@ const handleDelete = (toDelete, dataArr, stateFunc, dataName) => {
   }
 };
 
+const handleFirstLetterCap = (string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1)
+}
+
+
 export {
   battingAverages,
   getOverallPlayer,
@@ -279,4 +284,6 @@ export {
   imgURL,
   checkLocalData,
   handleDelete,
+  handleFirstLetterCap
+  
 };

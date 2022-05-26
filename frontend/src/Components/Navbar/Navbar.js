@@ -32,7 +32,7 @@ function Navbar({ isActive, setActive, mobile, signedIn, setSignedIn }) {
     }
   };
 
-  const handleAuthentication = async (e) => {
+  const handleUserAuthentication = async (e) => {
     e.preventDefault();
 
     if (signedIn) {

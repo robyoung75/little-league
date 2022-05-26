@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import ImgFileInput from "./ImgFileInput";
 import "./Forms.css";
@@ -8,6 +8,8 @@ import { playersSchema } from "../../Schema/FormsSchema";
 import { ThemedButton } from "../../utils/ThemedComponents";
 import { useStateValue } from "../../Context/stateProvider";
 import { useNavigate } from "react-router-dom";
+
+import { adminPlayersPost } from "../../assets/requests";
 
 //  eventHandlers
 import {
@@ -27,6 +29,7 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
   const [mouseOverOffense, setMouseOverOffense] = useState(false);
   const [mouseOverDefense, setMouseOverDefense] = useState(false);
   const [mouseOverNext, setMouseOverNext] = useState(false);
+  const [dataSubmit, setDataSubmit] = useState([]);
   const navigate = useNavigate();
   const [{ theme }] = useStateValue();
   const {
@@ -43,17 +46,19 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
       data.playerImg = headshotPreview;
       data.playerOffenseImg = offensePreview;
       data.playerDefenseImg = defensePreview;
-
+      
       dataArr = JSON.parse(localStorage.getItem("players data")) || [];
       dataArr.push(data);
 
       localStorage.setItem("players data", JSON.stringify(dataArr));
+      console.log({playersForm_formSubmit: dataArr});
+      setDataSubmit(dataSubmit.concat(data));
 
       newPlayersData ? setNewPlayersData(false) : setNewPlayersData(true);
       setHeadshotPreview(null);
       setOffensePreview(null);
       setDefensePreview(null);
-      window.scroll(0, 0)
+      window.scroll(0, 0);
       reset();
     }
   };
@@ -225,7 +230,11 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
             hovering={mouseOverNext}
             onMouseOver={() => handleMouseOver(setMouseOverNext)}
             onMouseOut={() => handleMouseOut(setMouseOverNext)}
-            onClick={() => handleNext(navigate, "/forms/create_coaches")}
+            onClick={async (e) => {
+              e.preventDefault();
+              await adminPlayersPost(dataSubmit);
+              handleNext(navigate, "/forms/create_coaches");
+            }}
           >
             Next
           </ThemedButton>

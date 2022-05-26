@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { authUserSignInPost } from "../../assets/requests";
 
 function SignIn({ setSignedIn }) {
-  const [{ theme }] = useStateValue();
+  const [{ theme, userData }, dispatch] = useStateValue();
   const navigate = useNavigate();
 
   const {
@@ -23,7 +23,12 @@ function SignIn({ setSignedIn }) {
   const formSubmit = async (data) => {
     if (isSubmitSuccessful) {
       console.log({ formSubmit_signIn: data });
-      await authUserSignInPost(data);
+      const user = await authUserSignInPost(data);
+
+      dispatch({
+        type: "SET_USER",
+        userData: user.data,
+      });
       setSignedIn(true);
       reset();
       navigate("/social");

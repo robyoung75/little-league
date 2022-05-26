@@ -27,6 +27,7 @@ export const adminTeamPost = async (dataObj) => {
 };
 
 export const authUserSignInPost = async (dataObj) => {
+  console.log("authUserSignInPost dataObj", dataObj)
   try {
     const response = await axiosInstance.post("/api/signin", dataObj);
     if (response) {
@@ -51,3 +52,17 @@ export const authUserSignOut = async () => {
     return error;
   }
 };
+
+export const adminPlayersPost = async (dataObj) => {
+  console.log({adminPlayersPost_dataObj: dataObj})
+  try {
+    const response = await axiosInstance.post("/api/admin/createPlayers", dataObj);
+    if (response) {
+      console.log("adminPlayersPost resposne", response);
+      return response;
+    }
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+}
