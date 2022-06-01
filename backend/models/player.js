@@ -24,14 +24,17 @@ const PlayerSchema = new Schema({
     required: [true, "Please enter players number"],
     maxlength: 3,
     minlength: 1,
+    unique: true,
   },
   positions: {
     type: Array,
+    required: [true, 'Please enter at least one player positions'],
     minlength: 1,
     maxlength: 3,
   },
   battingStance: {
     type: Array,
+    required: [true, 'Please enter a batting stance'],
     minlength: 1,
     maxlength: 2,
   },
@@ -39,7 +42,15 @@ const PlayerSchema = new Schema({
     type: String,
     required: true,
   },
-
+  headshotImg: {
+    type: String,
+  },
+  offenseImg: {
+    type: String,
+  },
+  defenseImg: {
+    type: String,
+  },
 });
 
 export default PlayerSchema;

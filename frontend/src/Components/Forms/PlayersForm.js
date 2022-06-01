@@ -21,17 +21,31 @@ import {
 } from "../../assets/eventHandlers";
 
 function PlayersForm({ newPlayersData, setNewPlayersData }) {
+  const initialState = {
+    firstName: "",
+    lastName: "",
+    number: "",
+    images: [],
+    headshotImg: "",
+    offenseImg: "",
+    defenseImg: "",
+  };
   const [headshotPreview, setHeadshotPreview] = useState(null);
   const [offensePreview, setOffensePreview] = useState(null);
   const [defensePreview, setDefensePreview] = useState(null);
+  const [playerInfo, setPlayerInfo] = useState(initialState);
+
   const [mouseOver, setMouseOver] = useState(false);
   const [mouseOverHeadShot, setMouseOverHeadShot] = useState(false);
   const [mouseOverOffense, setMouseOverOffense] = useState(false);
   const [mouseOverDefense, setMouseOverDefense] = useState(false);
   const [mouseOverNext, setMouseOverNext] = useState(false);
   const [dataSubmit, setDataSubmit] = useState([]);
+
   const navigate = useNavigate();
+
   const [{ theme }] = useStateValue();
+
   const {
     register,
     handleSubmit,
@@ -39,20 +53,49 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
     formState: { errors, isSubmitSuccessful },
   } = useForm({ resolver: yupResolver(playersSchema) });
 
-  const formSubmit = (data) => {
+  const formSubmit = async (data) => {
     if (isSubmitSuccessful) {
+      data.playerImg = playerInfo.headshotImg;
+      data.playerOffenseImg = playerInfo.offenseImg;
+      data.playerDefenseImg = playerInfo.defenseImg;
+      data.images = playerInfo.images;
+
+      console.log("playersFormSubmit_data", data);
+      let formData = new FormData();
+      formData.append("headshotImg", playerInfo.headshotImg);
+      formData.append("offenseImg", playerInfo.offenseImg);
+      formData.append("defenseImg", playerInfo.defenseImg);
+      formData.append("images", playerInfo.images);
+      formData.append("number", data.number);
+      formData.append("firstName", data.firstName);
+      formData.append("lastName", data.lastName);
+      formData.append("positions", data.positions);
+      formData.append("battingStance", data.battingStance);
+
+      await adminPlayersPost(formData);
+
       let dataArr = [];
 
-      data.playerImg = headshotPreview;
-      data.playerOffenseImg = offensePreview;
-      data.playerDefenseImg = defensePreview;
-      
       dataArr = JSON.parse(localStorage.getItem("players data")) || [];
-      dataArr.push(data);
+      let localData = {
+        headshotImg: URL.createObjectURL(playerInfo.headshotImg),
+        offenseImg: URL.createObjectURL(playerInfo.offenseImg),
+        defenseImg: URL.createObjectURL(playerInfo.defenseImg),
+        images: data.images,
+        number: data.number,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        positions: data.positions,
+        battingStance: data.battingStance,
+      };
+
+      dataArr.push(localData);
 
       localStorage.setItem("players data", JSON.stringify(dataArr));
-      console.log({playersForm_formSubmit: dataArr});
-      setDataSubmit(dataSubmit.concat(data));
+
+      console.log({ playersForm_formSubmit: dataArr });
+      setDataSubmit((prevState) => [...prevState, data]);
+      setPlayerInfo(initialState);
 
       newPlayersData ? setNewPlayersData(false) : setNewPlayersData(true);
       setHeadshotPreview(null);
@@ -75,6 +118,11 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
     "LF",
   ];
 
+  const handlePlayers = (e) => {
+    e.preventDefault();
+    // setPlayers(prevState => ([...prevState, playerInfo]))
+  };
+
   return (
     <div className="playersForm form">
       <h3>Players Form</h3>
@@ -89,6 +137,12 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
           name="playerFirstName"
           aria-describedby="players first name"
           {...register("firstName")}
+          onChange={(e) =>
+            setPlayerInfo((prevState) => ({
+              ...prevState,
+              firstName: e.target.value,
+            }))
+          }
         />
         {errors.firstName && (
           <span className="form__errors">{errors.firstName.message}</span>
@@ -100,6 +154,12 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
           name="playerLastName"
           aria-describedby="players last name"
           {...register("lastName")}
+          onChange={(e) =>
+            setPlayerInfo((prevState) => ({
+              ...prevState,
+              lastName: e.target.value,
+            }))
+          }
         />
         {errors.lastName && (
           <span className="form__errors">{errors.lastName.message}</span>
@@ -111,6 +171,12 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
           name="playerNumber"
           aria-describedby="players number"
           {...register("number")}
+          onChange={(e) =>
+            setPlayerInfo((prevState) => ({
+              ...prevState,
+              number: e.target.value,
+            }))
+          }
         />
         {errors.number && (
           <span className="form__errors">Valid number is required</span>
@@ -173,7 +239,14 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
           name="playerImg"
           htmlFor={"playerImg"}
           title="Select player headshot image"
-          onChange={(e) => handleImgPreview(e, setHeadshotPreview, imgURL)}
+          onChange={(e) => (
+            handleImgPreview(e, setHeadshotPreview, imgURL),
+            setPlayerInfo((prevState) => ({
+              ...prevState,
+              headshotImg: e.target.files[0],
+              images: [...prevState.images, { headshot: e.target.files[0] }],
+            }))
+          )}
           onClick={(e) => handleImgCancel(e, setHeadshotPreview)}
           preview={headshotPreview}
           alt="player"
@@ -187,7 +260,14 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
           name="playerOffenseImg"
           htmlFor="playerOffenseImg"
           title="Select player offense image"
-          onChange={(e) => handleImgPreview(e, setOffensePreview, imgURL)}
+          onChange={(e) => (
+            handleImgPreview(e, setOffensePreview, imgURL),
+            setPlayerInfo((prevState) => ({
+              ...prevState,
+              offenseImg: e.target.files[0],
+              images: [...prevState.images, { offenseImg: e.target.files[0] }],
+            }))
+          )}
           onClick={(e) => handleImgCancel(e, setOffensePreview)}
           preview={offensePreview}
           alt="player offense"
@@ -201,7 +281,14 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
           name="playerDefenseImg"
           htmlFor="playerDefenseImg"
           title="Select player defense image"
-          onChange={(e) => handleImgPreview(e, setDefensePreview, imgURL)}
+          onChange={(e) => (
+            handleImgPreview(e, setDefensePreview, imgURL),
+            setPlayerInfo((prevState) => ({
+              ...prevState,
+              defenseImg: e.target.files[0],
+              images: [...prevState.images, { defenseImg: e.target.files[0] }],
+            }))
+          )}
           onClick={(e) => handleImgCancel(e, setDefensePreview)}
           preview={defensePreview}
           alt="player defense"
@@ -232,8 +319,9 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
             onMouseOut={() => handleMouseOut(setMouseOverNext)}
             onClick={async (e) => {
               e.preventDefault();
-              await adminPlayersPost(dataSubmit);
-              handleNext(navigate, "/forms/create_coaches");
+              // await adminPlayersPost(dataSubmit);
+              handlePlayers(e);
+              // handleNext(navigate, "/forms/create_coaches");
             }}
           >
             Next

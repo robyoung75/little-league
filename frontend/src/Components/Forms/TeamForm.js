@@ -51,6 +51,7 @@ function TeamForm({ newTeamData, setNewTeamData }) {
       formData.append("teamLogo", imgFile);
       formData.append("primaryColor", data.primaryColor);
       formData.append("secondaryColor", data.secondaryColor);
+      
       await adminTeamPost(formData);
       // localStorage.clear();
       localStorage.setItem("team data", JSON.stringify(data));

@@ -1,5 +1,6 @@
 import { axiosInstance } from "../axios";
 
+// create an admin user
 export const adminUserPost = async (dataObj) => {
   try {
     const response = await axiosInstance.post("/api/createAdminUser", dataObj);
@@ -13,6 +14,7 @@ export const adminUserPost = async (dataObj) => {
   }
 };
 
+// create by admin user only new team, logo and colors
 export const adminTeamPost = async (dataObj) => {
   try {
     const response = await axiosInstance.post("/api/admin/team", dataObj);
@@ -26,6 +28,7 @@ export const adminTeamPost = async (dataObj) => {
   }
 };
 
+// user sign in
 export const authUserSignInPost = async (dataObj) => {
   console.log("authUserSignInPost dataObj", dataObj)
   try {
@@ -40,6 +43,7 @@ export const authUserSignInPost = async (dataObj) => {
   }
 };
 
+// user sign out
 export const authUserSignOut = async () => {
   try {
     const response = await axiosInstance.get("/api/signout");
@@ -53,6 +57,7 @@ export const authUserSignOut = async () => {
   }
 };
 
+// create by admin user only players, images, positions...
 export const adminPlayersPost = async (dataObj) => {
   console.log({adminPlayersPost_dataObj: dataObj})
   try {

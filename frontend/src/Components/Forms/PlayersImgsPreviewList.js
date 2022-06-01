@@ -10,9 +10,9 @@ function ImgsPreviewList({ playersData }) {
             key={Math.random()}
             firstName={player.firstName}
             lastName={player.lastName}
-            playerImg={player.playerImg}
-            playerOffenseImg={player.playerOffenseImg}
-            playerDefenseImg={player.playerDefenseImg}
+            playerImg={player.headshotImg}
+            playerOffenseImg={player.offenseImg}
+            playerDefenseImg={player.defenseImg}
           />
         ))}
     </>

@@ -15,7 +15,7 @@ export const verifyJwtToken = (token, secret) => {
   return jwt.verify(token, secret, (err, decodedToken) => {
     if (err) {
       console.log(err.message);
-      return { message: err.message };
+      return err;
     } else {
       let decoded = decodedToken;
       console.log("decoded from verifyJwtToken", decoded);

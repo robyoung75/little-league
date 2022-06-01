@@ -1,7 +1,6 @@
 // import verifyJwtToke from ../controllers/createJWT.js
 import { verifyJwtToken } from "../controllers/createJWT.js";
 
-
 const requiresAuth = (req, res, next) => {
   const token = req.cookies.jwt;
 
@@ -12,12 +11,10 @@ const requiresAuth = (req, res, next) => {
     req.userId = auth;
     next();
   } else {
-    let error = new Error("you must be signed in an authorized to proceed");
-    req.error = error.message;
+    let error = new Error("you must be signed in and authorized to proceed");
+    req.error = error;
     next();
   }
 };
-
-
 
 export { requiresAuth };
