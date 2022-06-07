@@ -11,24 +11,31 @@ import { authPlayers_post } from "../controllers/playersControllers.js";
 
 import { authTeam_post } from "../controllers/teamControllers.js";
 
+import { authCoaches_post } from "../controllers/coachesControllers.js";
+
 import { cloudinaryUpload_post } from "../controllers/cloudinaryUpload.js";
 
 import { requiresAuth } from "../middleware/authMiddleware.js";
-import { multerUploads, multerUploadsMultiple } from "../middleware/multer.js";
+import { multerUploads, multerUploadsMultiple, multerUploadsCoach} from "../middleware/multer.js";
 
 const router = Router();
 
-router.post("/api/createAdminUser", adminUser_post);
+router.post("/api/createAdminUser", requiresAuth, adminUser_post);
 router.post("/api/createUser", createUser_post);
 router.post("/api/signin", signInUser_post);
 router.get("/api/signout", signOutUser_get);
-router.post("/api/admin/team", requiresAuth, multerUploads,  authTeam_post);
+router.post("/api/admin/team", requiresAuth, multerUploads, authTeam_post);
 router.post(
   "/api/admin/createPlayers",
   requiresAuth,
   multerUploadsMultiple,
-  
   authPlayers_post
+);
+router.post(
+  "/api/admin/createCoaches",
+  requiresAuth,
+  multerUploadsCoach,
+  authCoaches_post
 );
 
 export { router as authRoute };

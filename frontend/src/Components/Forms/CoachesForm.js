@@ -9,6 +9,8 @@ import ImgFileInput from "./ImgFileInput";
 import { imgURL } from "../../assets/functions";
 import { useNavigate } from "react-router-dom";
 
+import { adminCoachesPost } from "../../assets/requests";
+
 //  eventHandlers
 import {
   handleMouseOver,
@@ -22,9 +24,11 @@ import {
 function CoachesForm({ newCoachesData, setNewCoachesData }) {
   const [{ theme }] = useStateValue();
   const [headshotPreview, setHeadshotPreview] = useState(null);
+  const [imgFile, setImgFile] = useState(null);
   const [mouseOverHeadShot, setMouseOverHeadShot] = useState(false);
   const [mouseOver, setMouseOver] = useState(false);
   const [mouseOverNext, setMouseOverNext] = useState(false);
+
   const navigate = useNavigate();
   const {
     register,
@@ -33,11 +37,20 @@ function CoachesForm({ newCoachesData, setNewCoachesData }) {
     formState: { errors, isSubmitSuccessful },
   } = useForm({ resolver: yupResolver(coachesSchema) });
 
-  const formSubmit = (data) => {
+  const formSubmit = async (data) => {
     if (isSubmitSuccessful) {
-      let dataArr = [];
-
       data.coachImg = headshotPreview;
+      console.log("coachesFormSubmit_data", data);
+
+      let formData = new FormData();
+      formData.append("firstName", data.firstName);
+      formData.append("lastName", data.lastName);
+      formData.append("email", data.email);
+      formData.append("headshotImg", imgFile);
+
+      await adminCoachesPost(formData);
+
+      let dataArr = [];
 
       dataArr = JSON.parse(localStorage.getItem("coaches data")) || [];
       dataArr.push(data);
@@ -47,6 +60,7 @@ function CoachesForm({ newCoachesData, setNewCoachesData }) {
       newCoachesData ? setNewCoachesData(false) : setNewCoachesData(true);
 
       setHeadshotPreview(null);
+
       reset();
     }
   };
@@ -58,22 +72,22 @@ function CoachesForm({ newCoachesData, setNewCoachesData }) {
         className="coachesForm__form formContainer flexColumn"
         onSubmit={handleSubmit(formSubmit)}
       >
-        <label htmlFor="fname">First name:</label>
+        <label htmlFor="firstName">First name:</label>
         <input
           type="text"
-          id="fname"
-          name="fname"
+          id="firstName"
+          name="firstName"
           aria-describedby="userFirstName"
           {...register("firstName")}
         />
         {errors.firstName && (
           <span className="form__errors">{errors.firstName.message}</span>
         )}
-        <label htmlFor="lname">Last name:</label>
+        <label htmlFor="lastName">Last name:</label>
         <input
           type="text"
-          id="lname"
-          name="lname"
+          id="lastName"
+          name="lastName"
           aria-describedby="userLastName"
           {...register("lastName")}
         />
@@ -93,12 +107,16 @@ function CoachesForm({ newCoachesData, setNewCoachesData }) {
         )}
 
         <ImgFileInput
-          id="coachImg"
-          className="imageUploadContainer"
-          name="coachImg"
-          htmlFor={"coachImg"}
+          id="headshotImg"
+          className="coachesForm__imgUpload"
+          name="headshotImg"
+          htmlFor="headshotImg"
           title="Select coach headshot image"
-          onChange={(e) => handleImgPreview(e, setHeadshotPreview, imgURL)}
+          onChange={(e) => (
+            console.log("coaches frontend image"),
+            handleImgPreview(e, setHeadshotPreview, imgURL),
+            setImgFile(e.target.files[0])
+          )}
           onClick={(e) => handleImgCancel(e, setHeadshotPreview)}
           preview={headshotPreview}
           alt="coach"

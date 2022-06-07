@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 import PlayerSchema from "./player.js";
-import validator_pkg from "validator";
-import bcrypt from "bcrypt";
 
 const Schema = mongoose.Schema;
+import validator_pkg from "validator";
+import bcrypt from "bcrypt";
 
 const TeamPlayersSchema = new Schema({
   teamId: {
@@ -12,11 +12,11 @@ const TeamPlayersSchema = new Schema({
   },
   teamUserName: {
     type: String,
-    required: true
+    required: true,
   },
   teamName: {
     type: String,
-    required: true
+    required: true,
   },
   players: [PlayerSchema],
 });

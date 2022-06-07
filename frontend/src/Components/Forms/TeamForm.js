@@ -99,6 +99,7 @@ function TeamForm({ newTeamData, setNewTeamData }) {
           htmlFor="teamLogo"
           title="Select team logo image"
           onChange={(e) => (
+            console.log('teamForm image'),
             handleImgPreview(e, setLogoPreview, imgURL),
             setImgFile(e.target.files[0])
           )}

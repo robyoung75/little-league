@@ -9,6 +9,7 @@ export const handleErrors = (err) => {
     email: "",
     password: "",
     user: "",
+    adminUser: "",
     adminTeamPost: "",
   };
 
@@ -31,6 +32,10 @@ export const handleErrors = (err) => {
 
   if (err.message === "you must be signed in and authorized to proceed") {
     errors.adminTeamPost = err.message
+  }
+
+  if (err.message.includes("you have exceeded the maximum allowed of two admin users")) {
+    errors.adminUser = err.message
   }
 
   return errors;

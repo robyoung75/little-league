@@ -16,6 +16,7 @@ export const adminUserPost = async (dataObj) => {
 
 // create by admin user only new team, logo and colors
 export const adminTeamPost = async (dataObj) => {
+  console.log('adminTeamPost_dataObj', dataObj)
   try {
     const response = await axiosInstance.post("/api/admin/team", dataObj);
     if (response) {
@@ -30,7 +31,7 @@ export const adminTeamPost = async (dataObj) => {
 
 // user sign in
 export const authUserSignInPost = async (dataObj) => {
-  console.log("authUserSignInPost dataObj", dataObj)
+  console.log("authUserSignInPost dataObj", dataObj);
   try {
     const response = await axiosInstance.post("/api/signin", dataObj);
     if (response) {
@@ -39,7 +40,7 @@ export const authUserSignInPost = async (dataObj) => {
     }
   } catch (error) {
     console.log({ authUserSignInPost: error });
-    return error
+    return error;
   }
 };
 
@@ -59,15 +60,36 @@ export const authUserSignOut = async () => {
 
 // create by admin user only players, images, positions...
 export const adminPlayersPost = async (dataObj) => {
-  console.log({adminPlayersPost_dataObj: dataObj})
+  console.log({ adminPlayersPost_dataObj: dataObj });
   try {
-    const response = await axiosInstance.post("/api/admin/createPlayers", dataObj);
+    const response = await axiosInstance.post(
+      "/api/admin/createPlayers",
+      dataObj
+    );
     if (response) {
-      console.log("adminPlayersPost resposne", response);
+      console.log("adminPlayersPost response", response);
       return response;
     }
   } catch (error) {
     console.log(error);
     return error;
   }
-}
+};
+
+export const adminCoachesPost = async (dataObj) => {
+  console.log({ adminCoachesPost_dataObj: dataObj });
+
+  try {
+    const response = await axiosInstance.post(
+      "/api/admin/createCoaches",
+      dataObj
+    );
+    if (response) {
+      console.log({ adminCoachesPost: response });
+      return response;
+    }
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};

@@ -15,6 +15,7 @@ import { findUserById } from "../utilities/controllerFunctions.js";
 // create team
 const authTeam_post = async (req, res) => {
   console.log("authTeam_post controller.js >>>>> req.file", req.file);
+  console.log("authTeam_post controller.js >>>>> req.body", req.body);
   try {
     // req body
     const { primaryColor, secondaryColor } = req.body;
@@ -33,10 +34,7 @@ const authTeam_post = async (req, res) => {
       let { id } = req.userId;
       authUser.authId = id;
       authUser.authStatus = true;
-      authUser.authUserDoc = await findUserById(
-        AdminUserSchema,
-        authUser.authId
-      );
+      authUser.authUserDoc = await AdminUserSchema.findById(authUser.authId)
     }
 
     if (authUser.authStatus && req.file && authUser.authUserDoc) {

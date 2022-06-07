@@ -30,7 +30,7 @@ const AdminUserSchema = new Schema({
   teamName: {
     type: String,
     required: [true, "Please enter a minimum six character team user name"],
-    
+
     lowercase: true,
     minlength: 3,
     maxlength: 20,
@@ -38,10 +38,13 @@ const AdminUserSchema = new Schema({
   teamUserName: {
     type: String,
     required: [true, "Please enter a unique team user name"],
-    unique: true,
+    // unique: true,
     lowercase: true,
     minlength: 6,
     maxlength: 20,
+  },
+  teamId: {
+    type: String,
   },
   password: {
     type: String,
@@ -73,14 +76,14 @@ AdminUserSchema.pre("save", async (next) => {
 
 // this is a static method that can be used with the AdminUserSchema model
 AdminUserSchema.statics.login = async function (email, password) {
-  console.log({adminUserSchema_statics_login: [email, password] })
+  console.log({ adminUserSchema_statics_login: [email, password] });
   let authUser = {
-    auth: false
-  }
-   const user = await this.findOne({ email });
+    auth: false,
+  };
+  const user = await this.findOne({ email });
 
   if (user && user.password === password) {
-    authUser.auth = true
+    authUser.auth = true;
     if (authUser) {
       return user;
     }
