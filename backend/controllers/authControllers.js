@@ -2,6 +2,12 @@
 import AdminUserSchema from "../models/aminUser.js";
 import UserSchema from "../models/user.js";
 
+// Mongodb functions
+import {
+  findAdminUsersByTeamUserName,
+  setTeamId,
+} from "../utilities/controllerFunctions.js";
+
 // import errors functions from errors/errors.js
 import { handleErrors } from "../errors/errors.js";
 
@@ -13,16 +19,16 @@ const adminUser_post = async (req, res) => {
   // req body
   const { firstName, lastName, email, teamName, teamUserName, password } =
     req.body;
-  // console.log("adminUser_post >>>> req.userId", req.userId);
 
   try {
-    // if an admin user is logged in
+    // if there is at least one admin user and they are logged in
     if (req.userId) {
       const { id } = req.userId;
+      req.body.teamId = id
       // console.log("adminUser_post >>>> req.userId", req.userId);
 
-      // find existing admin users by teamUserName, a unique name and allows for two admins
-      let existingAdmin = await AdminUserSchema.find({ teamUserName });
+      // find existing admin users by unique teamUserName
+      const existingAdmin = await findAdminUsersByTeamUserName(teamUserName);
 
       // check if more than two admin users exist, only two are allowed
       if (existingAdmin.length >= 2) {
@@ -30,40 +36,17 @@ const adminUser_post = async (req, res) => {
           `you have exceeded the maximum allowed of two admin users. User #1: ${existingAdmin[0].firstName} ${existingAdmin[0].lastName}. User #2: ${existingAdmin[1].firstName} ${existingAdmin[1].lastName}`
         );
       }
+
       // if there are less than two admin users create a new newAdmin user with mongoose user schema
-      const newAdmin = await AdminUserSchema.create({
-        firstName,
-        lastName,
-        email,
-        teamName,
-        teamUserName,
-        teamId: id,
-        password,
-      });
+      const newAdmin = await AdminUserSchema.create(req.body);
 
       // send new user results as json
-      res.status(201).json({
-        firstName: newAdmin.firstName,
-        lastName: newAdmin.lastName,
-        email: newAdmin.email,
-        teamName: newAdmin.teamName,
-        teamUserName: newAdmin.teamUserName,
-        teamId: newAdmin.teamId,
-        password: newAdmin.password,
-        admin: newAdmin.admin,
-        id: newAdmin._id,
-      });
+      res.status(201).json(newAdmin);
+
       // if the user is new and there is no admin or jwt auth create new newAdmin users
     } else {
-      const newAdmin = await AdminUserSchema.create({
-        firstName,
-        lastName,
-        email,
-        teamName,
-        teamUserName,
-        password,
-        teamId: "",
-      });
+      req.body.teamId = ""
+      const newAdmin = await AdminUserSchema.create(req.body);
 
       // create a jwt token
       const token = createJwtToken(newAdmin._id);
@@ -72,16 +55,9 @@ const adminUser_post = async (req, res) => {
       res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
 
       // set the new newAdmin user team id to the id object. This id will be used to find team info in the database
-      const setTeamId = await AdminUserSchema.findByIdAndUpdate(
-        newAdmin._id,
-        {
-          teamId: newAdmin._id,
-        },
-        { returnOriginal: false }
-      );
+      let teamId = await setTeamId(newAdmin._id);
 
-      // send
-      res.status(200).json(setTeamId);
+      res.status(200).json(teamId);
     }
   } catch (error) {
     const errors = handleErrors(error);

@@ -53,7 +53,7 @@ const AdminUserSchema = new Schema({
     minlength: [6, `Minimum password length 6 characters`],
   },
   admin: {
-    type: String,
+    type: Boolean,
   },
   date: {
     type: Date,

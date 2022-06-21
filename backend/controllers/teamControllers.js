@@ -9,7 +9,7 @@ import { handleErrors } from "../errors/errors.js";
 // helper functions
 import { async_cloudinaryStreamImg } from "../utilities/cloudinaryFuctions.js";
 import { sharpImgResize } from "../utilities/sharpFunctions.js";
-import { findUserById } from "../utilities/controllerFunctions.js";
+import { findAdminUserById } from "../utilities/controllerFunctions.js";
 
 // CONTROLLERS FOR ADMIN TO CREATE A TEAM
 // create team
@@ -19,6 +19,8 @@ const authTeam_post = async (req, res) => {
   try {
     // req body
     const { primaryColor, secondaryColor } = req.body;
+
+
 
     let authUser = {
       authStatus: false,
@@ -34,7 +36,7 @@ const authTeam_post = async (req, res) => {
       let { id } = req.userId;
       authUser.authId = id;
       authUser.authStatus = true;
-      authUser.authUserDoc = await AdminUserSchema.findById(authUser.authId)
+      authUser.authUserDoc = await findAdminUserById(authUser.authId)
     }
 
     if (authUser.authStatus && req.file && authUser.authUserDoc) {
@@ -51,7 +53,7 @@ const authTeam_post = async (req, res) => {
 
       const authTeamDoc = await TeamSchema.create({
         teamName: authUser.authUserDoc.teamName,
-        teamId: authUser.authUserDoc._id,
+        teamId: authUser.authUserDoc.teamId,
         primaryColor,
         secondaryColor,
         teamLogo: imgUploadResponse.secure_url,
@@ -59,7 +61,7 @@ const authTeam_post = async (req, res) => {
 
       res.status(200).json({
         teamName: authTeamDoc.teamName,
-        teamId: authTeamDoc._id,
+        teamId: authTeamDoc.teamId,
         primaryColor: authTeamDoc.primaryColor,
         secondaryColor: authTeamDoc.secondaryColor,
         teamLogo: authTeamDoc.teamLogo,
