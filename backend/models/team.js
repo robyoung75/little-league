@@ -11,6 +11,12 @@ const TeamSchema = new Schema({
     minlength: 3,
     required: [true, "Please enter a team name"],
   },
+  teamUserName: {
+    type: String,
+    lowercase: true,
+    minlength: 6,
+    required: [true, "Please login as an authorized admin user"]
+  },
   primaryColor: {
     type: String,
     minlength: 7,
@@ -31,7 +37,7 @@ const TeamSchema = new Schema({
   },
   teamLogo: {
     type: String,
-    required: true
+    // required: true
   }
 });
 

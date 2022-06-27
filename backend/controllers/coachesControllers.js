@@ -1,58 +1,89 @@
-// import model schemas from models/teamControllers
-import TeamSchema from "../models/team.js";
-import AdminUserSchema from "../models/aminUser.js";
-import TeamPlayersSchema from "../models/teamPlayers.js";
-import TeamCoachesSchema from "../models/teamCoaches.js";
 // import errors functions from errors/errors.js
 import { handleErrors } from "../errors/errors.js";
 
 // helper functions
 import { async_cloudinaryStreamImg } from "../utilities/cloudinaryFuctions.js";
 import { sharpImgResize } from "../utilities/sharpFunctions.js";
-import { findUserById } from "../utilities/controllerFunctions.js";
+import {
+  findAdminUserById,
+  findOneTeamCoachById,
+  checkForCoachesAndUpdate,
+  createNewCoach,
+} from "../utilities/controllerFunctions.js";
 
 // CONTROLLERS FOR ADMIN to Create Coaches
 export const authCoaches_post = async (req, res) => {
-  console.log("authCoaches_post");
-  console.log("authCoaches_post_req.body", req.body);
-  console.log("authCoaches_post_req.userId", req.userId);
-  console.log("authCoaches_post_req.file", req.file);
+  // console.log("authCoaches_post");
+  console.log({ authCoaches_post: req.body });
+  // console.log("authCoaches_post_req.file", req.file);
 
   try {
-    let reducedFileSize;
-
     if (req.error) {
+      console.log({ authCoaches_post: error });
       throw req.error;
     }
 
+    const { id } = req.userId;
+    const authUserDoc = await findAdminUserById(id);
+    const authUserCoaches = await findOneTeamCoachById(authUserDoc.teamId);
+    req.body.headshotImg = null;
+    let { firstName, lastName, email, headshotImg } = req.body;
+
     if (req.file) {
-      reducedFileSize = await sharpImgResize(req.file);
-      console.log(reducedFileSize);
+      headshotImg = await sharpImgResize(req.file);
     }
 
-    const { id } = req.userId;
-    const authUserDoc = await AdminUserSchema.findById(id);
+    if (authUserDoc && !authUserCoaches) {
+      const imgUploadResponse = await async_cloudinaryStreamImg(
+        headshotImg,
+        authUserDoc.teamId,
+        authUserDoc.teamUserName
+      );
 
-    const imgUploadResponse = await async_cloudinaryStreamImg(
-        reducedFileSize,
+      const coachData = {
+        firstName,
+        lastName,
+        email,
+        headshotImg: imgUploadResponse ? imgUploadResponse.secure_url : null,
+        teamId: authUserDoc.teamId,
+      };
+
+      const authCoachesDoc = await createNewCoach({
+        teamId: authUserDoc.teamId,
+        teamUserName: authUserDoc.teamUserName,
+        teamName: authUserDoc.teamName,
+        coaches: coachData,
+      });
+
+      res.status(200).json(authCoachesDoc);
+    }
+
+    if (authUserDoc && authUserCoaches) {
+      const imgUploadResponse = await async_cloudinaryStreamImg(
+        headshotImg,
         authUserDoc.authId,
         authUserDoc.teamUserName
-    )
+      );
 
-    const authCoachesDoc = await TeamCoachesSchema.create({
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      email: req.body.email,
-      headshotImg: imgUploadResponse.secure_url,
-    });
-    const response = {
-      teamId: id,
-      firstName: authCoachesDoc.firstName,
-      lastName: authCoachesDoc.lastName,
-      email: authCoachesDoc.email,
-      headshotImg: authCoachesDoc.headshotImg,
-    };
-    res.status(200).json(response);
+      const coachData = {
+        firstName,
+        lastName,
+        email,
+        headshotImg: imgUploadResponse ? imgUploadResponse.secure_url : null,
+        teamId: authUserCoaches.teamId,
+      };
+
+      const filter = authUserCoaches.teamId;
+      const update = {
+        $push: {
+          coaches: coachData,
+        },
+      };
+
+      const updatedCoachesDoc = await checkForCoachesAndUpdate(filter, update);
+
+      res.status(200).json(updatedCoachesDoc);
+    }
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });

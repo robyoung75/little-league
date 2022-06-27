@@ -1,34 +1,24 @@
 import mongoose from "mongoose";
 import validator_pkg from "validator";
-const { isEmail } = validator_pkg;
+
+import CoachSchema from "./coach.js";
+
 const Schema = mongoose.Schema;
 
 const TeamCoachesSchema = new Schema({
-  firstName: {
+  teamId: {
     type: String,
-    required: [true, "Please enter your first name"],
-    lowercase: true,
-    maxlength: 20,
-    minlength: 2,
+    required: true,
   },
-  lastName: {
+  teamUserName: {
     type: String,
-    required: [true, "Please enter your last name"],
-    lowercase: true,
-    maxlength: 20,
-    minlength: 2,
+    required: true,
   },
-
-  email: {
+  teamName: {
     type: String,
-    required: [true, "Please enter your email"],
-    // unique: true,
-    lowercase: true,
-    validate: [isEmail, "Please enter a valid email"],
+    required: true,
   },
-  headshotImg: {
-    type: String,
-  },
+  coaches: [CoachSchema],
   date: {
     type: Date,
     default: Date.now,

@@ -1,39 +1,41 @@
-// import model schemas from models/teamControllers
-import AdminUserSchema from "../models/aminUser.js";
-import TeamPlayersSchema from "../models/teamPlayers.js";
-
 // import errors functions from errors/errors.js
 import { handleErrors } from "../errors/errors.js";
 
 // helper functions
 import { async_cloudinaryStreamImgs } from "../utilities/cloudinaryFuctions.js";
 import { sharpImgResize } from "../utilities/sharpFunctions.js";
+import {
+  findAdminUserById,
+  findOneTeamPlayerById,
+  checkForPlayersAndUpdate,
+  createNewPlayer,
+} from "../utilities/controllerFunctions.js";
 
 // create team players
 export const authPlayers_post = async (req, res) => {
-  // console.log({ authPlayers_post_req_body: req.body });
+  console.log({ authPlayers_post_req_body: req.body });
   // console.log({ authPlayers_post_req_files: req.files });
   // console.log(req.files.headshotImg);
   // console.log(req.files.offenseImg);
   // console.log(req.files.defenseImg);
 
   try {
-
     if (req.error) {
-      throw req.error
+      console.log({ authPlayers_post: req.error });
+      throw req.error;
     }
 
     // req.userId returns from auth
     const { id } = req.userId;
+    const authUserDoc = await findAdminUserById(id);
+    const authUserPlayers = await findOneTeamPlayerById(authUserDoc.teamId);
+
     req.body.playerImages = [];
 
     if (req.files.headshotImg) {
       req.body.playerImages.push({
         imageTitle: "headshot",
         image: await sharpImgResize(req.files["headshotImg"][0]),
-        playerNumber: req.body.number,
-        playerLastName: req.body.lastName,
-        playerFirstName: req.body.firstName,
       });
     }
 
@@ -41,9 +43,6 @@ export const authPlayers_post = async (req, res) => {
       req.body.playerImages.push({
         imageTitle: "offense",
         image: await sharpImgResize(req.files["offenseImg"][0]),
-        playerNumber: req.body.number,
-        playerLastName: req.body.lastName,
-        playerFirstName: req.body.firstName,
       });
     }
 
@@ -51,14 +50,9 @@ export const authPlayers_post = async (req, res) => {
       req.body.playerImages.push({
         imageTitle: "defense",
         image: await sharpImgResize(req.files["defenseImg"][0]),
-        playerNumber: req.body.number,
-        playerLastName: req.body.lastName,
-        playerFirstName: req.body.firstName,
       });
     }
 
-    const authUserDoc = await AdminUserSchema.findById(id);
-    const authUserPlayers = await TeamPlayersSchema.findOne({ teamId: id });
     const {
       firstName,
       lastName,
@@ -68,6 +62,7 @@ export const authPlayers_post = async (req, res) => {
       teamId,
       playerImages,
     } = req.body;
+
     // if authUserDoc and no authUserPlayerDoc create a teamsPlayersDoc
     if (authUserDoc && !authUserPlayers) {
       const imgUploadResponse = await async_cloudinaryStreamImgs(
@@ -86,25 +81,20 @@ export const authPlayers_post = async (req, res) => {
         number,
         positions,
         battingStance,
-        teamId,
+        teamId: authUserDoc.teamId,
         headshotImg: URLS.find((item) => item.includes("headshot")),
         offenseImg: URLS.find((item) => item.includes("offense")),
         defenseImg: URLS.find((item) => item.includes("defense")),
       };
       // create new team players post
-      const authPlayerDoc = await TeamPlayersSchema.create({
+      const authPlayerDoc = await createNewPlayer({
         teamId: authUserDoc._id,
         teamUserName: authUserDoc.teamUserName,
         teamName: authUserDoc.teamName,
         players: playerData,
       });
-      const response = {
-        teamId: authPlayerDoc.teamId,
-        teamName: authPlayerDoc.teamName,
-        teamUserName: authPlayerDoc.teamUserName,
-        players: authPlayerDoc.players,
-      };
-      res.status(200).json(response);
+
+      res.status(200).json(authPlayerDoc);
     }
     // if authUserDoc and authUserPlayers then update the existing authUserPlayersDoc
     if (authUserDoc && authUserPlayers) {
@@ -121,7 +111,7 @@ export const authPlayers_post = async (req, res) => {
       const headshotImg = URLS.find((item) => item.includes("headshot"));
       const offenseImg = URLS.find((item) => item.includes("offense"));
       const defenseImg = URLS.find((item) => item.includes("defense"));
-      const filter = { teamId };
+      const filter = authUserPlayers.teamId;
       const update = {
         $push: {
           players: {
@@ -130,19 +120,16 @@ export const authPlayers_post = async (req, res) => {
             number,
             positions,
             battingStance,
-            teamId,
+            teamId: authUserPlayers.teamId,
             headshotImg,
             offenseImg,
             defenseImg,
           },
         },
       };
-      const updatedUserDoc = await TeamPlayersSchema.findOneAndUpdate(
-        filter,
-        update,
-        { returnOriginal: false }
-      );
-      res.send(updatedUserDoc);
+      const updatedPlayersdoc = await checkForPlayersAndUpdate(filter, update);
+
+      res.status(200).json(updatedPlayersdoc);
     }
   } catch (error) {
     console.log("authPlayers_post ERROR >>>>>", error);

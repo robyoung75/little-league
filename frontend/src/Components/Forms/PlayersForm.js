@@ -78,9 +78,15 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
 
       dataArr = JSON.parse(localStorage.getItem("players data")) || [];
       let localData = {
-        headshotImg: URL.createObjectURL(playerInfo.headshotImg),
-        offenseImg: URL.createObjectURL(playerInfo.offenseImg),
-        defenseImg: URL.createObjectURL(playerInfo.defenseImg),
+        headshotImg: playerInfo.headshotImg
+          ? URL.createObjectURL(playerInfo.headshotImg)
+          : null,
+        offenseImg: playerInfo.offenseImg
+          ? URL.createObjectURL(playerInfo.offenseImg)
+          : null,
+        defenseImg: playerInfo.defenseImg
+          ? URL.createObjectURL(playerInfo.defenseImg)
+          : null,
         images: data.images,
         number: data.number,
         firstName: data.firstName,

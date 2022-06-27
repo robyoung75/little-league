@@ -51,6 +51,10 @@ const PlayerSchema = new Schema({
   defenseImg: {
     type: String,
   },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 export default PlayerSchema;

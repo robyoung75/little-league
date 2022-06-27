@@ -19,6 +19,10 @@ const TeamPlayersSchema = new Schema({
     required: true,
   },
   players: [PlayerSchema],
+  date: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 // mongoose middleware

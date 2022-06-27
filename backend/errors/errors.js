@@ -27,16 +27,25 @@ export const handleErrors = (err) => {
 
   if (err.code === 11000) {
     errors.user = `${err.keyValue.email} already exists, user must be unique.`;
-    console.log(errors);
   }
 
   if (err.message === "you must be signed in and authorized to proceed") {
-    errors.adminTeamPost = err.message
+    errors.adminTeamPost = err.message;
   }
 
-  if (err.message.includes("you have exceeded the maximum allowed of two admin users")) {
-    errors.adminUser = err.message
+  if (
+    err.message.includes(
+      "you have exceeded the maximum allowed of two admin users"
+    )
+  ) {
+    errors.adminUser = err.message;
   }
+
+  if (err.message.includes("A team with this id already exists")) {
+    errors.adminTeamPost = err.message;
+  }
+
+  console.log({errors: errors})
 
   return errors;
 };

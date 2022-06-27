@@ -6,6 +6,7 @@ import UserSchema from "../models/user.js";
 import {
   findAdminUsersByTeamUserName,
   setTeamId,
+  createNewAdminUser
 } from "../utilities/controllerFunctions.js";
 
 // import errors functions from errors/errors.js
@@ -38,7 +39,7 @@ const adminUser_post = async (req, res) => {
       }
 
       // if there are less than two admin users create a new newAdmin user with mongoose user schema
-      const newAdmin = await AdminUserSchema.create(req.body);
+      const newAdmin = await createNewAdminUser(req.body);
 
       // send new user results as json
       res.status(201).json(newAdmin);
@@ -46,7 +47,7 @@ const adminUser_post = async (req, res) => {
       // if the user is new and there is no admin or jwt auth create new newAdmin users
     } else {
       req.body.teamId = ""
-      const newAdmin = await AdminUserSchema.create(req.body);
+      const newAdmin = await createNewAdminUser(req.body);
 
       // create a jwt token
       const token = createJwtToken(newAdmin._id);
