@@ -2,8 +2,7 @@ import mongoose from "mongoose";
 import PlayerSchema from "./player.js";
 
 const Schema = mongoose.Schema;
-import validator_pkg from "validator";
-import bcrypt from "bcrypt";
+
 
 const TeamPlayersSchema = new Schema({
   teamId: {
@@ -19,6 +18,7 @@ const TeamPlayersSchema = new Schema({
     required: true,
   },
   players: [PlayerSchema],
+  
   date: {
     type: Date,
     default: Date.now,

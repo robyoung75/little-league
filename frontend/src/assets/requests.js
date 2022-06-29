@@ -16,7 +16,7 @@ export const adminUserPost = async (dataObj) => {
 
 // create by admin user only new team, logo and colors
 export const adminTeamPost = async (dataObj) => {
-  console.log('adminTeamPost_dataObj', dataObj)
+  console.log("adminTeamPost_dataObj", dataObj);
   try {
     const response = await axiosInstance.post("/api/admin/team", dataObj);
     if (response) {
@@ -76,6 +76,7 @@ export const adminPlayersPost = async (dataObj) => {
   }
 };
 
+// create coaches
 export const adminCoachesPost = async (dataObj) => {
   console.log({ adminCoachesPost_dataObj: dataObj });
 
@@ -90,6 +91,22 @@ export const adminCoachesPost = async (dataObj) => {
     }
   } catch (error) {
     console.log(error);
+    return error;
+  }
+};
+
+// create schedule
+export const adminSchedulePost = async (dataObj) => {
+  console.log({ adminSchedulePost: dataObj });
+
+  try {
+    const response = await axiosInstance.post("/api/admin/schedule", dataObj);
+    if (response) {
+      console.log({ adminSchedulePost: response });
+      return response;
+    }
+  } catch (error) {
+    console.log({ adminSchedulePost: error });
     return error;
   }
 };

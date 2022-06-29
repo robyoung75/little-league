@@ -13,10 +13,16 @@ import { authTeam_post } from "../controllers/teamControllers.js";
 
 import { authCoaches_post } from "../controllers/coachesControllers.js";
 
+import { authSchedule_post } from "../controllers/scheduleControllers.js";
+
 import { cloudinaryUpload_post } from "../controllers/cloudinaryUpload.js";
 
 import { requiresAuth } from "../middleware/authMiddleware.js";
-import { multerUploads, multerUploadsMultiple, multerUploadsCoach} from "../middleware/multer.js";
+import {
+  multerUploads,
+  multerUploadsMultiple,
+  multerUploadsCoach,
+} from "../middleware/multer.js";
 
 const router = Router();
 
@@ -37,5 +43,6 @@ router.post(
   multerUploadsCoach,
   authCoaches_post
 );
+router.post("/api/admin/schedule", requiresAuth, authSchedule_post);
 
 export { router as authRoute };

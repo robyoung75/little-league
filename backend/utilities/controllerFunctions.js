@@ -2,7 +2,7 @@ import AdminUserSchema from "../models/aminUser.js";
 import TeamPlayersSchema from "../models/teamPlayers.js";
 import TeamCoachesSchema from "../models/teamCoaches.js";
 import TeamSchema from "../models/team.js";
-
+import TeamsScheduleSchema from "../models/teamSchedule.js";
 // find auth user by id
 export const findUserById = async (mongooseSchema, id) => {
   try {
@@ -155,7 +155,39 @@ export const checkForCoachesAndUpdate = async (filter, updateObj) => {
   }
 };
 
-// SCHEDULE CONTROLLER FUNCTIONS 
+// SCHEDULE CONTROLLER FUNCTIONS
 
 // create new schedule
+export const createNewSchedule = async (reqObj) => {
+  try {
+    const newGame = await TeamsScheduleSchema.create(reqObj);
+    return newGame;
+  } catch (error) {
+    return { createNewSchedule: error };
+  }
+};
 
+// check if existing teamSchedule exists
+export const findTeamSchedule = async (id) => {
+  try {
+    const existingSchedule = await TeamsScheduleSchema.findOne({
+      teamId: id,
+    });
+    return existingSchedule;
+  } catch (error) {
+    return { findTeamSchedule: error };
+  }
+};
+
+export const updateTeamSchedule = async (filter, updateObj) => {
+  try {
+    const updatedSchedule = await TeamsScheduleSchema.findOneAndUpdate(
+      filter,
+      updateObj,
+      { returnOriginal: false }
+    );
+    return updatedSchedule;
+  } catch (error) {
+    return { updateTeamSchedule: error };
+  }
+};

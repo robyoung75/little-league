@@ -14,6 +14,9 @@ import {
   handleNext,
 } from "../../assets/eventHandlers";
 
+// requests
+import {adminSchedulePost} from '../../assets/requests'
+
 function ScheduleForm({ newScheduleData, setNewScheduleData }) {
   const [{ theme }] = useStateValue();
   const [mouseOver, setMouseOver] = useState(false);
@@ -26,7 +29,7 @@ function ScheduleForm({ newScheduleData, setNewScheduleData }) {
     formState: { errors, isSubmitSuccessful },
   } = useForm({ resolver: yupResolver(scheduleSchema) });
 
-  const formSubmit = (data) => {
+  const formSubmit = async (data) => {
     if (isSubmitSuccessful) {
       let dataArr = [];
       dataArr = JSON.parse(localStorage.getItem("schedule data")) || [];
@@ -36,6 +39,8 @@ function ScheduleForm({ newScheduleData, setNewScheduleData }) {
 
       newScheduleData ? setNewScheduleData(false) : setNewScheduleData(true);
       window.scroll(0, 0)
+
+      await adminSchedulePost(data)
 
       reset();
     }

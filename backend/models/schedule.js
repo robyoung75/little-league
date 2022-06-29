@@ -3,6 +3,21 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 const ScheduleSchema = new Schema({
+  teamName: {
+    type: String,
+    required: [true, "Admin user must be signed in and provide the teamName"],
+  },
+  teamUserName: {
+    type: String,
+    required: [
+      true,
+      "Admin user must be signed in and provide the teamUserName",
+    ],
+  },
+  teamId: {
+    type: String,
+    required: [true, "Admin user must be signed in and provide the teamId"],
+  },
   opponent: {
     type: String,
     lowercase: true,
@@ -42,6 +57,10 @@ const ScheduleSchema = new Schema({
   uniformColor: {
     type: String,
   },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-export default mongoose.model("schedule", ScheduleSchema);
+export default ScheduleSchema;
