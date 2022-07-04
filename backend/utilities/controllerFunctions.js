@@ -1,4 +1,4 @@
-import AdminUserSchema from "../models/aminUser.js";
+import TeamAdminSchema from "../models/teamAdmin.js";
 import TeamPlayersSchema from "../models/teamPlayers.js";
 import TeamCoachesSchema from "../models/teamCoaches.js";
 import TeamSchema from "../models/team.js";
@@ -6,7 +6,7 @@ import TeamsScheduleSchema from "../models/teamSchedule.js";
 // find auth user by id
 export const findUserById = async (mongooseSchema, id) => {
   try {
-    return await AdminUserSchema.findById(id);
+    return await TeamAdminSchema.findById(id);
   } catch (error) {
     console.log({ findUserById: error });
     return error;
@@ -18,7 +18,7 @@ export const findUserById = async (mongooseSchema, id) => {
 // create a new admin user
 export const createNewAdminUser = async (reqObj) => {
   try {
-    const newAdminUser = await AdminUserSchema.create(reqObj);
+    const newAdminUser = await TeamAdminSchema.create(reqObj);
     return newAdminUser;
   } catch (error) {
     return { createNewAdminUser: error };
@@ -26,9 +26,9 @@ export const createNewAdminUser = async (reqObj) => {
 };
 
 // find admin users by team name
-export const findAdminUsersByTeamUserName = async (teamUserName) => {
+export const findAdminUsersByTeamId = async (id) => {
   try {
-    let users = await AdminUserSchema.find({ teamUserName: teamUserName });
+    let users = await TeamAdminSchema.find({ teamId: id });
     return users;
   } catch (error) {
     return { findAdminUsersByTeamUserName: error };
@@ -38,17 +38,31 @@ export const findAdminUsersByTeamUserName = async (teamUserName) => {
 // find admin user by id
 export const findAdminUserById = async (id) => {
   try {
-    const user = await AdminUserSchema.findById(id);
+    const user = await TeamAdminSchema.findById(id);
     return user;
   } catch (error) {
     return { findAdminUserById: error };
   }
 };
 
+// if admin is < 2 in length add another admin user
+export const createSecondAdminUser = async (filter, updateObj) => {
+  try {
+    const secondAdmin = await TeamAdminSchema.findOneAndUpdate(
+      filter,
+      updateObj,
+      { returnOriginal: false }
+    );
+    return secondAdmin;
+  } catch (error) {
+    return { createSecondAdminUser: error };
+  }
+};
+
 // if no current admin and after a new admin is established setTeamId updates the new admin user to include the teamId
 export const setTeamId = async (id) => {
   try {
-    const teamId = await AdminUserSchema.findByIdAndUpdate(
+    const teamId = await TeamAdminSchema.findByIdAndUpdate(
       id,
       { teamId: id },
       { returnOriginal: false }

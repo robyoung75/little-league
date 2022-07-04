@@ -1,6 +1,6 @@
 // import model schemas from models/teamControllers
 import TeamSchema from "../models/team.js";
-import AdminUserSchema from "../models/aminUser.js";
+import AdminUserSchema from "../models/teamAdmin.js";
 import TeamPlayersSchema from "../models/teamPlayers.js";
 
 // import errors functions from errors/errors.js

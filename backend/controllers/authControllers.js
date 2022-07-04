@@ -1,12 +1,14 @@
 // import model schemas from models/...
-import AdminUserSchema from "../models/aminUser.js";
+import AdminUserSchema from "../models/teamAdmin.js";
+import TeamAdminSchema from "../models/teamAdmin.js";
 import UserSchema from "../models/user.js";
 
 // Mongodb functions
 import {
-  findAdminUsersByTeamUserName,
+  findAdminUserById,
+  createSecondAdminUser,
+  findAdminUsersByTeamId,
   setTeamId,
-  createNewAdminUser
 } from "../utilities/controllerFunctions.js";
 
 // import errors functions from errors/errors.js
@@ -17,37 +19,10 @@ import { createJwtToken, maxAge } from "./createJWT.js";
 
 // create admin user
 const adminUser_post = async (req, res) => {
-  // req body
-  const { firstName, lastName, email, teamName, teamUserName, password } =
-    req.body;
-
   try {
-    // if there is at least one admin user and they are logged in
-    if (req.userId) {
-      const { id } = req.userId;
-      req.body.teamId = id
-      // console.log("adminUser_post >>>> req.userId", req.userId);
-
-      // find existing admin users by unique teamUserName
-      const existingAdmin = await findAdminUsersByTeamUserName(teamUserName);
-
-      // check if more than two admin users exist, only two are allowed
-      if (existingAdmin.length >= 2) {
-        throw Error(
-          `you have exceeded the maximum allowed of two admin users. User #1: ${existingAdmin[0].firstName} ${existingAdmin[0].lastName}. User #2: ${existingAdmin[1].firstName} ${existingAdmin[1].lastName}`
-        );
-      }
-
-      // if there are less than two admin users create a new newAdmin user with mongoose user schema
-      const newAdmin = await createNewAdminUser(req.body);
-
-      // send new user results as json
-      res.status(201).json(newAdmin);
-
-      // if the user is new and there is no admin or jwt auth create new newAdmin users
-    } else {
-      req.body.teamId = ""
-      const newAdmin = await createNewAdminUser(req.body);
+    if (!req.userId) {
+      req.body.teamId = "";
+      const newAdmin = await AdminUserSchema.create(req.body);
 
       // create a jwt token
       const token = createJwtToken(newAdmin._id);
@@ -59,6 +34,33 @@ const adminUser_post = async (req, res) => {
       let teamId = await setTeamId(newAdmin._id);
 
       res.status(200).json(teamId);
+    }
+
+    if (req.userId) {
+      const { id } = req.userId;
+      const existingAdmin = await findAdminUserById(id);
+
+      if (existingAdmin.admin.length < 2) {
+        const filter = existingAdmin.teamId;
+        const update = {
+          $push: {
+            admin: req.body.admin,
+          },
+        };
+        const secondAdmin = await createSecondAdminUser(filter, update);
+        res.status(200).json(secondAdmin);
+      }
+      if (existingAdmin.admin.length >= 2) {
+        throw Error(
+          `you have exceeded the maximum allowed of two admin users. ${existingAdmin.admin.map(
+            (user, index) => {
+              return ` user ${index + 1}: ${user.firstName} ${user.lastName} ${
+                user.teamName
+              }`;
+            }
+          )}`
+        );
+      }
     }
   } catch (error) {
     const errors = handleErrors(error);
@@ -116,26 +118,23 @@ const createUser_post = async (req, res) => {
 const signInUser_post = async (req, res) => {
   const { email, password } = req.body;
   console.log({ signInUser_post: [email, password] });
+  const authUser = await TeamAdminSchema.login(email, password);
 
   try {
-    const authUser = await AdminUserSchema.login(email, password);
-    if (authUser) {
-      // create jwt token
-      const token = createJwtToken(authUser._id);
-      console.log("jwt new admin user", token);
-      // send token as a cookie
-      res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
-      res.status(200).json({
-        teamId: authUser._id,
-        userEmail: authUser.email,
-        firstName: authUser.firstName,
-        lastName: authUser.lastName,
-        teamName: authUser.teamName,
-        teamUserName: authUser.teamUserName,
-      });
-    }
+    if (authUser.error) throw authUser.error;
+
+    // create jwt token
+    const token = createJwtToken(authUser._id);
+    console.log("jwt new admin user", token);
+
+    // send token as a cookie
+    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
+
+    res.status(200).json(authUser);
   } catch (error) {
-    console.log({ signInUser_post: error });
+    const errors = handleErrors(error);
+    console.log({ message: errors });
+    res.status(400).json({ message: errors });
   }
 };
 

@@ -45,7 +45,11 @@ export const handleErrors = (err) => {
     errors.adminTeamPost = err.message;
   }
 
-  console.log({errors: errors})
+  if (err.message.includes("signin failed check credentials")) {
+    errors.adminUser = err.message;
+  }
+
+  console.log({ errors: errors });
 
   return errors;
 };
