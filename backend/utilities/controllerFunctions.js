@@ -73,6 +73,20 @@ export const setTeamId = async (id) => {
   }
 };
 
+export const setAdminUserTeamId = async (id) => {
+  try {
+    let authUser = TeamAdminSchema.findOneAndUpdate(
+      { id, "admin.teamId": "" },
+      { "admin.$.teamId": id },
+      { returnOriginal: false }
+    );
+
+    return authUser;
+  } catch (error) {
+    return { setAdminUserTeamId: error };
+  }
+};
+
 // TEAM CONTROLLER FUNCTIONS - set team colors and name
 
 // create a new team

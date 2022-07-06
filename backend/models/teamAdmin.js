@@ -10,14 +10,14 @@ const Schema = mongoose.Schema;
 const TeamAdminSchema = new Schema({
   teamName: {
     type: String,
-    // required: [true, "Please enter a minimum six character team user name"],
+    required: [true, "Please enter a minimum six character team user name"],
     lowercase: true,
     minlength: 3,
     maxlength: 20,
   },
   teamUserName: {
     type: String,
-    // required: [true, "Please enter a unique team user name"],
+    required: [true, "Please enter a unique team user name"],
     // unique: true,
     lowercase: true,
     minlength: 6,
@@ -52,17 +52,21 @@ TeamAdminSchema.pre("save", async (next) => {
 TeamAdminSchema.statics.login = async function (email, password) {
   console.log({ TeamAdminSchema_statics_login: [email, password] });
 
-  let user = await this.findOne(
+  let authUser = await this.findOne(
     { "admin.email": email },
     { admin: { $elemMatch: { email: email } } }
   );
 
-  if (user) {
-    return user;
+  if (authUser) {
+    if (authUser.admin[0].password === password) {
+      return authUser;
+    }
+    let error = new Error("invalid password");
+
+    return { error: error };
   }
 
-  let error = new Error("signin failed check credentials");
-
+  let error = new Error("invalid email");
   return { error: error };
 };
 

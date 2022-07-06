@@ -49,6 +49,14 @@ export const handleErrors = (err) => {
     errors.adminUser = err.message;
   }
 
+  if (err.message.includes("invalid email")) {
+    errors.email = err.message;
+  }
+
+  if (err.message.includes("invalid password")) {
+    errors.password = err.message;
+  }
+
   console.log({ errors: errors });
 
   return errors;

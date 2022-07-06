@@ -7,7 +7,7 @@ import UserSchema from "../models/user.js";
 import {
   findAdminUserById,
   createSecondAdminUser,
-  findAdminUsersByTeamId,
+  setAdminUserTeamId,
   setTeamId,
 } from "../utilities/controllerFunctions.js";
 
@@ -19,10 +19,29 @@ import { createJwtToken, maxAge } from "./createJWT.js";
 
 // create admin user
 const adminUser_post = async (req, res) => {
+
+  req.body.teamId = ""
+  console.log("adminUser_post_reqBody", req.body);
+  let { firstName, lastName, email, teamName, teamUserName, password, teamId} =
+    req.body;
+
+  let adminUser = {
+    firstName,
+    lastName,
+    email,
+    teamName,
+    teamUserName,
+    password,
+    teamId
+  };
+
   try {
     if (!req.userId) {
-      req.body.teamId = "";
-      const newAdmin = await AdminUserSchema.create(req.body);
+     
+
+      console.log("adminUser", adminUser)
+      const teamAdmin = { teamName, teamUserName, teamId, admin: adminUser };
+      const newAdmin = await AdminUserSchema.create(teamAdmin);
 
       // create a jwt token
       const token = createJwtToken(newAdmin._id);
@@ -31,12 +50,15 @@ const adminUser_post = async (req, res) => {
       res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
 
       // set the new newAdmin user team id to the id object. This id will be used to find team info in the database
-      let teamId = await setTeamId(newAdmin._id);
+      await setTeamId(newAdmin._id);
 
-      res.status(200).json(teamId);
+      const updatedPlayerDoc = await setAdminUserTeamId(newAdmin._id)
+      console.log(updatedPlayerDoc)
+      res.status(200).json(updatedPlayerDoc);
     }
 
     if (req.userId) {
+      console.log({ adminUser_post: req.userId });
       const { id } = req.userId;
       const existingAdmin = await findAdminUserById(id);
 
