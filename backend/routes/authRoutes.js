@@ -14,6 +14,8 @@ import { authCoaches_post } from "../controllers/coachesControllers.js";
 
 import { authSchedule_post } from "../controllers/scheduleControllers.js";
 
+import { authNewUser_post, userCreateUser_post } from "../controllers/userControllers.js";
+
 import { cloudinaryUpload_post } from "../controllers/cloudinaryUpload.js";
 
 import { requiresAuth } from "../middleware/authMiddleware.js";
@@ -23,7 +25,10 @@ import {
   multerUploadsCoach,
 } from "../middleware/multer.js";
 
+
 const router = Router();
+
+router.post("/api/userCreateUser", userCreateUser_post)
 
 router.post("/api/createAdminUser", requiresAuth, adminUser_post);
 
@@ -43,5 +48,9 @@ router.post(
   authCoaches_post
 );
 router.post("/api/admin/schedule", requiresAuth, authSchedule_post);
+
+router.post("/api/admin/createUser", requiresAuth, authNewUser_post)
+
+
 
 export { router as authRoute };

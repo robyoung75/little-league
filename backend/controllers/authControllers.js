@@ -3,8 +3,9 @@ import AdminUserSchema from "../models/teamAdmin.js";
 import TeamAdminSchema from "../models/teamAdmin.js";
 import UserSchema from "../models/user.js";
 
-// Mongodb functions
+// Mongodb helper functions
 import {
+  createNewAdminUser,
   findAdminUserById,
   createSecondAdminUser,
   setAdminUserTeamId,
@@ -19,10 +20,9 @@ import { createJwtToken, maxAge } from "./createJWT.js";
 
 // create admin user
 const adminUser_post = async (req, res) => {
-
-  req.body.teamId = ""
+  req.body.teamId = "teamId not set";
   console.log("adminUser_post_reqBody", req.body);
-  let { firstName, lastName, email, teamName, teamUserName, password, teamId} =
+  let { firstName, lastName, email, teamName, teamUserName, password, teamId } =
     req.body;
 
   let adminUser = {
@@ -32,16 +32,15 @@ const adminUser_post = async (req, res) => {
     teamName,
     teamUserName,
     password,
-    teamId
+    teamId,
   };
 
   try {
+    // create a brand new admin user who will build the team data
     if (!req.userId) {
-     
-
-      console.log("adminUser", adminUser)
+      console.log("adminUser", adminUser);
       const teamAdmin = { teamName, teamUserName, teamId, admin: adminUser };
-      const newAdmin = await AdminUserSchema.create(teamAdmin);
+      const newAdmin = await createNewAdminUser(teamAdmin);
 
       // create a jwt token
       const token = createJwtToken(newAdmin._id);
@@ -52,26 +51,36 @@ const adminUser_post = async (req, res) => {
       // set the new newAdmin user team id to the id object. This id will be used to find team info in the database
       await setTeamId(newAdmin._id);
 
-      const updatedPlayerDoc = await setAdminUserTeamId(newAdmin._id)
-      console.log(updatedPlayerDoc)
+      const updatedPlayerDoc = await setAdminUserTeamId(newAdmin._id);
+      console.log(updatedPlayerDoc);
       res.status(200).json(updatedPlayerDoc);
     }
-
+    // if one admin user already exists add the second admin user
     if (req.userId) {
       console.log({ adminUser_post: req.userId });
       const { id } = req.userId;
       const existingAdmin = await findAdminUserById(id);
+      adminUser.teamId = existingAdmin.teamId;
+      console.log("existingAdmin from signin", existingAdmin);
 
+      // if there are are less than two admin users create the second admin user
       if (existingAdmin.admin.length < 2) {
+        console.log("existingAdmin.admin from signin", existingAdmin.admin);
+        console.log(
+          "existingAdmin.admin length from admin signin",
+          existingAdmin.admin.length
+        );
         const filter = existingAdmin.teamId;
         const update = {
           $push: {
-            admin: req.body.admin,
+            admin: adminUser,
           },
         };
         const secondAdmin = await createSecondAdminUser(filter, update);
         res.status(200).json(secondAdmin);
       }
+
+      // if existing admin already has two users throw an error as only two admins are allowed
       if (existingAdmin.admin.length >= 2) {
         throw Error(
           `you have exceeded the maximum allowed of two admin users. ${existingAdmin.admin.map(

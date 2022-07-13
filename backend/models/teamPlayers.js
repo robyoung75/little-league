@@ -38,4 +38,4 @@ TeamPlayersSchema.post("save", function (doc, next) {
   next();
 });
 
-export default mongoose.model("teamPlayers", TeamPlayersSchema);
+export default mongoose.model("players", TeamPlayersSchema);

@@ -57,6 +57,14 @@ export const handleErrors = (err) => {
     errors.password = err.message;
   }
 
+  if (
+    err.message.includes(
+      "Authorization denied, no existing team found check credentials"
+    )
+  ) {
+    errors.user = err.message;
+  }
+
   console.log({ errors: errors });
 
   return errors;

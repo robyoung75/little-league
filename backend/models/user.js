@@ -27,13 +27,13 @@ const UserSchema = new Schema({
     lowercase: true,
     validate: [isEmail, "Please enter a valid email"],
   },
-  teamUserName: {
-    type: String,
-    required: [true, "Please enter a valid team user name provided from your website administrator"],
-    lowercase: true,
-    minlength: 6,
-    maxlength: 20,
-  },
+  // teamUserName: {
+  //   type: String,
+  //   required: [true, "Please enter a valid team user name provided from your website administrator"],
+  //   lowercase: true,
+  //   minlength: 6,
+  //   maxlength: 20,
+  // },
 
   password: {
     type: String,
@@ -53,27 +53,4 @@ const UserSchema = new Schema({
   },
 });
 
-// mongoose middleware
-
-// this function will fire after a doc is saved to the database
-UserSchema.post("save", (doc, next) => {
-  console.log("A new user was saved", doc);
-  next();
-});
-
-UserSchema.pre("save", async (next) => {
-  console.log("A new user is about to be saved, hashing password");
-  next();
-});
-
-// this is a static method that can be used with the UserSchema model
-UserSchema.statics.login = async function (email, password) {
-  const user = await this.findOne({ email });
-
-  if (user) {
-    return user;
-  }
-  throw Error("Incorrect password");
-};
-
-export default mongoose.model("user", UserSchema);
+export default UserSchema

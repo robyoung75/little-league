@@ -39,4 +39,4 @@ TeamsScheduleSchema.post("save", function (doc, next) {
   next();
 });
 
-export default mongoose.model("teamsSchedule", TeamsScheduleSchema);
+export default mongoose.model("schedule", TeamsScheduleSchema);

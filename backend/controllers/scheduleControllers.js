@@ -29,15 +29,15 @@ export const authSchedule_post = async (req, res) => {
         teamName: authUser.teamName,
         teamUserName: authUser.teamUserName,
         teamId: authUser.teamId,
-        schedule: req.body.schedule,
+        schedule: req.body,
       });
       res.status(200).json(schedule);
     }
     if (existingSchedule && authUser) {
-      const filter = authUser.teamId;
+      const filter = existingSchedule.teamId;
       const update = {
         $push: {
-          schedule: req.body.schedule,
+          schedule: req.body,
         },
       };
       const updatedSchedule = await updateTeamSchedule(filter, update);

@@ -46,7 +46,7 @@ const AdminSchema = new Schema({
 
   teamId: {
     type: String,
-    // required: [true, "Team id is required"],
+    required: [true],
   },
   date: {
     type: Date,

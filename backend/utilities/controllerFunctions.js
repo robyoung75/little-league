@@ -3,17 +3,21 @@ import TeamPlayersSchema from "../models/teamPlayers.js";
 import TeamCoachesSchema from "../models/teamCoaches.js";
 import TeamSchema from "../models/team.js";
 import TeamsScheduleSchema from "../models/teamSchedule.js";
-// find auth user by id
-export const findUserById = async (mongooseSchema, id) => {
-  try {
-    return await TeamAdminSchema.findById(id);
-  } catch (error) {
-    console.log({ findUserById: error });
-    return error;
-  }
-};
+import TeamUsersSchema from "../models/teamUsers.js";
 
 // MONGO DB ADMIN USER FUNCTIONS
+
+// find a team by teamUserName
+export const findTeamByTeamUserName = async (teamUserName) => {
+  try {
+    const existingTeam = await TeamAdminSchema.findOne({
+      teamUserName: teamUserName,
+    });
+    return existingTeam;
+  } catch (error) {
+    return { findTeamByTeamUserName: error };
+  }
+};
 
 // create a new admin user
 export const createNewAdminUser = async (reqObj) => {
@@ -76,7 +80,7 @@ export const setTeamId = async (id) => {
 export const setAdminUserTeamId = async (id) => {
   try {
     let authUser = TeamAdminSchema.findOneAndUpdate(
-      { id, "admin.teamId": "" },
+      { id, "admin.teamId": "teamId not set" },
       { "admin.$.teamId": id },
       { returnOriginal: false }
     );
@@ -114,7 +118,7 @@ export const findTeamById = async (id) => {
 // create a new player
 export const createNewPlayer = async (reqObj) => {
   try {
-    const newPlayer = await TeamCoachesSchema.create(reqObj);
+    const newPlayer = await TeamPlayersSchema.create(reqObj);
     return newPlayer;
   } catch (error) {
     return { createNewPlayer: error };
@@ -217,5 +221,53 @@ export const updateTeamSchedule = async (filter, updateObj) => {
     return updatedSchedule;
   } catch (error) {
     return { updateTeamSchedule: error };
+  }
+};
+
+// USER CONTROLLER FUNCTIONS
+
+// check if users exist by teamUserName
+export const findUsersByTeamUserName = async (teamUserName) => {
+  try {
+    const users = await TeamUsersSchema.findOne({ teamUserName });
+    return users;
+  } catch (error) {
+    return { findUsersByTeamUserName: error };
+  }
+};
+
+// check if users already exist.
+export const findUsersById = async (id) => {
+  try {
+    const users = await TeamUsersSchema.findOne({
+      teamId: id,
+    });
+    return users;
+  } catch (error) {
+    return { findUsersById: error };
+  }
+};
+
+// create new user
+export const createNewUser = async (reqObj) => {
+  try {
+    const newUser = await TeamUsersSchema.create(reqObj);
+    return newUser;
+  } catch (error) {
+    return { createNewUser: error };
+  }
+};
+
+// add to existing users
+export const addToExistingUsers = async (filter, updateObj) => {
+  try {
+    const updatedUsers = await TeamUsersSchema.findOneAndUpdate(
+      filter,
+      updateObj,
+      { returnOriginal: false }
+    );
+    return updatedUsers;
+  } catch (error) {
+    return { updateTeamSchedule: error.message };
   }
 };

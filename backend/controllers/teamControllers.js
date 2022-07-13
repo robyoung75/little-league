@@ -18,12 +18,12 @@ import {
 // CONTROLLERS FOR ADMIN TO CREATE A TEAM
 // create team
 const authTeam_post = async (req, res) => {
-
   try {
     if (req.error) {
       console.log({ authTeam_post: req.error });
       throw req.error;
     }
+
     // req.userId returns from auth middleware
     const { id } = req.userId;
     const adminUser = await findAdminUserById(id);
@@ -34,6 +34,10 @@ const authTeam_post = async (req, res) => {
     if (req.file) {
       // sharp to reduce image size for db storage
       teamLogo = await sharpImgResize(req.file);
+    }
+
+    if (adminUser && existingTeam) {
+      throw Error("A team with this id already exists");
     }
 
     if (adminUser && !existingTeam) {
@@ -55,9 +59,6 @@ const authTeam_post = async (req, res) => {
       });
 
       res.status(200).json(authTeamDoc);
-    }
-    if (adminUser && existingTeam) {
-      throw Error('A team with this id already exists')
     }
   } catch (error) {
     const errors = handleErrors(error);

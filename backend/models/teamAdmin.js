@@ -25,6 +25,7 @@ const TeamAdminSchema = new Schema({
   },
   teamId: {
     type: String,
+    required: [true, "you do not have a team id"]
   },
 
   admin: [AdminSchema],
