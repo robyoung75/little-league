@@ -13,8 +13,7 @@ import {
 
 // CONTROLLERS FOR ADMIN to Create Coaches
 export const authCoaches_post = async (req, res) => {
-  // console.log("authCoaches_post");
-  console.log({ authCoaches_post: req.body });
+  
   // console.log("authCoaches_post_req.file", req.file);
 
   try {
@@ -73,7 +72,10 @@ export const authCoaches_post = async (req, res) => {
         teamId: authUserCoaches.teamId,
       };
 
-      const filter = authUserCoaches.teamId;
+      const filter = {
+        teamId: authUserCoaches.teamId,
+        "coaches.email": { $ne: email },
+      };
       const update = {
         $push: {
           coaches: coachData,
@@ -81,6 +83,10 @@ export const authCoaches_post = async (req, res) => {
       };
 
       const updatedCoachesDoc = await checkForCoachesAndUpdate(filter, update);
+
+      if (!updatedCoachesDoc) {
+        throw new Error("A user with this email already exists");
+      }
 
       res.status(200).json(updatedCoachesDoc);
     }

@@ -1,7 +1,5 @@
 // import model schemas from models/...
-import AdminUserSchema from "../models/teamAdmin.js";
 import TeamAdminSchema from "../models/teamAdmin.js";
-import UserSchema from "../models/user.js";
 
 // Mongodb helper functions
 import {
@@ -21,7 +19,7 @@ import { createJwtToken, maxAge } from "./createJWT.js";
 // create admin user
 const adminUser_post = async (req, res) => {
   req.body.teamId = "teamId not set";
-  console.log("adminUser_post_reqBody", req.body);
+
   let { firstName, lastName, email, teamName, teamUserName, password, teamId } =
     req.body;
 
@@ -38,7 +36,6 @@ const adminUser_post = async (req, res) => {
   try {
     // create a brand new admin user who will build the team data
     if (!req.userId) {
-      console.log("adminUser", adminUser);
       const teamAdmin = { teamName, teamUserName, teamId, admin: adminUser };
       const newAdmin = await createNewAdminUser(teamAdmin);
 
@@ -51,32 +48,31 @@ const adminUser_post = async (req, res) => {
       // set the new newAdmin user team id to the id object. This id will be used to find team info in the database
       await setTeamId(newAdmin._id);
 
+      // set the new admin user data to include the teamId
       const updatedPlayerDoc = await setAdminUserTeamId(newAdmin._id);
-      console.log(updatedPlayerDoc);
+
       res.status(200).json(updatedPlayerDoc);
     }
     // if one admin user already exists add the second admin user
     if (req.userId) {
-      console.log({ adminUser_post: req.userId });
       const { id } = req.userId;
       const existingAdmin = await findAdminUserById(id);
       adminUser.teamId = existingAdmin.teamId;
-      console.log("existingAdmin from signin", existingAdmin);
 
       // if there are are less than two admin users create the second admin user
       if (existingAdmin.admin.length < 2) {
-        console.log("existingAdmin.admin from signin", existingAdmin.admin);
-        console.log(
-          "existingAdmin.admin length from admin signin",
-          existingAdmin.admin.length
-        );
-        const filter = existingAdmin.teamId;
+        let { teamId, email } = adminUser;
+        const filter = { teamId, "admin.email": { $ne: email } };
         const update = {
           $push: {
             admin: adminUser,
           },
         };
         const secondAdmin = await createSecondAdminUser(filter, update);
+
+        if (!secondAdmin) {
+          throw new Error("A user with this email already exists");
+        }
         res.status(200).json(secondAdmin);
       }
 
@@ -99,56 +95,10 @@ const adminUser_post = async (req, res) => {
   }
 };
 
-const createUser_post = async (req, res) => {
-  const { firstName, lastName, email, password, teamName, teamUserName } =
-    req.body;
-
-  const adminUser = await AdminUserSchema.findOne({ teamUserName });
-
-  try {
-    if (adminUser && teamUserName === adminUser.teamUserName) {
-      const user = {
-        firstName,
-        lastName,
-        email,
-        password,
-        teamName: adminUser.teamName,
-        teamUserName: adminUser.teamUserName,
-        teamId: adminUser._id,
-      };
-      const newUser = UserSchema.create(user);
-
-      // create a jwt token
-      const token = createJwtToken(newUser._id);
-
-      // send token as a cookie
-      res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
-
-      // response
-      const response = {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        password: user.password,
-        teamName: adminUser.teamName,
-        teamUserName: adminUser.teamUserName,
-        teamId: adminUser._id,
-      };
-
-      // send newUser resposne
-      res.status(200).send(response);
-    }
-  } catch (error) {
-    const errors = handleErrors(error);
-    console.log({ message: errors });
-    res.status(400).json({ message: errors });
-  }
-};
-
 // user sign in
-const signInUser_post = async (req, res) => {
+const signInAdminUser_post = async (req, res) => {
   const { email, password } = req.body;
-  console.log({ signInUser_post: [email, password] });
+
   const authUser = await TeamAdminSchema.login(email, password);
 
   try {
@@ -156,7 +106,6 @@ const signInUser_post = async (req, res) => {
 
     // create jwt token
     const token = createJwtToken(authUser._id);
-    console.log("jwt new admin user", token);
 
     // send token as a cookie
     res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
@@ -176,4 +125,4 @@ const signOutUser_get = async (req, res) => {
   res.redirect("/");
 };
 
-export { adminUser_post, createUser_post, signInUser_post, signOutUser_get };
+export { adminUser_post, signInAdminUser_post, signOutUser_get };

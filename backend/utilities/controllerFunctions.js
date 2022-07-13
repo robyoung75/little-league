@@ -191,6 +191,8 @@ export const checkForCoachesAndUpdate = async (filter, updateObj) => {
 
 // create new schedule
 export const createNewSchedule = async (reqObj) => {
+
+  
   try {
     const newGame = await TeamsScheduleSchema.create(reqObj);
     return newGame;
@@ -224,7 +226,7 @@ export const updateTeamSchedule = async (filter, updateObj) => {
   }
 };
 
-// USER CONTROLLER FUNCTIONS
+
 
 // check if users exist by teamUserName
 export const findUsersByTeamUserName = async (teamUserName) => {

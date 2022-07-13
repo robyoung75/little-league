@@ -65,6 +65,10 @@ export const handleErrors = (err) => {
     errors.user = err.message;
   }
 
+  if (err.message.includes("A user with this email already exists")) {
+    errors.user = err.message;
+  }
+
   console.log({ errors: errors });
 
   return errors;

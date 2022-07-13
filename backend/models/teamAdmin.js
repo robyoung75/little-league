@@ -18,7 +18,7 @@ const TeamAdminSchema = new Schema({
   teamUserName: {
     type: String,
     required: [true, "Please enter a unique team user name"],
-    // unique: true,
+    unique: true,
     lowercase: true,
     minlength: 6,
     maxlength: 20,

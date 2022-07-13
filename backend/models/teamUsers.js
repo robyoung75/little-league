@@ -43,13 +43,27 @@ TeamUserSchema.pre("save", async (next) => {
 });
 
 // this is a static method that can be used with the UserSchema model
+// this is a static method that can be used with the TeamAdminSchema model
 TeamUserSchema.statics.login = async function (email, password) {
-  const user = await this.findOne({ email });
+  console.log({ TeamAdminSchema_statics_login: [email, password] });
 
-  if (user) {
-    return user;
+  let authUser = await this.findOne(
+    { "users.email": email },
+    { users: { $elemMatch: { email: email } } }
+  ); 
+
+  if (authUser) {
+    if (authUser.users[0].password === password) {
+      return authUser;
+    }
+    let error = new Error("invalid password");
+
+    return { error: error };
   }
-  throw Error("Incorrect password");
+
+  let error = new Error("invalid email");
+  return { error: error };
 };
+
 
 export default mongoose.model("user", TeamUserSchema);

@@ -1,6 +1,9 @@
 // import errors functions from errors/errors.js
 import { handleErrors } from "../errors/errors.js";
 
+//import schema model
+import TeamUserSchema from "../models/teamUsers.js";
+
 // import jsonwebtoken functions from createJWT.js
 import { createJwtToken, maxAge } from "./createJWT.js";
 
@@ -24,32 +27,32 @@ export const authNewUser_post = async (req, res) => {
 
     const { id } = req.userId;
 
+    // check for auth admin user
     const authUser = await findAdminUserById(id);
 
     if (!authUser) {
       const error = new Error("You must be an admin user to post new user");
       throw error;
     }
+
+    // check for existing users
     const existingUsers = await findUsersById(authUser.teamId);
 
-    req.body.teamName = authUser.teamName;
-    req.body.teamUserName = authUser.teamUserName;
     req.body.teamId = authUser.teamId;
+    const { firstName, lastName, email, password, teamId } = req.body;
 
-    const { firstName, lastName, email, password } = req.body.users;
-    const { teamId, teamUserName, teamName } = req.body;
-
-    // if (existingUsers.users.email === email) {
-    //     const error = new Error("User email already exists")
-    //     throw error
-    // }
+    const teamUser = {
+      teamName: authUser.teamName,
+      teamUserName: authUser.teamUserName,
+      teamId: authUser.teamId,
+    };
 
     if (!existingUsers && authUser) {
       const newUserDoc = await createNewUser({
-        teamId,
-        teamUserName,
-        teamName,
-        users: req.body.users,
+        teamId: teamUser.teamId,
+        teamUserName: teamUser.teamUserName,
+        teamName: teamUser.teamName,
+        users: { firstName, lastName, email, password, teamId },
       });
       res.status(200).json(newUserDoc);
     }
@@ -58,7 +61,7 @@ export const authNewUser_post = async (req, res) => {
       const filter = { teamId, "users.email": { $ne: email } };
       const update = {
         $push: {
-          users: req.body.users,
+          users: { firstName, lastName, email, password, teamId },
         },
       };
       const updatedUsersDoc = await addToExistingUsers(filter, update);
@@ -70,17 +73,22 @@ export const authNewUser_post = async (req, res) => {
       res.status(200).json(updatedUsersDoc);
     }
   } catch (error) {
-    res.status(400).send(error.message);
+    const errors = handleErrors(error);
+    res.status(400).json({ errors });
   }
 };
 
 // new user creates user
 export const userCreateUser_post = async (req, res) => {
+  let { firstName, lastName, email, password, teamUserName } = req.body;
+
   // check for existing team...
-  const existingTeam = await findTeamByTeamUserName("cottonwoodcolts");
+  const existingTeam = await findTeamByTeamUserName(teamUserName);
 
   // check for existing users...
-  const existingUsers = await findUsersByTeamUserName("cottonwoodcolts");
+  const existingUsers = await findUsersByTeamUserName(teamUserName);
+
+  let user = {};
 
   try {
     if (!existingTeam) {
@@ -90,12 +98,28 @@ export const userCreateUser_post = async (req, res) => {
       throw error;
     }
 
+    if (existingTeam) {
+      user.firstName = firstName;
+      user.lastName = lastName;
+      user.email = email;
+      user.password = password;
+      user.teamUserName = teamUserName;
+      user.teamName = existingTeam.teamName;
+      user.teamId = existingTeam.teamId;
+    }
+
     if (existingTeam && !existingUsers) {
       const newUserDoc = await createNewUser({
-        teamId: existingTeam.teamId,
-        teamUserName: existingTeam.teamUserName,
-        teamName: existingTeam.teamName,
-        users: req.body.users,
+        teamId: user.teamId,
+        teamUserName: user.teamUserName,
+        teamName: user.teamName,
+        users: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          password: user.password,
+          teamId: user.teamId,
+        },
       });
 
       // create a jwt token
@@ -107,12 +131,18 @@ export const userCreateUser_post = async (req, res) => {
     }
 
     if (existingTeam && existingUsers) {
-      let teamId = existingTeam.teamId;
-      let { email } = req.body.users;
-      const filter = { teamId, "users.email": { $ne: email } };
+      // let teamId = user.teamId;
+
+      const filter = { teamId: user.teamId, "users.email": { $ne: email } };
       const update = {
         $push: {
-          users: req.body.users,
+          users: {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            password: user.password,
+            teamId: user.teamId,
+          },
         },
       };
       const updatedUsersDoc = await addToExistingUsers(filter, update);
@@ -132,5 +162,27 @@ export const userCreateUser_post = async (req, res) => {
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });
+  }
+};
+
+// user signin
+export const signInUser_post = async (req, res) => {
+  const { email, password } = req.body;
+  console.log(req.body);
+  const authUser = await TeamUserSchema.login(email, password);
+  try {
+    if (authUser.error) throw authUser.error;
+
+    // create jwt token
+    const token = createJwtToken(authUser._id);
+
+    // send token as a cookie
+    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
+
+    res.status(200).json(authUser);
+  } catch (error) {
+    const errors = handleErrors(error);
+    console.log({ message: errors });
+    res.status(400).json({ message: errors });
   }
 };
