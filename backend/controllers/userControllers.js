@@ -1,8 +1,12 @@
 // import errors functions from errors/errors.js
 import { handleErrors } from "../errors/errors.js";
 
+// password hashing with bcrypt
+import { hashPassword } from "../utilities/bcrypt.js";
+
 //import schema model
 import TeamUserSchema from "../models/teamUsers.js";
+import UserSchema from "../models/user.js";
 
 // import jsonwebtoken functions from createJWT.js
 import { createJwtToken, maxAge } from "./createJWT.js";
@@ -39,7 +43,7 @@ export const authNewUser_post = async (req, res) => {
     const existingUsers = await findUsersById(authUser.teamId);
 
     req.body.teamId = authUser.teamId;
-    const { firstName, lastName, email, password, teamId } = req.body;
+    let { firstName, lastName, email, password, teamId } = req.body;
 
     const teamUser = {
       teamName: authUser.teamName,
@@ -52,7 +56,13 @@ export const authNewUser_post = async (req, res) => {
         teamId: teamUser.teamId,
         teamUserName: teamUser.teamUserName,
         teamName: teamUser.teamName,
-        users: { firstName, lastName, email, password, teamId },
+        users: {
+          firstName,
+          lastName,
+          email,
+          password: await hashPassword(password),
+          teamId,
+        },
       });
       res.status(200).json(newUserDoc);
     }
@@ -61,7 +71,13 @@ export const authNewUser_post = async (req, res) => {
       const filter = { teamId, "users.email": { $ne: email } };
       const update = {
         $push: {
-          users: { firstName, lastName, email, password, teamId },
+          users: {
+            firstName,
+            lastName,
+            email,
+            password: await hashPassword(password),
+            teamId,
+          },
         },
       };
       const updatedUsersDoc = await addToExistingUsers(filter, update);
@@ -88,6 +104,8 @@ export const userCreateUser_post = async (req, res) => {
   // check for existing users...
   const existingUsers = await findUsersByTeamUserName(teamUserName);
 
+  const hashedPassword = await hashPassword(password);
+
   let user = {};
 
   try {
@@ -102,7 +120,7 @@ export const userCreateUser_post = async (req, res) => {
       user.firstName = firstName;
       user.lastName = lastName;
       user.email = email;
-      user.password = password;
+      user.password = hashedPassword;
       user.teamUserName = teamUserName;
       user.teamName = existingTeam.teamName;
       user.teamId = existingTeam.teamId;
@@ -169,6 +187,7 @@ export const userCreateUser_post = async (req, res) => {
 export const signInUser_post = async (req, res) => {
   const { email, password } = req.body;
   console.log(req.body);
+
   const authUser = await TeamUserSchema.login(email, password);
   try {
     if (authUser.error) throw authUser.error;

@@ -24,7 +24,7 @@ import { cloudinaryUpload_post } from "../controllers/cloudinaryUpload.js";
 
 import { requiresAuth } from "../middleware/authMiddleware.js";
 import {
-  multerUploads,
+  multerUploadsTeam,
   multerUploadsMultiple,
   multerUploadsCoach,
 } from "../middleware/multer.js";
@@ -39,7 +39,7 @@ router.post("/api/admin/signin", signInAdminUser_post);
 router.post("/api/user/signin", signInUser_post);
 router.get("/api/signout", signOutUser_get);
 
-router.post("/api/admin/team", requiresAuth, multerUploads, authTeam_post);
+router.post("/api/admin/team", requiresAuth, multerUploadsTeam, authTeam_post);
 router.post(
   "/api/admin/createPlayers",
   requiresAuth,

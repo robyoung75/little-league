@@ -1,7 +1,8 @@
 import multer from "multer";
 
 const storage = multer.memoryStorage();
-const multerUploads = multer({ storage }).single("teamLogo");
+
+const multerUploadsTeam = multer({ storage }).single("teamLogo");
 
 const multerUploadsCoach = multer({ storage }).single("headshotImg");
 
@@ -12,4 +13,4 @@ const multerUploadsMultiple = multer({ storage }).fields([
 ]);
 
 // const multerUploadsMultiple = multer({ storage }).array('images');
-export { multerUploads, multerUploadsMultiple, multerUploadsCoach };
+export { multerUploadsTeam, multerUploadsMultiple, multerUploadsCoach };

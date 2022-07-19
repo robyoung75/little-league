@@ -111,7 +111,10 @@ export const authPlayers_post = async (req, res) => {
       const headshotImg = URLS.find((item) => item.includes("headshot"));
       const offenseImg = URLS.find((item) => item.includes("offense"));
       const defenseImg = URLS.find((item) => item.includes("defense"));
-      const filter = authUserPlayers.teamId;
+      const filter = {
+        teamId: authUserPlayers.teamId,
+        "players.number": { $ne: number },
+      };
       const update = {
         $push: {
           players: {
@@ -128,6 +131,10 @@ export const authPlayers_post = async (req, res) => {
         },
       };
       const updatedPlayersdoc = await checkForPlayersAndUpdate(filter, update);
+
+      if (!updatedPlayersdoc) {
+        throw new Error("A player with this number already exists");
+      }
 
       res.status(200).json(updatedPlayersdoc);
     }

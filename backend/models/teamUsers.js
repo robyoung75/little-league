@@ -31,39 +31,42 @@ const TeamUserSchema = new Schema({
 
 // mongoose middleware
 
-// this function will fire after a doc is saved to the database
-TeamUserSchema.post("save", (doc, next) => {
-  console.log("A new user was saved", doc);
-  next();
-});
+// this function will fire before the doc is saved
 
 TeamUserSchema.pre("save", async (next) => {
   console.log("A new user is about to be saved, hashing password");
   next();
 });
 
-// this is a static method that can be used with the UserSchema model
+// this function will fire after a doc is saved to the database
+TeamUserSchema.post("save", (doc, next) => {
+  console.log("A new user was saved", doc);
+  next();
+});
+
 // this is a static method that can be used with the TeamAdminSchema model
 TeamUserSchema.statics.login = async function (email, password) {
   console.log({ TeamAdminSchema_statics_login: [email, password] });
 
-  let authUser = await this.findOne(
+  let user = await this.findOne(
     { "users.email": email },
     { users: { $elemMatch: { email: email } } }
-  ); 
+  );
 
-  if (authUser) {
-    if (authUser.users[0].password === password) {
-      return authUser;
+  if (user) {
+    let userPassword = user.users[0].password;
+    let userEmail = user.users[0].email;
+
+    console.log("shit the bed.......................", userPassword, userEmail);
+    const authUser = await bcrypt.compare(password, user.users[0].password);
+
+    if (authUser) {
+      return user;
     }
-    let error = new Error("invalid password");
-
-    return { error: error };
+    throw Error("invalid password");
   }
 
-  let error = new Error("invalid email");
-  return { error: error };
+  throw Error("invalid email");
 };
-
 
 export default mongoose.model("user", TeamUserSchema);

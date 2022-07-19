@@ -18,14 +18,14 @@ const TeamAdminSchema = new Schema({
   teamUserName: {
     type: String,
     required: [true, "Please enter a unique team user name"],
-    unique: true,
+    // unique: true,
     lowercase: true,
     minlength: 6,
     maxlength: 20,
   },
   teamId: {
     type: String,
-    required: [true, "you do not have a team id"]
+    required: [true, "you do not have a team id"],
   },
 
   admin: [AdminSchema],
@@ -37,6 +37,11 @@ const TeamAdminSchema = new Schema({
 });
 
 // mongoose middleware
+// this function will fire before the doc is saved
+TeamAdminSchema.pre("save", async function (next) {
+  console.log("adminUser about to be saved, hashing password");
+  next();
+});
 
 // this function will fire after a doc is saved to the database
 TeamAdminSchema.post("save", (doc, next) => {
@@ -44,31 +49,26 @@ TeamAdminSchema.post("save", (doc, next) => {
   next();
 });
 
-TeamAdminSchema.pre("save", async (next) => {
-  console.log("A new user is about to be saved, hashing password");
-  next();
-});
-
 // this is a static method that can be used with the TeamAdminSchema model
 TeamAdminSchema.statics.login = async function (email, password) {
-  console.log({ TeamAdminSchema_statics_login: [email, password] });
-
-  let authUser = await this.findOne(
+  let user = await this.findOne(
     { "admin.email": email },
     { admin: { $elemMatch: { email: email } } }
   );
 
-  if (authUser) {
-    if (authUser.admin[0].password === password) {
-      return authUser;
+  console.log("A new user is signing in >>>>>>>>>>> ", {
+    firstName: user.admin[0].firstName,
+    lastName: user.admin[0].lastName,
+  });
+
+  if (user) {
+    const authUser = await bcrypt.compare(password, user.admin[0].password);
+    if (authUser) {
+      return user;
     }
-    let error = new Error("invalid password");
-
-    return { error: error };
+    throw Error("Incorrect password");
   }
-
-  let error = new Error("invalid email");
-  return { error: error };
+  throw Error("This email does not exist");
 };
 
 export default mongoose.model("admin", TeamAdminSchema);

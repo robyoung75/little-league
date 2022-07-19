@@ -1,6 +1,9 @@
 // import model schemas from models/...
 import TeamAdminSchema from "../models/teamAdmin.js";
 
+// import hashpassword function to hash the password
+import { hashPassword } from "../utilities/bcrypt.js";
+
 // Mongodb helper functions
 import {
   createNewAdminUser,
@@ -23,36 +26,19 @@ const adminUser_post = async (req, res) => {
   let { firstName, lastName, email, teamName, teamUserName, password, teamId } =
     req.body;
 
+  let hashedPassword = await hashPassword(password);
+
   let adminUser = {
     firstName,
     lastName,
     email,
+    password: hashedPassword,
     teamName,
     teamUserName,
-    password,
     teamId,
   };
 
   try {
-    // create a brand new admin user who will build the team data
-    if (!req.userId) {
-      const teamAdmin = { teamName, teamUserName, teamId, admin: adminUser };
-      const newAdmin = await createNewAdminUser(teamAdmin);
-
-      // create a jwt token
-      const token = createJwtToken(newAdmin._id);
-
-      // send token as a cookie
-      res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
-
-      // set the new newAdmin user team id to the id object. This id will be used to find team info in the database
-      await setTeamId(newAdmin._id);
-
-      // set the new admin user data to include the teamId
-      const updatedPlayerDoc = await setAdminUserTeamId(newAdmin._id);
-
-      res.status(200).json(updatedPlayerDoc);
-    }
     // if one admin user already exists add the second admin user
     if (req.userId) {
       const { id } = req.userId;
@@ -87,6 +73,24 @@ const adminUser_post = async (req, res) => {
             }
           )}`
         );
+      }
+    }
+    // create a brand new admin user who will build the team data
+    if (!req.userId) {
+      const teamAdmin = { teamName, teamUserName, teamId, admin: adminUser };
+
+      const newAdmin = await createNewAdminUser(teamAdmin);
+      let updatedTeamId = await setTeamId(newAdmin._id);
+
+      let updatedAdmin = await setAdminUserTeamId(newAdmin._id);
+
+      if (updatedAdmin) {
+        // create a jwt token
+        const token = createJwtToken(newAdmin._id);
+
+        // send token as a cookie
+        res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
+        res.status(200).json(updatedAdmin);
       }
     }
   } catch (error) {

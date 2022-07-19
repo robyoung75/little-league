@@ -11,6 +11,7 @@ export const handleErrors = (err) => {
     user: "",
     adminUser: "",
     adminTeamPost: "",
+    player: "",
   };
 
   // validation errors from UserSchema validators
@@ -67,6 +68,10 @@ export const handleErrors = (err) => {
 
   if (err.message.includes("A user with this email already exists")) {
     errors.user = err.message;
+  }
+
+  if (err.message.includes("A player with this number already exists")) {
+    errors.player = err.message;
   }
 
   console.log({ errors: errors });

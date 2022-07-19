@@ -1,7 +1,7 @@
 import { cloudinary } from "../utilities/cloudinary.js";
 import sharp from "sharp";
 import { Readable } from "stream";
-import { multerUploads } from "../middleware/multer.js";
+
 
 // read the data from the buffer of the image that we'll pass as argument. And later the data will be returned as a buffer object.
 const bufferToStream = (buffer) => {

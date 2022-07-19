@@ -13,8 +13,7 @@ import morgan from "morgan";
 
 // import routes
 import { authRoute } from "./routes/authRoutes.js";
-import { multerUploads } from "./middleware/multer.js";
-import { requiresAuth } from "./middleware/authMiddleware.js";
+
 
 // configure dotenv file
 dotenv.config();

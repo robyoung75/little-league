@@ -22,7 +22,7 @@ const UserSchema = new Schema({
   },
   email: {
     type: String,
-    required: [true, "Please enter your email"],    
+    required: [true, "Please enter your email"],
     lowercase: true,
     validate: [isEmail, "Please enter a valid email"],
   },
@@ -45,4 +45,4 @@ const UserSchema = new Schema({
   },
 });
 
-export default UserSchema
+export default UserSchema;

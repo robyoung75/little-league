@@ -47,10 +47,12 @@ function TeamForm({ newTeamData, setNewTeamData }) {
 
   const formSubmit = async (data) => {
     if (isSubmitSuccessful) {
-      let formData = new FormData();
-      formData.append("teamLogo", imgFile);
+      data.teamLogo = logoPreview
+
+      let formData = new FormData();      
       formData.append("primaryColor", data.primaryColor);
       formData.append("secondaryColor", data.secondaryColor);
+      formData.append("teamLogo", imgFile);
       
       await adminTeamPost(formData);
       // localStorage.clear();

@@ -69,7 +69,7 @@ export const setTeamId = async (id) => {
     const teamId = await TeamAdminSchema.findByIdAndUpdate(
       id,
       { teamId: id },
-      { returnOriginal: false }
+      { new: true }
     );
     return teamId;
   } catch (error) {
@@ -81,8 +81,8 @@ export const setAdminUserTeamId = async (id) => {
   try {
     let authUser = TeamAdminSchema.findOneAndUpdate(
       { id, "admin.teamId": "teamId not set" },
-      { "admin.$.teamId": id },
-      { returnOriginal: false }
+      { $set: { "admin.$.teamId": id } },
+      { new: true }
     );
 
     return authUser;
@@ -191,8 +191,6 @@ export const checkForCoachesAndUpdate = async (filter, updateObj) => {
 
 // create new schedule
 export const createNewSchedule = async (reqObj) => {
-
-  
   try {
     const newGame = await TeamsScheduleSchema.create(reqObj);
     return newGame;
@@ -225,8 +223,6 @@ export const updateTeamSchedule = async (filter, updateObj) => {
     return { updateTeamSchedule: error };
   }
 };
-
-
 
 // check if users exist by teamUserName
 export const findUsersByTeamUserName = async (teamUserName) => {
