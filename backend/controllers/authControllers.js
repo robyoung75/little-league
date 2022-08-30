@@ -19,7 +19,7 @@ import { handleErrors } from "../errors/errors.js";
 // import jsonwebtoken functions from createJWT.js
 import { createJwtToken, maxAge } from "./createJWT.js";
 
-// create admin user
+// CREATE ADMIN USER
 const adminUser_post = async (req, res) => {
   req.body.teamId = "teamId not set";
 

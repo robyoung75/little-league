@@ -15,16 +15,28 @@ const bufferToStream = (buffer) => {
 };
 
 // streams a single image upload. parameters are multer req.file, teamId and team username. The promise resolves to the cloudinary result object
-const createCloudinaryStream = (imgFileBuffer, teamId, teamUserName) => {
+const createCloudinaryStream = (
+  imgFileBuffer,
+  adminUserObject,
+  imgTagsArray
+) => {
   // console.log("imgFileBuffer >>>>> ", imgFileBuffer);
 
   if (!imgFileBuffer) return;
 
   return new Promise((resolve, reject) => {
+    // the last item in the tags array with be the file folder location name in cloudinary
+    let fileFolderName = imgTagsArray[imgTagsArray.length - 1];
+
     const stream = cloudinary.uploader.upload_stream(
       {
-        folder: teamUserName,
-        tags: [teamId, teamUserName],
+        folder: `${adminUserObject.teamUserName}/${fileFolderName}`,
+        tags: imgTagsArray,
+        public_id: `${adminUserObject.teamUserName}_name_${
+          imgFileBuffer.lastName
+            ? imgFileBuffer.lastName
+            : adminUserObject.teamName
+        }_${fileFolderName}`,
       },
       (error, result) => {
         if (error) {
@@ -36,30 +48,28 @@ const createCloudinaryStream = (imgFileBuffer, teamId, teamUserName) => {
       }
     );
 
-    bufferToStream(imgFileBuffer).pipe(stream);
+    bufferToStream(imgFileBuffer.img).pipe(stream);
   });
 };
 
 const createCloudinaryStreamMultiple = (
-  imgFileBuffer,
-  teamId,
-  teamUserName
+  imgFileBufferArray,
+  adminUserObject,
+  imgTagsArray
 ) => {
-  let res_promises = imgFileBuffer.map(
+  // the last item in the tags array with be the file folder location name in cloudinary
+  let fileFolderName = imgTagsArray[imgTagsArray.length - 1];
+
+  let res_promises = imgFileBufferArray.map(
     (img) =>
       new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           {
-            folder: teamUserName,
-            tags: [
-              teamId,
-              teamUserName,
-              img.imageTitle,
-              img.playerNumber,
-              img.playerLastName,
-              img.playerFirstName,
-            ],
-            public_id: `${teamUserName}_${img.playerNumber}_${img.playerLastName}_${img.imageTitle}`,
+            folder: `${adminUserObject.teamUserName}/${fileFolderName}`,
+            tags: imgTagsArray,
+            // public_id set the end of the public domain
+            // example: https://res.cloudinary.com/dyxsxutlm/image/upload/v1661706901/cottonwoodcolts/players/cottonwoodcolts_17_young_defense.webp
+            public_id: `${adminUserObject.teamUserName}_number_${img.number}_lName_${img.lastName}_title_${img.imageTitle}`,
           },
           (error, result) => {
             if (error) reject(error);
@@ -79,15 +89,16 @@ const createCloudinaryStreamMultiple = (
 // a url as an example
 export const async_cloudinaryStreamImg = async (
   imgFileBuffer,
-  teamId,
-  teamUserName
+  adminUserObject,
+  imgTagsArray
 ) => {
   const result = await createCloudinaryStream(
     imgFileBuffer,
-    teamId,
-    teamUserName
+    adminUserObject,
+    imgTagsArray
   );
-  console.log(result);
+
+  console.log("imageUploadResult", result);
 
   return result;
 };

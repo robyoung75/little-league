@@ -95,49 +95,40 @@ export const authNewUser_post = async (req, res) => {
 };
 
 // new user creates user
-export const userCreateUser_post = async (req, res) => {
-  let { firstName, lastName, email, password, teamUserName } = req.body;
-
-  // check for existing team...
-  const existingTeam = await findTeamByTeamUserName(teamUserName);
-
-  // check for existing users...
-  const existingUsers = await findUsersByTeamUserName(teamUserName);
-
-  const hashedPassword = await hashPassword(password);
-
-  let user = {};
+export const userCreateUser_post = async (req, res) => { 
 
   try {
+
+    let { firstName, lastName, email, password, teamUserName } = req.body;
+
+    // check for existing team...
+    const existingTeam = await findTeamByTeamUserName(teamUserName);
+  
+    // check for existing users...
+    const existingUsers = await findUsersByTeamUserName(teamUserName);
+  
+    const hashedPassword = await hashPassword(password);
+  
+    let user = req.body;
+
     if (!existingTeam) {
       const error = new Error(
         "Authorization denied, no existing team found check credentials"
       );
       throw error;
-    }
+    }    
 
-    if (existingTeam) {
-      user.firstName = firstName;
-      user.lastName = lastName;
-      user.email = email;
-      user.password = hashedPassword;
-      user.teamUserName = teamUserName;
+      user.password = hashedPassword;  
       user.teamName = existingTeam.teamName;
       user.teamId = existingTeam.teamId;
-    }
+   
 
     if (existingTeam && !existingUsers) {
       const newUserDoc = await createNewUser({
         teamId: user.teamId,
         teamUserName: user.teamUserName,
         teamName: user.teamName,
-        users: {
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          password: user.password,
-          teamId: user.teamId,
-        },
+        users: user,
       });
 
       // create a jwt token
@@ -154,13 +145,7 @@ export const userCreateUser_post = async (req, res) => {
       const filter = { teamId: user.teamId, "users.email": { $ne: email } };
       const update = {
         $push: {
-          users: {
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            password: user.password,
-            teamId: user.teamId,
-          },
+          users: user,
         },
       };
       const updatedUsersDoc = await addToExistingUsers(filter, update);

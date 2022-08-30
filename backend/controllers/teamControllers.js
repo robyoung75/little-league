@@ -1,8 +1,3 @@
-// import model schemas from models/teamControllers
-import TeamSchema from "../models/team.js";
-import AdminUserSchema from "../models/teamAdmin.js";
-import TeamPlayersSchema from "../models/teamPlayers.js";
-
 // import errors functions from errors/errors.js
 import { handleErrors } from "../errors/errors.js";
 
@@ -26,28 +21,41 @@ const authTeam_post = async (req, res) => {
 
     // req.userId returns from auth middleware
     const { id } = req.userId;
-    const adminUser = await findAdminUserById(id);
-    const existingTeam = await findTeamById(adminUser.teamId);
-    req.body.teamLogo = null;
-    let { primaryColor, secondaryColor, teamLogo } = req.body;
 
-    if (req.file) {
-      // sharp to reduce image size for db storage
-      teamLogo = await sharpImgResize(req.file);
-    }
+    const adminUser = await findAdminUserById(id);
+    const existingTeam = await findTeamById(adminUser.teamId);    
+
+    let { primaryColor, secondaryColor} = req.body;
+    let teamLogo;
+    let imgUploadResponse;
 
     if (adminUser && existingTeam) {
       throw Error("A team with this id already exists");
     }
 
-    if (adminUser && !existingTeam) {
-      // cloudinary upload image returning a result
-      const imgUploadResponse = await async_cloudinaryStreamImg(
-        teamLogo,
+    // HANDLE AND UPLOAD IMAGES TO CLOUDINARY
+    if (adminUser && req.file) {
+      // sharp to reduce image size for db storage
+      let fileResize = await sharpImgResize(req.file);
+      teamLogo = { img: fileResize };
+
+      const imgTags = [
         adminUser.teamId,
-        adminUser.teamUserName
+        adminUser.teamUserName,
+        adminUser.teamName,
+        "teamLogo",
+      ];
+
+       // cloudinary upload image returning a result
+       imgUploadResponse = await async_cloudinaryStreamImg(
+        teamLogo,
+        adminUser,
+        imgTags
       );
-      // console.log("imgUploadResponse >>>>> ", imgUploadResponse);
+
+    }
+
+    if (adminUser && !existingTeam) {
 
       const authTeamDoc = await createNewTeam({
         teamName: adminUser.teamName,

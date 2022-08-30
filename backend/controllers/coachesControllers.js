@@ -13,7 +13,6 @@ import {
 
 // CONTROLLERS FOR ADMIN to Create Coaches
 export const authCoaches_post = async (req, res) => {
-  
   // console.log("authCoaches_post_req.file", req.file);
 
   try {
@@ -23,55 +22,58 @@ export const authCoaches_post = async (req, res) => {
     }
 
     const { id } = req.userId;
-    const authUserDoc = await findAdminUserById(id);
-    const authUserCoaches = await findOneTeamCoachById(authUserDoc.teamId);
-    req.body.headshotImg = null;
-    let { firstName, lastName, email, headshotImg } = req.body;
 
-    if (req.file) {
-      headshotImg = await sharpImgResize(req.file);
-    }
+    const adminUser = await findAdminUserById(id);
+    const authUserCoaches = await findOneTeamCoachById(adminUser.teamId);
 
-    if (authUserDoc && !authUserCoaches) {
-      const imgUploadResponse = await async_cloudinaryStreamImg(
-        headshotImg,
-        authUserDoc.teamId,
-        authUserDoc.teamUserName
-      );
+    let { firstName, lastName, email } = req.body;
+    let imgTags = [];
+   
+    let imgUploadResponse;
+    let playerImage = {};
 
-      const coachData = {
+    let coachData = {
+      firstName,
+      lastName,
+      email,
+      headshotImg: imgUploadResponse ? imgUploadResponse.secure_url : null,
+      teamId: adminUser.teamId,
+    };
+
+    // HANDLE AND UPLOAD IMAGES TO CLOUDINARY
+    if (adminUser && req.file) {
+      let fileResize = await sharpImgResize(req.file);
+      playerImage = { img: fileResize, lastName };
+
+      imgTags = [
+        adminUser.teamId,
+        adminUser.teamUserName,
+        adminUser.teamName,
         firstName,
         lastName,
         email,
-        headshotImg: imgUploadResponse ? imgUploadResponse.secure_url : null,
-        teamId: authUserDoc.teamId,
-      };
+        "coaches",
+      ];
 
+      imgUploadResponse = await async_cloudinaryStreamImg(
+        playerImage,
+        adminUser,
+        imgTags
+      );
+    }
+
+    if (adminUser && !authUserCoaches) {
       const authCoachesDoc = await createNewCoach({
-        teamId: authUserDoc.teamId,
-        teamUserName: authUserDoc.teamUserName,
-        teamName: authUserDoc.teamName,
+        teamId: adminUser.teamId,
+        teamUserName: adminUser.teamUserName,
+        teamName: adminUser.teamName,
         coaches: coachData,
       });
 
       res.status(200).json(authCoachesDoc);
     }
 
-    if (authUserDoc && authUserCoaches) {
-      const imgUploadResponse = await async_cloudinaryStreamImg(
-        headshotImg,
-        authUserDoc.authId,
-        authUserDoc.teamUserName
-      );
-
-      const coachData = {
-        firstName,
-        lastName,
-        email,
-        headshotImg: imgUploadResponse ? imgUploadResponse.secure_url : null,
-        teamId: authUserCoaches.teamId,
-      };
-
+    if (adminUser && authUserCoaches) {
       const filter = {
         teamId: authUserCoaches.teamId,
         "coaches.email": { $ne: email },

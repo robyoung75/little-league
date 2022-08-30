@@ -10,68 +10,37 @@ import {
 
 // check if existing team schedule exists if not create new schedule else update schedule
 export const authSchedule_post = async (req, res) => {
-  let {
-    opponent,
-    date,
-    gameTime,
-    arrivalTime,
-    address,
-    city,
-    state,
-    zipCode,
-    homeAway,
-    uniformColor,
-  } = req.body;
 
-  let schedule = {};
   try {
+
     if (req.error) {
       console.log({ authSchedule_post: req.error });
       throw req.error;
     }
-    const { id } = req.userId;
 
-    console.log("ID SCHEDULE CREATE", id);
+    const { id } = req.userId;
+  
+    let schedule = req.body;
+
+    // console.log("ID SCHEDULE CREATE", id);
+
     const authUser = await findAdminUserById(id);
     const existingSchedule = await findTeamSchedule(authUser.teamId);
 
-    console.log("AUTHUSER_SCEHDULE", authUser);
+    // console.log("AUTHUSER_SCEHDULE", authUser);
     schedule.teamId = authUser.teamId;
     schedule.teamUserName = authUser.teamUserName;
     schedule.teamName = authUser.teamName;
-    schedule.opponent = opponent;
-    schedule.date = date;
-    schedule.gameTime = gameTime;
-    schedule.arrivalTime = arrivalTime;
-    schedule.address = address;
-    schedule.city = city;
-    schedule.state = state;
-    schedule.zipCode = zipCode;
-    schedule.homeAway = homeAway;
-    schedule.uniformColor = uniformColor;
+    
 
-    console.log("SCHEDULE", schedule);
+    // console.log("SCHEDULE", schedule);
 
     if (!existingSchedule && authUser) {
       const scheduleDoc = await createNewSchedule({
         teamName: schedule.teamName,
         teamUserName: schedule.teamUserName,
         teamId: schedule.teamId,
-        schedule: {
-          teamName: schedule.teamName,
-          teamUserName: schedule.teamUserName,
-          teamId: schedule.teamId,
-          opponent: schedule.opponent,
-          date: schedule.date,
-          gameTime: schedule.gameTime,
-          arrivalTime: schedule.arrivalTime,
-          address: schedule.address,
-          city: schedule.city,
-          state: schedule.state,
-          zipCode: schedule.zipCode,
-          homeAway: schedule.homeAway,
-          uniformColor: schedule.uniformColor,
-        },
+        schedule: schedule,
       });
       res.status(200).json(scheduleDoc);
     }

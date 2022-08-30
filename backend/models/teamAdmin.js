@@ -57,8 +57,9 @@ TeamAdminSchema.statics.login = async function (email, password) {
   );
 
   console.log("A new user is signing in >>>>>>>>>>> ", {
-    firstName: user.admin[0].firstName,
-    lastName: user.admin[0].lastName,
+    // firstName: user.admin[0].firstName,
+    // lastName: user.admin[0].lastName,
+    user
   });
 
   if (user) {

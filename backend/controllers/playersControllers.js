@@ -13,11 +13,8 @@ import {
 
 // create team players
 export const authPlayers_post = async (req, res) => {
-  console.log({ authPlayers_post_req_body: req.body });
+  // console.log({ authPlayers_post_req_body: req.body });
   // console.log({ authPlayers_post_req_files: req.files });
-  // console.log(req.files.headshotImg);
-  // console.log(req.files.offenseImg);
-  // console.log(req.files.defenseImg);
 
   try {
     if (req.error) {
@@ -27,107 +24,114 @@ export const authPlayers_post = async (req, res) => {
 
     // req.userId returns from auth
     const { id } = req.userId;
-    const authUserDoc = await findAdminUserById(id);
-    const authUserPlayers = await findOneTeamPlayerById(authUserDoc.teamId);
+    const adminUser = await findAdminUserById(id);
+    const authUserPlayers = await findOneTeamPlayerById(adminUser.teamId);
+    
 
-    req.body.playerImages = [];
-
-    if (req.files.headshotImg) {
-      req.body.playerImages.push({
-        imageTitle: "headshot",
-        image: await sharpImgResize(req.files["headshotImg"][0]),
-      });
-    }
-
-    if (req.files.offenseImg) {
-      req.body.playerImages.push({
-        imageTitle: "offense",
-        image: await sharpImgResize(req.files["offenseImg"][0]),
-      });
-    }
-
-    if (req.files.defenseImg) {
-      req.body.playerImages.push({
-        imageTitle: "defense",
-        image: await sharpImgResize(req.files["defenseImg"][0]),
-      });
-    }
+    let imgTags = [];
+    let imageUploadResult;
+    let URLS = [];
+    let playerImages = [];
 
     const {
       firstName,
       lastName,
       number,
       positions,
-      battingStance,
-      teamId,
-      playerImages,
+      battingStance,      
     } = req.body;
 
-    // if authUserDoc and no authUserPlayerDoc create a teamsPlayersDoc
-    if (authUserDoc && !authUserPlayers) {
-      const imgUploadResponse = await async_cloudinaryStreamImgs(
-        playerImages,
-        teamId,
-        authUserDoc.teamUserName
-      );
-      // console.log("imgUploadResposne >>>>>", imgUploadResponse);
-      // provides URLS form player images from imgUploadResponse
-      const URLS = imgUploadResponse.map((player, index) => {
-        return player.secure_url;
+    let playerData = {
+      firstName,
+      lastName,
+      number,
+      positions,
+      battingStance,
+      teamId: adminUser.teamId      
+    };
+
+    if (req.files.headshotImg) {
+      playerImages.push({
+        imageTitle: "headshot",
+        lastName,
+        number,
+        image: await sharpImgResize(req.files["headshotImg"][0]),
       });
-      const playerData = {
+    }
+
+    if (req.files.offenseImg) {
+      playerImages.push({
+        imageTitle: "offense",
+        lastName,
+        number,
+        image: await sharpImgResize(req.files["offenseImg"][0]),
+      });
+    }
+
+    if (req.files.defenseImg) {
+      playerImages.push({
+        imageTitle: "defense",
+        lastName,
+        number,
+        image: await sharpImgResize(req.files["defenseImg"][0]),
+      });
+    }
+
+
+    // HANDLE AND UPLOAD IMAGES TO CLOUDINARY
+    if (adminUser && playerImages !== []) {
+
+      // assign image tags to each image
+      imgTags = [
+        adminUser.teamId,
+        adminUser.teamUserName,
+        adminUser.teamName,
         firstName,
         lastName,
         number,
-        positions,
-        battingStance,
-        teamId: authUserDoc.teamId,
-        headshotImg: URLS.find((item) => item.includes("headshot")),
-        offenseImg: URLS.find((item) => item.includes("offense")),
-        defenseImg: URLS.find((item) => item.includes("defense")),
-      };
+        "players",
+      ];
+
+      // upload multiple images to cloudinary
+      imageUploadResult = await async_cloudinaryStreamImgs(
+        playerImages,
+        adminUser,
+        imgTags
+      );
+
+      // provides URLS form player images from imgUploadResponse
+      URLS = imageUploadResult.map((player, index) => {
+        return player.secure_url;
+      });
+
+      // set playerData object images
+      playerData.headshotImg = URLS.find((item) => item.includes("headshot"));
+      playerData.offenseImg = URLS.find((item) => item.includes("offense"));
+      playerData.defenseImg = URLS.find((item) => item.includes("defense"));
+    }
+
+    // if adminUser and no authUserPlayerDoc create a teamsPlayersDoc
+    if (adminUser && !authUserPlayers) {
       // create new team players post
       const authPlayerDoc = await createNewPlayer({
-        teamId: authUserDoc._id,
-        teamUserName: authUserDoc.teamUserName,
-        teamName: authUserDoc.teamName,
+        teamId: adminUser._id,
+        teamUserName: adminUser.teamUserName,
+        teamName: adminUser.teamName,
         players: playerData,
       });
 
       res.status(200).json(authPlayerDoc);
     }
-    // if authUserDoc and authUserPlayers then update the existing authUserPlayersDoc
-    if (authUserDoc && authUserPlayers) {
-      const imgUploadResponse = await async_cloudinaryStreamImgs(
-        playerImages,
-        teamId,
-        authUserDoc.teamUserName
-      );
-      // console.log("imgUploadResposne >>>>>", imgUploadResponse);
-      // provides URLS form player images from imgUploadResponse
-      const URLS = imgUploadResponse.map((player, index) => {
-        return player.secure_url;
-      });
-      const headshotImg = URLS.find((item) => item.includes("headshot"));
-      const offenseImg = URLS.find((item) => item.includes("offense"));
-      const defenseImg = URLS.find((item) => item.includes("defense"));
+    // if adminUser and authUserPlayers then update the existing authUserPlayersDoc
+    if (adminUser && authUserPlayers) {
+      
       const filter = {
         teamId: authUserPlayers.teamId,
         "players.number": { $ne: number },
       };
       const update = {
         $push: {
-          players: {
-            firstName,
-            lastName,
-            number,
-            positions,
-            battingStance,
-            teamId: authUserPlayers.teamId,
-            headshotImg,
-            offenseImg,
-            defenseImg,
-          },
+          players: playerData,
         },
       };
       const updatedPlayersdoc = await checkForPlayersAndUpdate(filter, update);
