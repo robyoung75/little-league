@@ -43,7 +43,7 @@ const createCloudinaryStream = (
           console.log(error);
           reject(error);
         }
-        console.log({ result_cloudinary_stream_upload: result });
+        // console.log({ result_cloudinary_stream_upload: result });
         resolve(result);
       }
     );
@@ -98,7 +98,7 @@ export const async_cloudinaryStreamImg = async (
     imgTagsArray
   );
 
-  console.log("imageUploadResult", result);
+  // console.log("imageUploadResult", result);
 
   return result;
 };
@@ -113,6 +113,6 @@ export const async_cloudinaryStreamImgs = async (
     teamId,
     teamUserName
   );
-  console.log("async_cloudinaryStreamImgs_results", results);
+  // console.log("async_cloudinaryStreamImgs_results", results);
   return results;
 };

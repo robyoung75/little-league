@@ -33,8 +33,8 @@ const TeamUserSchema = new Schema({
 
 // this function will fire before the doc is saved
 
-TeamUserSchema.pre("save", async (next) => {
-  console.log("A new user is about to be saved, hashing password");
+TeamUserSchema.pre("save", async function (next) {
+  console.log("newUser about to be saved, hashing password");
   next();
 });
 
@@ -43,6 +43,7 @@ TeamUserSchema.post("save", (doc, next) => {
   console.log("A new user was saved", doc);
   next();
 });
+
 
 // this is a static method that can be used with the TeamAdminSchema model
 TeamUserSchema.statics.login = async function (email, password) {

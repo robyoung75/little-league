@@ -42,27 +42,17 @@ export const authNewUser_post = async (req, res) => {
     // check for existing users
     const existingUsers = await findUsersById(authUser.teamId);
 
-    req.body.teamId = authUser.teamId;
-    let { firstName, lastName, email, password, teamId } = req.body;
-
-    const teamUser = {
-      teamName: authUser.teamName,
-      teamUserName: authUser.teamUserName,
-      teamId: authUser.teamId,
-    };
+    let { firstName, lastName, email, password } = req.body;
+    const teamId = authUser.teamId;
+    let user = { firstName, lastName, email, teamId };
+    user.password = await hashPassword(password);
 
     if (!existingUsers && authUser) {
       const newUserDoc = await createNewUser({
-        teamId: teamUser.teamId,
-        teamUserName: teamUser.teamUserName,
-        teamName: teamUser.teamName,
-        users: {
-          firstName,
-          lastName,
-          email,
-          password: await hashPassword(password),
-          teamId,
-        },
+        teamId: authUser.teamId,
+        teamUserName: authUser.teamUserName,
+        teamName: authUser.teamName,
+        users: user,
       });
       res.status(200).json(newUserDoc);
     }
@@ -71,13 +61,7 @@ export const authNewUser_post = async (req, res) => {
       const filter = { teamId, "users.email": { $ne: email } };
       const update = {
         $push: {
-          users: {
-            firstName,
-            lastName,
-            email,
-            password: await hashPassword(password),
-            teamId,
-          },
+          users: user,
         },
       };
       const updatedUsersDoc = await addToExistingUsers(filter, update);
@@ -95,39 +79,32 @@ export const authNewUser_post = async (req, res) => {
 };
 
 // new user creates user
-export const userCreateUser_post = async (req, res) => { 
-
+export const userCreateUser_post = async (req, res) => {
   try {
-
     let { firstName, lastName, email, password, teamUserName } = req.body;
 
     // check for existing team...
     const existingTeam = await findTeamByTeamUserName(teamUserName);
-  
+
     // check for existing users...
     const existingUsers = await findUsersByTeamUserName(teamUserName);
-  
-    const hashedPassword = await hashPassword(password);
-  
-    let user = req.body;
+
+    const teamId = existingTeam.teamId;
+    let user = { firstName, lastName, email, teamId };
+    user.password = await hashPassword(password);
 
     if (!existingTeam) {
       const error = new Error(
         "Authorization denied, no existing team found check credentials"
       );
       throw error;
-    }    
-
-      user.password = hashedPassword;  
-      user.teamName = existingTeam.teamName;
-      user.teamId = existingTeam.teamId;
-   
+    }
 
     if (existingTeam && !existingUsers) {
       const newUserDoc = await createNewUser({
-        teamId: user.teamId,
-        teamUserName: user.teamUserName,
-        teamName: user.teamName,
+        teamId: existingTeam.teamId,
+        teamUserName: existingTeam.teamUserName,
+        teamName: existingTeam.teamName,
         users: user,
       });
 

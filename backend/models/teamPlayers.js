@@ -34,7 +34,11 @@ TeamPlayersSchema.pre("save", async (next) => {
 
 // this function will fire after a doc is saved to the database
 TeamPlayersSchema.post("save", function (doc, next) {
-  console.log("New player data was saved", doc);
+
+  const players = doc.players
+  const newPlayer = players.length - 1;
+
+  console.log("Hello from TeamPlayersSchema: A new player data was saved", players[newPlayer]);
   next();
 });
 

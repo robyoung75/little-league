@@ -28,22 +28,22 @@ export const authCoaches_post = async (req, res) => {
 
     let { firstName, lastName, email } = req.body;
     let imgTags = [];
-   
+
     let imgUploadResponse;
-    let playerImage = {};
+    let coachImage = {};
 
     let coachData = {
       firstName,
       lastName,
       email,
-      headshotImg: imgUploadResponse ? imgUploadResponse.secure_url : null,
+      headshotImg: null,
       teamId: adminUser.teamId,
     };
 
     // HANDLE AND UPLOAD IMAGES TO CLOUDINARY
     if (adminUser && req.file) {
       let fileResize = await sharpImgResize(req.file);
-      playerImage = { img: fileResize, lastName };
+      coachImage = { img: fileResize, lastName };
 
       imgTags = [
         adminUser.teamId,
@@ -56,10 +56,13 @@ export const authCoaches_post = async (req, res) => {
       ];
 
       imgUploadResponse = await async_cloudinaryStreamImg(
-        playerImage,
+        coachImage,
         adminUser,
         imgTags
-      );
+      );  
+
+      coachData.headshotImg = imgUploadResponse ? imgUploadResponse.secure_url : null
+
     }
 
     if (adminUser && !authUserCoaches) {

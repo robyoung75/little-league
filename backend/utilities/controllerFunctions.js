@@ -57,6 +57,8 @@ export const createSecondAdminUser = async (filter, updateObj) => {
       updateObj,
       { returnOriginal: false }
     );
+    // saving after the push update to the sub document saves the doc thus calling mongoose middleware
+    await secondAdmin.save()
     return secondAdmin;
   } catch (error) {
     return { createSecondAdminUser: error };
@@ -144,7 +146,11 @@ export const checkForPlayersAndUpdate = async (filter, updateObj) => {
       updateObj,
       { returnOriginal: false }
     );
+
+    // .save() calls mongoose middleware 
+    await updatedPlayers.save();
     return updatedPlayers;
+
   } catch (error) {
     return { checkForPlayersAndUpdate: error };
   }
@@ -181,6 +187,8 @@ export const checkForCoachesAndUpdate = async (filter, updateObj) => {
       updateObj,
       { returnOriginal: false }
     );
+    // i use save to cause my mongoose middleware to fire on a push to a sub document
+    await updatedCoaches.save()
     return updatedCoaches;
   } catch (error) {
     return { checkForCoachesAndUpdate: error };
@@ -224,6 +232,7 @@ export const updateTeamSchedule = async (filter, updateObj) => {
   }
 };
 
+// USER CONTROLLER FUNCTIONS
 // check if users exist by teamUserName
 export const findUsersByTeamUserName = async (teamUserName) => {
   try {

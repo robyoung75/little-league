@@ -45,7 +45,9 @@ TeamAdminSchema.pre("save", async function (next) {
 
 // this function will fire after a doc is saved to the database
 TeamAdminSchema.post("save", (doc, next) => {
-  console.log("A new user was saved", doc);
+  const admins = doc.admin
+  const newAdmin = admins.length - 1;
+  console.log("Hello from TeamAdminSchema: A new admin user was saved", admins[newAdmin]);
   next();
 });
 

@@ -19,19 +19,33 @@ const TeamCoachesSchema = new Schema({
     required: true,
   },
   coaches: [CoachSchema],
+  
   date: {
     type: Date,
     default: Date.now,
   },
+  ass: {
+    type: String
+  }
 });
 
+
 TeamCoachesSchema.pre("save", async (next) => {
-  console.log("A new coached is about to be saved");
+  console.log(
+    "Hello from TeamCoachesSchema: A new coached is about to be saved"
+  );
   next();
 });
 
 TeamCoachesSchema.post("save", (doc, next) => {
-  console.log("A new coach has been saved to the database", doc);
+
+  const coaches = doc.coaches
+  const newCoach = coaches.length - 1
+ 
+  console.log(
+    "Hello from TeamCoachesSchema: A new coach has been saved to the database",
+    coaches[newCoach]
+  );
   next();
 });
 
