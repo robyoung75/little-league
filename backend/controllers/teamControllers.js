@@ -23,9 +23,9 @@ const authTeam_post = async (req, res) => {
     const { id } = req.userId;
 
     const adminUser = await findAdminUserById(id);
-    const existingTeam = await findTeamById(adminUser.teamId);    
+    const existingTeam = await findTeamById(adminUser.teamId);
 
-    let { primaryColor, secondaryColor} = req.body;
+    let { primaryColor, secondaryColor } = req.body;
     let teamLogo;
     let imgUploadResponse;
 
@@ -46,17 +46,15 @@ const authTeam_post = async (req, res) => {
         "teamLogo",
       ];
 
-       // cloudinary upload image returning a result
-       imgUploadResponse = await async_cloudinaryStreamImg(
+      // cloudinary upload image returning a result
+      imgUploadResponse = await async_cloudinaryStreamImg(
         teamLogo,
         adminUser,
         imgTags
       );
-
     }
 
     if (adminUser && !existingTeam) {
-
       const authTeamDoc = await createNewTeam({
         teamName: adminUser.teamName,
         teamUserName: adminUser.teamUserName,
@@ -74,4 +72,22 @@ const authTeam_post = async (req, res) => {
   }
 };
 
-export { authTeam_post };
+const team_get = async (req, res) => {
+  try {
+    if (req.error) {
+      console.log({ team_get: req.error.message });
+      throw req.error;
+    }
+
+    const { id } = req.userId;
+
+    const team = await findTeamById(id);
+
+    res.status(200).json(team);
+  } catch (error) {
+    const errors = handleErrors(error);
+    res.status(400).json({ errors });
+  }
+};
+
+export { authTeam_post, team_get };

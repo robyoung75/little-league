@@ -40,7 +40,10 @@ TeamUserSchema.pre("save", async function (next) {
 
 // this function will fire after a doc is saved to the database
 TeamUserSchema.post("save", (doc, next) => {
-  console.log("A new user was saved", doc);
+  const users = doc.users
+  const newUser = users.length - 1
+
+  console.log("A new user was saved", users[newUser]);
   next();
 });
 

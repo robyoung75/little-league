@@ -35,7 +35,11 @@ TeamsScheduleSchema.pre("save", async (next) => {
 
 // this function will fire after a doc is saved to the database
 TeamsScheduleSchema.post("save", function (doc, next) {
-  console.log("New player data was saved", doc);
+
+  const schedule = doc.schedule
+  const newScheduleDate = schedule.length - 1;
+
+  console.log("New player data was saved", schedule[newScheduleDate]);
   next();
 });
 

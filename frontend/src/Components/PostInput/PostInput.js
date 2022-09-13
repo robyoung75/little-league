@@ -45,6 +45,7 @@ function PostInput() {
           <div className="postInput__btn">
             <ThemedButton
               className="btn"
+              type="file"
               theme={theme}
               hovering={hovering_1}
               onMouseOver={handleHovering_1}

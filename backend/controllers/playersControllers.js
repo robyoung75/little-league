@@ -11,8 +11,9 @@ import {
   createNewPlayer,
 } from "../utilities/controllerFunctions.js";
 
-// create team players
-export const authPlayers_post = async (req, res) => {
+// CREATE TEAM PLAYERS
+
+const authPlayers_post = async (req, res) => {
   // console.log({ authPlayers_post_req_body: req.body });
   // console.log({ authPlayers_post_req_files: req.files });
 
@@ -26,20 +27,13 @@ export const authPlayers_post = async (req, res) => {
     const { id } = req.userId;
     const adminUser = await findAdminUserById(id);
     const authUserPlayers = await findOneTeamPlayerById(adminUser.teamId);
-    
 
     let imgTags = [];
     let imageUploadResult;
     let URLS = [];
     let playerImages = [];
 
-    const {
-      firstName,
-      lastName,
-      number,
-      positions,
-      battingStance,      
-    } = req.body;
+    const { firstName, lastName, number, positions, battingStance } = req.body;
 
     let playerData = {
       firstName,
@@ -47,7 +41,7 @@ export const authPlayers_post = async (req, res) => {
       number,
       positions,
       battingStance,
-      teamId: adminUser.teamId      
+      teamId: adminUser.teamId,
     };
 
     if (req.files.headshotImg) {
@@ -77,10 +71,8 @@ export const authPlayers_post = async (req, res) => {
       });
     }
 
-
     // HANDLE AND UPLOAD IMAGES TO CLOUDINARY
     if (adminUser && playerImages !== []) {
-
       // assign image tags to each image
       imgTags = [
         adminUser.teamId,
@@ -124,7 +116,6 @@ export const authPlayers_post = async (req, res) => {
     }
     // if adminUser and authUserPlayers then update the existing authUserPlayersDoc
     if (adminUser && authUserPlayers) {
-      
       const filter = {
         teamId: authUserPlayers.teamId,
         "players.number": { $ne: number },
@@ -148,3 +139,23 @@ export const authPlayers_post = async (req, res) => {
     res.status(400).json({ errors });
   }
 };
+
+const players_get = async (req, res) => {
+  console.log("hello from players_get");
+  try {
+    if (req.error) {
+      console.log({ players_get: req.error.message });
+      throw req.error;
+    }
+
+    const { id } = req.userId;
+
+    const players = await findOneTeamPlayerById(id);
+    res.status(200).json(players);
+  } catch (error) {
+    const errors = handleErrors(error);
+    res.status(400).json({ errors });
+  }
+};
+
+export { authPlayers_post, players_get };

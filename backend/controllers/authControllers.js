@@ -99,6 +99,27 @@ const adminUser_post = async (req, res) => {
   }
 };
 
+// READ ADMIN USERS
+// there are only two admin users allowed.
+
+const allAdminUsers_get = async (req, res) => {
+  try {
+    if (req.error) {
+      console.log({ allAdminUsers_get: req.error.message });
+      throw req.error;
+    }
+
+    const { id } = req.userId;
+
+    const adminUsers = await findAdminUserById(id);
+
+    res.status(200).json(adminUsers);
+  } catch (error) {
+    const errors = handleErrors(error)
+    res.status(400).json({errors})
+  }
+};
+
 // user sign in
 const signInAdminUser_post = async (req, res) => {
   const { email, password } = req.body;
@@ -122,6 +143,7 @@ const signInAdminUser_post = async (req, res) => {
   }
 };
 
+// user sign out
 const signOutUser_get = async (req, res) => {
   // empty string replaces existing jwt hence logging out
   // expires in 1ms
@@ -129,4 +151,9 @@ const signOutUser_get = async (req, res) => {
   res.redirect("/");
 };
 
-export { adminUser_post, signInAdminUser_post, signOutUser_get };
+export {
+  adminUser_post,
+  allAdminUsers_get,
+  signInAdminUser_post,
+  signOutUser_get,
+};

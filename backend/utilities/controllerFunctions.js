@@ -226,6 +226,7 @@ export const updateTeamSchedule = async (filter, updateObj) => {
       updateObj,
       { returnOriginal: false }
     );
+    await updatedSchedule.save()
     return updatedSchedule;
   } catch (error) {
     return { updateTeamSchedule: error };
@@ -273,6 +274,7 @@ export const addToExistingUsers = async (filter, updateObj) => {
       updateObj,
       { returnOriginal: false }
     );
+    await updatedUsers.save()
     return updatedUsers;
   } catch (error) {
     return { updateTeamSchedule: error.message };
