@@ -22,7 +22,10 @@ const authTeam_post = async (req, res) => {
     // req.userId returns from auth middleware
     const { id } = req.userId;
 
+    console.log("authTeam_post", id);
+
     const adminUser = await findAdminUserById(id);
+    console.log("authTeam_post", adminUser);
     const existingTeam = await findTeamById(adminUser.teamId);
 
     let { primaryColor, secondaryColor } = req.body;
@@ -72,21 +75,15 @@ const authTeam_post = async (req, res) => {
   }
 };
 
+// READ TEAM
 const team_get = async (req, res) => {
   try {
-    if (req.error) {
-      console.log({ team_get: req.error.message });
-      throw req.error;
-    }
-
-    const { id } = req.userId;
-
-    const team = await findTeamById(id);
-
+    const team = await findTeamById(req.userTeamId);
     res.status(200).json(team);
   } catch (error) {
+    console.log(error);
     const errors = handleErrors(error);
-    res.status(400).json({ errors });
+    res.status(400).json({ error });
   }
 };
 

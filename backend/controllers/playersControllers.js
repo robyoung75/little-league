@@ -6,7 +6,7 @@ import { async_cloudinaryStreamImgs } from "../utilities/cloudinaryFuctions.js";
 import { sharpImgResize } from "../utilities/sharpFunctions.js";
 import {
   findAdminUserById,
-  findOneTeamPlayerById,
+  findPlayersByTeamId,
   checkForPlayersAndUpdate,
   createNewPlayer,
 } from "../utilities/controllerFunctions.js";
@@ -26,7 +26,7 @@ const authPlayers_post = async (req, res) => {
     // req.userId returns from auth
     const { id } = req.userId;
     const adminUser = await findAdminUserById(id);
-    const authUserPlayers = await findOneTeamPlayerById(adminUser.teamId);
+    const authUserPlayers = await findPlayersByTeamId(adminUser.teamId);
 
     let imgTags = [];
     let imageUploadResult;
@@ -140,17 +140,17 @@ const authPlayers_post = async (req, res) => {
   }
 };
 
-const players_get = async (req, res) => {
-  console.log("hello from players_get");
+// READ ALL PLAYERS DATA
+
+const players_get = async (req, res) => { 
+
   try {
     if (req.error) {
       console.log({ players_get: req.error.message });
       throw req.error;
     }
 
-    const { id } = req.userId;
-
-    const players = await findOneTeamPlayerById(id);
+    const players = await findPlayersByTeamId(req.userTeamId);
     res.status(200).json(players);
   } catch (error) {
     const errors = handleErrors(error);

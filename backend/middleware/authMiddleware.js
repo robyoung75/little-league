@@ -17,4 +17,9 @@ const requiresAuth = (req, res, next) => {
   }
 };
 
-export { requiresAuth };
+const getTeamByTeamId = (req, res, next, teamId) => {
+  req.userTeamId = teamId;
+  next();
+};
+
+export { requiresAuth, getTeamByTeamId };

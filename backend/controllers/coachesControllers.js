@@ -6,7 +6,7 @@ import { async_cloudinaryStreamImg } from "../utilities/cloudinaryFuctions.js";
 import { sharpImgResize } from "../utilities/sharpFunctions.js";
 import {
   findAdminUserById,
-  findOneTeamCoachById,
+  findCoachesByTeamId,
   checkForCoachesAndUpdate,
   createNewCoach,
 } from "../utilities/controllerFunctions.js";
@@ -24,7 +24,7 @@ export const authCoaches_post = async (req, res) => {
     const { id } = req.userId;
 
     const adminUser = await findAdminUserById(id);
-    const authUserCoaches = await findOneTeamCoachById(adminUser.teamId);
+    const authUserCoaches = await findCoachesByTeamId(adminUser.teamId);
 
     let { firstName, lastName, email } = req.body;
     let imgTags = [];
@@ -59,10 +59,11 @@ export const authCoaches_post = async (req, res) => {
         coachImage,
         adminUser,
         imgTags
-      );  
+      );
 
-      coachData.headshotImg = imgUploadResponse ? imgUploadResponse.secure_url : null
-
+      coachData.headshotImg = imgUploadResponse
+        ? imgUploadResponse.secure_url
+        : null;
     }
 
     if (adminUser && !authUserCoaches) {
@@ -95,6 +96,23 @@ export const authCoaches_post = async (req, res) => {
 
       res.status(200).json(updatedCoachesDoc);
     }
+  } catch (error) {
+    const errors = handleErrors(error);
+    res.status(400).json({ errors });
+  }
+};
+
+// READ COACHES
+export const coaches_get = async (req, res) => {
+  try {
+    if (req.error) {
+      console.log({ coaches_get: req.error.message });
+      throw req.error;
+    }
+
+    const coaches = await findCoachesByTeamId(req.userTeamId);
+
+    res.status(200).json(coaches);
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });

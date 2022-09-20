@@ -10,16 +10,14 @@ import {
 
 // check if existing team schedule exists if not create new schedule else update schedule
 export const authSchedule_post = async (req, res) => {
-
   try {
-
     if (req.error) {
       console.log({ authSchedule_post: req.error });
       throw req.error;
     }
 
     const { id } = req.userId;
-  
+
     let schedule = req.body;
 
     // console.log("ID SCHEDULE CREATE", id);
@@ -31,7 +29,6 @@ export const authSchedule_post = async (req, res) => {
     schedule.teamId = authUser.teamId;
     schedule.teamUserName = authUser.teamUserName;
     schedule.teamName = authUser.teamName;
-    
 
     // console.log("SCHEDULE", schedule);
 
@@ -58,5 +55,23 @@ export const authSchedule_post = async (req, res) => {
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json(errors);
+  }
+};
+
+// READ ALL SCHEDULE ITEMS
+
+export const schedule_get = async (req, res) => {
+  try {
+    if (req.error) {
+      console.log({ schedule_get: req.error.message });
+      throw req.error;
+    }
+
+    const schedule = await findTeamSchedule(req.userTeamId);
+
+    res.status(200).json(schedule);
+  } catch (error) {
+    const errors = handleErrors(error);
+    res.status(400).json({ errors });
   }
 };

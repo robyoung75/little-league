@@ -4,6 +4,7 @@ import TeamCoachesSchema from "../models/teamCoaches.js";
 import TeamSchema from "../models/team.js";
 import TeamsScheduleSchema from "../models/teamSchedule.js";
 import TeamUsersSchema from "../models/teamUsers.js";
+import team from "../models/team.js";
 
 // MONGO DB ADMIN USER FUNCTIONS
 
@@ -58,7 +59,7 @@ export const createSecondAdminUser = async (filter, updateObj) => {
       { returnOriginal: false }
     );
     // saving after the push update to the sub document saves the doc thus calling mongoose middleware
-    await secondAdmin.save()
+    await secondAdmin.save();
     return secondAdmin;
   } catch (error) {
     return { createSecondAdminUser: error };
@@ -93,6 +94,22 @@ export const setAdminUserTeamId = async (id) => {
   }
 };
 
+export const removeAdminUser = async (id) => {
+  try {
+    const test = await TeamAdminSchema.findOneAndUpdate(
+      {_id: id},
+      { $pull: { "admin": {firstName: "rob"}} },
+      { new: true }
+    );
+
+    console.log(test);
+
+    return test;
+  } catch (error) {
+    return { removeAdminUser: error };
+  }
+};
+
 // TEAM CONTROLLER FUNCTIONS - set team colors and name
 
 // create a new team
@@ -107,8 +124,11 @@ export const createNewTeam = async (reqObj) => {
 
 // check if team already exists
 export const findTeamById = async (id) => {
+  console.log("findTeamById>>>>>>>>>>>>>>>>>>>>>>", id);
+
   try {
-    const existingTeam = TeamSchema.findOne({ teamId: id });
+    const existingTeam = await TeamSchema.findOne({ teamId: id });
+    console.log("findTeamById_existingTeam", existingTeam);
     return existingTeam;
   } catch (error) {
     return { findTeamById: error };
@@ -128,14 +148,14 @@ export const createNewPlayer = async (reqObj) => {
 };
 
 // check if one player already exists by teamId
-export const findOneTeamPlayerById = async (id) => {
+export const findPlayersByTeamId = async (id) => {
   try {
     const player = await TeamPlayersSchema.findOne({
       teamId: id,
     });
     return player;
   } catch (error) {
-    return { findOneTeamPlayer: error };
+    return { findPlayersByTeamId: error };
   }
 };
 
@@ -147,10 +167,9 @@ export const checkForPlayersAndUpdate = async (filter, updateObj) => {
       { returnOriginal: false }
     );
 
-    // .save() calls mongoose middleware 
+    // .save() calls mongoose middleware
     await updatedPlayers.save();
     return updatedPlayers;
-
   } catch (error) {
     return { checkForPlayersAndUpdate: error };
   }
@@ -169,14 +188,14 @@ export const createNewCoach = async (reqObj) => {
 };
 
 // check if any coaches already exist.
-export const findOneTeamCoachById = async (id) => {
+export const findCoachesByTeamId = async (id) => {
   try {
     const coach = await TeamCoachesSchema.findOne({
       teamId: id,
     });
     return coach;
   } catch (error) {
-    return { findOneTeamCoachById: error };
+    return { findCoachesByTeamId: error };
   }
 };
 
@@ -188,7 +207,7 @@ export const checkForCoachesAndUpdate = async (filter, updateObj) => {
       { returnOriginal: false }
     );
     // i use save to cause my mongoose middleware to fire on a push to a sub document
-    await updatedCoaches.save()
+    await updatedCoaches.save();
     return updatedCoaches;
   } catch (error) {
     return { checkForCoachesAndUpdate: error };
@@ -226,7 +245,7 @@ export const updateTeamSchedule = async (filter, updateObj) => {
       updateObj,
       { returnOriginal: false }
     );
-    await updatedSchedule.save()
+    await updatedSchedule.save();
     return updatedSchedule;
   } catch (error) {
     return { updateTeamSchedule: error };
@@ -274,7 +293,7 @@ export const addToExistingUsers = async (filter, updateObj) => {
       updateObj,
       { returnOriginal: false }
     );
-    await updatedUsers.save()
+    await updatedUsers.save();
     return updatedUsers;
   } catch (error) {
     return { updateTeamSchedule: error.message };

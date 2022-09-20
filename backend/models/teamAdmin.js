@@ -53,14 +53,20 @@ TeamAdminSchema.post("save", (doc, next) => {
 
 // this is a static method that can be used with the TeamAdminSchema model
 TeamAdminSchema.statics.login = async function (email, password) {
+  console.log(email, password)
+  
+
   let user = await this.findOne(
     { "admin.email": email },
     { admin: { $elemMatch: { email: email } } }
   );
 
+  console.log(user)
+  
+
   console.log("A new user is signing in >>>>>>>>>>> ", {
-    // firstName: user.admin[0].firstName,
-    // lastName: user.admin[0].lastName,
+    firstName: user.admin[0].firstName,
+    lastName: user.admin[0].lastName,
     user
   });
 

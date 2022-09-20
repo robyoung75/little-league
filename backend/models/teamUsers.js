@@ -65,7 +65,7 @@ TeamUserSchema.statics.login = async function (email, password) {
     const authUser = await bcrypt.compare(password, user.users[0].password);
 
     if (authUser) {
-      return user;
+      return user.users[0];
     }
     throw Error("invalid password");
   }

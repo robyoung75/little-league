@@ -11,6 +11,7 @@ import {
   createSecondAdminUser,
   setAdminUserTeamId,
   setTeamId,
+  removeAdminUser,
 } from "../utilities/controllerFunctions.js";
 
 // import errors functions from errors/errors.js
@@ -115,14 +116,25 @@ const allAdminUsers_get = async (req, res) => {
 
     res.status(200).json(adminUsers);
   } catch (error) {
-    const errors = handleErrors(error)
-    res.status(400).json({errors})
+    const errors = handleErrors(error);
+    res.status(400).json({ errors });
   }
 };
+
+// UPDATE ARRAY OF ADMIN USERS, DELETE ON USER
+const adminUserUpdateRemoveUser_put = async (req, res) => {
+  console.log({adminUserUpdateRemoveUser_put: req.params})
+  let test = await removeAdminUser(req.params.userId)
+  console.log({test: test})
+  res.send(test)
+}
+
 
 // user sign in
 const signInAdminUser_post = async (req, res) => {
   const { email, password } = req.body;
+
+  console.log("req.teamId >>>>>>>>>>>>>>>>>>>>>", req.teamId);
 
   const authUser = await TeamAdminSchema.login(email, password);
 
@@ -154,6 +166,7 @@ const signOutUser_get = async (req, res) => {
 export {
   adminUser_post,
   allAdminUsers_get,
+  adminUserUpdateRemoveUser_put,
   signInAdminUser_post,
   signOutUser_get,
 };
