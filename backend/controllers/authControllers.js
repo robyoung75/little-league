@@ -121,14 +121,39 @@ const allAdminUsers_get = async (req, res) => {
   }
 };
 
-// UPDATE ARRAY OF ADMIN USERS, DELETE ON USER
-const adminUserUpdateRemoveUser_put = async (req, res) => {
-  console.log({adminUserUpdateRemoveUser_put: req.params})
-  let test = await removeAdminUser(req.params.userId)
-  console.log({test: test})
-  res.send(test)
-}
+// UPDATE ARRAY OF ADMIN USERS, DELETE ONE USER
+const adminUserUpdateRemoveUser_delete = async (req, res) => {
+  try {
+    if (req.error) {
+      console.log({ allAdminUsers_get: req.error.message });
+      throw req.error;
+    }
+    console.log({ adminUserUpdateRemoveUser_delete: req.params });
 
+    const { id } = req.userId;
+
+    const adminUsers = await findAdminUserById(id);
+
+    if (adminUsers.admin.length < 2) {
+      throw Error(
+        `You only have one admin user that cannot be deleted. ${adminUsers.admin.map(
+          (user, index) => {
+            return ` user ${index + 1}: ${user.firstName} ${user.lastName} ${
+              user.teamName
+            }`;
+          }
+        )}`
+      );
+    }
+
+    let updatedAdminUsers = await removeAdminUser(req.params);
+    res.status(200).json(updatedAdminUsers);
+  } catch (error) {
+    console.log(error);
+    const errors = handleErrors(error);
+    res.status(400).json({ errors });
+  }
+};
 
 // user sign in
 const signInAdminUser_post = async (req, res) => {
@@ -166,7 +191,7 @@ const signOutUser_get = async (req, res) => {
 export {
   adminUser_post,
   allAdminUsers_get,
-  adminUserUpdateRemoveUser_put,
+  adminUserUpdateRemoveUser_delete,
   signInAdminUser_post,
   signOutUser_get,
 };

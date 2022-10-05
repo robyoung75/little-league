@@ -9,6 +9,7 @@ import {
   findPlayersByTeamId,
   checkForPlayersAndUpdate,
   createNewPlayer,
+  updatePlayer,
 } from "../utilities/controllerFunctions.js";
 
 // CREATE TEAM PLAYERS
@@ -142,8 +143,7 @@ const authPlayers_post = async (req, res) => {
 
 // READ ALL PLAYERS DATA
 
-const players_get = async (req, res) => { 
-
+const players_get = async (req, res) => {
   try {
     if (req.error) {
       console.log({ players_get: req.error.message });
@@ -158,4 +158,31 @@ const players_get = async (req, res) => {
   }
 };
 
-export { authPlayers_post, players_get };
+// UPDATE PLAYER INFO AND IMAGES
+const updatePlayerData_put = async (req, res) => {
+  // console.log(req.params);
+  // console.log(req.files)
+  // console.log(req.body)
+  
+  const number = req.body.number
+  const { id } = req.userId;
+  const { teamId } = req.params;
+
+  // get admin user data
+  const adminUser = await findAdminUserById(id);
+
+  let updateObj = {
+    number: Number(req.body.number),
+    newNumber: Number(req.body.newNumber)
+  }
+
+
+const updatedPlayer = await updatePlayer(id, updateObj)
+
+  // res.json({teamId, id, "req.params": req.params})
+  // res.json(adminUser)
+  res.json(updatedPlayer);
+  // res.send(req.body)
+};
+
+export { authPlayers_post, players_get, updatePlayerData_put };

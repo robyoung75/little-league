@@ -116,3 +116,13 @@ export const async_cloudinaryStreamImgs = async (
   // console.log("async_cloudinaryStreamImgs_results", results);
   return results;
 };
+
+
+// DELETE AN IMAGE BY PUBLIC ID
+export const async_cloudinaryDeleteImg = async (publicId) => {
+  console.log("hello from async_cloudinaryDeleteImg");
+
+  const result = await cloudinary.uploader.destroy('cottonwoodcolts/teamLogo/cottonwoodcolts_name_colts_teamLogo')
+
+  return result;
+};

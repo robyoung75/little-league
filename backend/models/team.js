@@ -38,6 +38,10 @@ const TeamSchema = new Schema({
   teamLogo: {
     type: String,
     // required: true
+  },
+  
+  teamLogoPublicId: {
+    type: String
   }
 });
 

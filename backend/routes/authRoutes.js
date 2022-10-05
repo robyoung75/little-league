@@ -3,7 +3,7 @@ import Router, { application } from "express";
 import {
   adminUser_post,
   allAdminUsers_get,
-  adminUserUpdateRemoveUser_put,
+  adminUserUpdateRemoveUser_delete,
   signInAdminUser_post,
   signOutUser_get,
 } from "../controllers/authControllers.js";
@@ -11,9 +11,14 @@ import {
 import {
   authPlayers_post,
   players_get,
+  updatePlayerData_put,
 } from "../controllers/playersControllers.js";
 
-import { authTeam_post, team_get } from "../controllers/teamControllers.js";
+import {
+  authTeam_post,
+  team_get,
+  teamUdpdate_put,
+} from "../controllers/teamControllers.js";
 
 import {
   authCoaches_post,
@@ -31,8 +36,6 @@ import {
   signInUser_post,
 } from "../controllers/userControllers.js";
 
-import { cloudinaryUpload_post } from "../controllers/cloudinaryUpload.js";
-
 import { requiresAuth, getTeamByTeamId } from "../middleware/authMiddleware.js";
 import {
   multerUploadsTeam,
@@ -45,27 +48,48 @@ const router = Router();
 //  PARAM MIDDLEWARE WILL RUN ANY TIME THE PARAMETER IS TEAMID and set req.userTeamId to the teamId parameter
 router.param("teamId", getTeamByTeamId);
 
-router.post("/api/userCreateUser", userCreateUser_post);
-
+// ADMIN ROUTES
 router.post("/api/createAdminUser", requiresAuth, adminUser_post);
 router.get("/api/admin/adminUsers", requiresAuth, allAdminUsers_get);
-router.delete('/api/admin/updateRemoveUser/:userId', requiresAuth, adminUserUpdateRemoveUser_put)
+router.post("/api/admin/createUser", requiresAuth, authNewUser_post);
+router.delete(
+  "/api/admin/updateRemoveUser/:userId/:email/:firstName/:lastName",
+  requiresAuth,
+  adminUserUpdateRemoveUser_delete
+);
 
+// ADMIN USER AND USER SIGN IN SIGNOUT ROUTES
 router.post("/api/admin/signin", signInAdminUser_post);
 router.post("/api/user/signin", signInUser_post);
 router.get("/api/signout", signOutUser_get);
 
+// TEAM ROUTES
 router.post("/api/admin/team", requiresAuth, multerUploadsTeam, authTeam_post);
 router.get("/api/admin/team/:teamId", requiresAuth, team_get);
+router.put(
+  "/api/admin/team/updateImage/:teamId",
+  requiresAuth,
+  multerUploadsTeam,
+  teamUdpdate_put
+);
 
+// PLAYER ROUTES
 router.post(
   "/api/admin/createPlayers",
   requiresAuth,
   multerUploadsMultiple,
   authPlayers_post
 );
-router.get("/api/admin/players/:teamId", requiresAuth, players_get);
 
+router.get("/api/admin/players/:teamId", requiresAuth, players_get);
+router.put(
+  "/api/admin/player/updatePlayer/:teamId",
+  requiresAuth,
+  multerUploadsMultiple,
+  updatePlayerData_put
+);
+
+// COACHES ROUTES
 router.post(
   "/api/admin/createCoaches",
   requiresAuth,
@@ -74,9 +98,11 @@ router.post(
 );
 router.get("/api/admin/coaches/:teamId", coaches_get);
 
+// SCHEDULE ROUTES
 router.post("/api/admin/schedule", requiresAuth, authSchedule_post);
 router.get("/api/admin/schedule/:teamId", requiresAuth, schedule_get);
 
-router.post("/api/admin/createUser", requiresAuth, authNewUser_post);
+// USER ROUTES
+router.post("/api/userCreateUser", userCreateUser_post);
 
 export { router as authRoute };

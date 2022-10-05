@@ -74,6 +74,12 @@ export const handleErrors = (err) => {
     errors.player = err.message;
   }
 
+  if (
+    err.message.includes("You only have one admin user that cannot be deleted.")
+  ) {
+    errors.adminUser = err.message;
+  }
+
   console.log({ errors: errors });
 
   return errors;

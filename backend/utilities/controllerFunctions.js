@@ -94,17 +94,25 @@ export const setAdminUserTeamId = async (id) => {
   }
 };
 
-export const removeAdminUser = async (id) => {
+export const removeAdminUser = async (params) => {
   try {
-    const test = await TeamAdminSchema.findOneAndUpdate(
-      {_id: id},
-      { $pull: { "admin": {firstName: "rob"}} },
+    const adminUser = await TeamAdminSchema.findOneAndUpdate(
+      { _id: params.userId },
+      {
+        $pull: {
+          admin: {
+            firstName: params.firstName,
+            lastName: params.lastName,
+            email: params.email,
+          },
+        },
+      },
       { new: true }
     );
 
-    console.log(test);
+    console.log(adminUser);
 
-    return test;
+    return adminUser;
   } catch (error) {
     return { removeAdminUser: error };
   }
@@ -135,6 +143,30 @@ export const findTeamById = async (id) => {
   }
 };
 
+// update teamLogo
+export const updateTeamLogo = async (filter, updateObj) => {
+  try {
+    const updatedLogo = await TeamSchema.findOneAndUpdate(filter, updateObj, {
+      new: true,
+    });
+    return updatedLogo;
+  } catch (error) {
+    return { updatedLogo: error };
+  }
+};
+
+// update team colors
+export const updateTeamColors = async (filter, updateObj) => {
+  try {
+    const updatedColors = await TeamSchema.findOneAndUpdate(filter, updateObj, {
+      new: true,
+    });
+    return updatedColors;
+  } catch (error) {
+    return { updateTeamColors: error };
+  }
+};
+
 // PLAYERS CONTROLLER FUNCTIONS - admin adds team player information
 
 // create a new player
@@ -159,6 +191,7 @@ export const findPlayersByTeamId = async (id) => {
   }
 };
 
+// adds a new player to existing players
 export const checkForPlayersAndUpdate = async (filter, updateObj) => {
   try {
     const updatedPlayers = await TeamPlayersSchema.findOneAndUpdate(
@@ -173,6 +206,25 @@ export const checkForPlayersAndUpdate = async (filter, updateObj) => {
   } catch (error) {
     return { checkForPlayersAndUpdate: error };
   }
+};
+
+// get and update a specific
+export const updatePlayer = async (teamId, updateObj) => {
+  console.log("fuck you from updatePlayer");
+  const updatedPlayer = await TeamPlayersSchema.findOneAndUpdate(
+    { id: teamId, "players.number": updateObj.number },
+    { $set: { "players.$.number": updateObj.newNumber } },
+    { returnOriginal: false }
+  );
+
+  // returns an array with only the updated player object
+  let myPlayer = updatedPlayer.players.filter((player) => {
+    if (player.number === updateObj.newNumber) {
+      return player;
+    }
+  });
+
+  return myPlayer[0];
 };
 
 // COACHES CONTROLLER FUNCTIONS - admin adds coaches

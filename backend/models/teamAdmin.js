@@ -64,11 +64,11 @@ TeamAdminSchema.statics.login = async function (email, password) {
   console.log(user)
   
 
-  console.log("A new user is signing in >>>>>>>>>>> ", {
-    firstName: user.admin[0].firstName,
-    lastName: user.admin[0].lastName,
-    user
-  });
+  // console.log("A new user is signing in >>>>>>>>>>> ", {
+  //   firstName: user.admin[0].firstName,
+  //   lastName: user.admin[0].lastName,
+  //   user
+  // });
 
   if (user) {
     const authUser = await bcrypt.compare(password, user.admin[0].password);
