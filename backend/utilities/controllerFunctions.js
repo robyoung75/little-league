@@ -209,22 +209,81 @@ export const checkForPlayersAndUpdate = async (filter, updateObj) => {
 };
 
 // get and update a specific
-export const updatePlayer = async (teamId, updateObj) => {
-  console.log("fuck you from updatePlayer");
-  const updatedPlayer = await TeamPlayersSchema.findOneAndUpdate(
-    { id: teamId, "players.number": updateObj.number },
-    { $set: { "players.$.number": updateObj.newNumber } },
-    { returnOriginal: false }
-  );
+export const updatePlayer = async (filter, updateObj) => {
+  console.log("updatePlayer_____filter_____", filter);
+  console.log("updatePlayer_____updateObj_____", updateObj);
 
-  // returns an array with only the updated player object
-  let myPlayer = updatedPlayer.players.filter((player) => {
-    if (player.number === updateObj.newNumber) {
-      return player;
+  try {
+    let playerNumber = updateObj.newNumber
+      ? updateObj.newNumber
+      : updateObj.number;
+    console.log("updatePlayer_____playerNumber", playerNumber);
+
+    let update;
+
+    let updatedPlayer;
+
+    if (updateObj.headshotImg) {
+      update = {
+        $set: {
+          // "players.$.number": playerNumber,
+          "players.$.headshotImg.secureURL": updateObj.headshotImg.secureURL,
+          "players.$.headshotImg.publicId": updateObj.headshotImg.publicId,
+        },
+      };
     }
-  });
 
-  return myPlayer[0];
+    if (updateObj.headshotImg && updateObj.offenseImg) {
+      update = {
+        $set: {
+          // "players.$.number": playerNumber,
+          "players.$.headshotImg.secureURL": updateObj.headshotImg.secureURL,
+          "players.$.headshotImg.publicId": updateObj.headshotImg.publicId,
+          "players.$.offenseImg.secureURL": updateObj.offenseImg.secureURL,
+          "players.$.offenseImg.publicId": updateObj.offenseImg.publicId,
+        },
+      };
+    }
+
+    if (updateObj.headshotImg && updateObj.offenseImg && updateObj.defenseImg) {
+      update = {
+        $set: {
+          // "players.$.number": playerNumber,
+          "players.$.headshotImg.secureURL": updateObj.headshotImg.secureURL,
+          "players.$.headshotImg.publicId": updateObj.headshotImg.publicId,
+          "players.$.offenseImg.secureURL": updateObj.offenseImg.secureURL,
+          "players.$.offenseImg.publicId": updateObj.offenseImg.publicId,
+          "players.$.defenseImg.secureURL": updateObj.defenseImg.secureURL,
+          "players.$.defenseImg.publicId": updateObj.defenseImg.publicId,
+        },
+      };
+    }
+
+    update = {
+      $set: {
+        "players.$.number": playerNumber,
+      },
+    };
+
+    updatedPlayer = await TeamPlayersSchema.findOneAndUpdate(filter, update, {
+      returnOriginal: false,
+    });
+
+    // returns an array with only the updated player object
+    // let myPlayer = updatedPlayer.players.filter((player) => {
+    //   if (
+    //     player.number === updateObj.newNumber ||
+    //     player.number === updateObj.number
+    //   ) {
+    //     return player;
+    //   }
+    // });
+   console.log('fuckyou', updatedPlayer)
+    return updatedPlayer;
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
 };
 
 // COACHES CONTROLLER FUNCTIONS - admin adds coaches

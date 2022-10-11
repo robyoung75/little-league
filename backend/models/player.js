@@ -43,13 +43,13 @@ const PlayerSchema = new Schema({
     required: true,
   },
   headshotImg: {
-    type: String,
+    type: Object,
   },
   offenseImg: {
-    type: String,
+    type: Object,
   },
   defenseImg: {
-    type: String,
+    type: Object,
   },
   date: {
     type: Date,

@@ -17,9 +17,16 @@ const requiresAuth = (req, res, next) => {
   }
 };
 
+// params middleware to find teamid
 const getTeamByTeamId = (req, res, next, teamId) => {
   req.userTeamId = teamId;
   next();
 };
 
-export { requiresAuth, getTeamByTeamId };
+// params middleware to find player id
+const getPlayerById = (req, res, next, playerId) => {
+  req.userPlayerId = playerId;
+  next();
+};
+
+export { requiresAuth, getTeamByTeamId, getPlayerById };

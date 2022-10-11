@@ -69,13 +69,14 @@ const createCloudinaryStreamMultiple = (
             tags: imgTagsArray,
             // public_id set the end of the public domain
             // example: https://res.cloudinary.com/dyxsxutlm/image/upload/v1661706901/cottonwoodcolts/players/cottonwoodcolts_17_young_defense.webp
-            public_id: `${adminUserObject.teamUserName}_number_${img.number}_lName_${img.lastName}_title_${img.imageTitle}`,
+            public_id: `${adminUserObject.teamUserName}_fName_${img.firstName}_lName_${img.lastName}_title_${img.imageTitle}`,
           },
           (error, result) => {
             if (error) reject(error);
             resolve(result);
           }
         );
+        console.log(img)
         bufferToStream(img.image).pipe(stream);
       })
   );
@@ -117,12 +118,21 @@ export const async_cloudinaryStreamImgs = async (
   return results;
 };
 
-
 // DELETE AN IMAGE BY PUBLIC ID
 export const async_cloudinaryDeleteImg = async (publicId) => {
   console.log("hello from async_cloudinaryDeleteImg");
 
-  const result = await cloudinary.uploader.destroy('cottonwoodcolts/teamLogo/cottonwoodcolts_name_colts_teamLogo')
+  const result = await cloudinary.uploader.destroy(publicId);
 
   return result;
+};
+
+// DELETE MULTIPLE IMAGES BY PUBLIC ID
+export const async_cloudinaryDeleteMultipleImages = async (publicIdArr) => {
+
+  console.log("hello mother fucker from async_cloudinaryDeleteMultipImages")
+  const result = await cloudinary.api.delete_resources(publicIdArr);
+
+
+  return result
 };

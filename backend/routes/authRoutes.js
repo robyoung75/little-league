@@ -36,7 +36,11 @@ import {
   signInUser_post,
 } from "../controllers/userControllers.js";
 
-import { requiresAuth, getTeamByTeamId } from "../middleware/authMiddleware.js";
+import {
+  requiresAuth,
+  getTeamByTeamId,
+  getPlayerById,
+} from "../middleware/authMiddleware.js";
 import {
   multerUploadsTeam,
   multerUploadsMultiple,
@@ -47,6 +51,7 @@ const router = Router();
 
 //  PARAM MIDDLEWARE WILL RUN ANY TIME THE PARAMETER IS TEAMID and set req.userTeamId to the teamId parameter
 router.param("teamId", getTeamByTeamId);
+router.param("playerId", getPlayerById);
 
 // ADMIN ROUTES
 router.post("/api/createAdminUser", requiresAuth, adminUser_post);
@@ -83,7 +88,7 @@ router.post(
 
 router.get("/api/admin/players/:teamId", requiresAuth, players_get);
 router.put(
-  "/api/admin/player/updatePlayer/:teamId",
+  "/api/admin/players/updatePlayer",
   requiresAuth,
   multerUploadsMultiple,
   updatePlayerData_put
