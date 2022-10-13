@@ -76,7 +76,7 @@ const createCloudinaryStreamMultiple = (
             resolve(result);
           }
         );
-        console.log(img)
+        console.log(img);
         bufferToStream(img.image).pipe(stream);
       })
   );
@@ -123,16 +123,16 @@ export const async_cloudinaryDeleteImg = async (publicId) => {
   console.log("hello from async_cloudinaryDeleteImg");
 
   const result = await cloudinary.uploader.destroy(publicId);
+  console.log("result___________________", result);
+
 
   return result;
 };
 
 // DELETE MULTIPLE IMAGES BY PUBLIC ID
 export const async_cloudinaryDeleteMultipleImages = async (publicIdArr) => {
-
-  console.log("hello mother fucker from async_cloudinaryDeleteMultipImages")
+  console.log("hello mother fucker from async_cloudinaryDeleteMultipImages");
   const result = await cloudinary.api.delete_resources(publicIdArr);
 
-
-  return result
+  return result;
 };

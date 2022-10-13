@@ -23,6 +23,7 @@ import {
 import {
   authCoaches_post,
   coaches_get,
+  updateCoachData_put,
 } from "../controllers/coachesControllers.js";
 
 import {
@@ -58,7 +59,7 @@ router.post("/api/createAdminUser", requiresAuth, adminUser_post);
 router.get("/api/admin/adminUsers", requiresAuth, allAdminUsers_get);
 router.post("/api/admin/createUser", requiresAuth, authNewUser_post);
 router.delete(
-  "/api/admin/updateRemoveUser/:userId/:email/:firstName/:lastName",
+  "/api/admin/updateRemoveAdminUser/:userId/:email/:firstName/:lastName",
   requiresAuth,
   adminUserUpdateRemoveUser_delete
 );
@@ -96,12 +97,18 @@ router.put(
 
 // COACHES ROUTES
 router.post(
-  "/api/admin/createCoaches",
+  "/api/admin/coaches/createCoach",
   requiresAuth,
   multerUploadsCoach,
   authCoaches_post
 );
 router.get("/api/admin/coaches/:teamId", coaches_get);
+router.put(
+  "/api/admin/coaches/updateCoach",
+  requiresAuth,
+  multerUploadsCoach,
+  updateCoachData_put
+);
 
 // SCHEDULE ROUTES
 router.post("/api/admin/schedule", requiresAuth, authSchedule_post);

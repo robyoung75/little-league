@@ -94,25 +94,26 @@ export const setAdminUserTeamId = async (id) => {
   }
 };
 
-export const removeAdminUser = async (params) => {
+// delete and existing admin user
+export const removeAdminUser = async (updateObj) => {
   try {
-    const adminUser = await TeamAdminSchema.findOneAndUpdate(
-      { _id: params.userId },
+    const adminUserDoc = await TeamAdminSchema.findOneAndUpdate(
+      { _id: updateObj.userId },
       {
         $pull: {
           admin: {
-            firstName: params.firstName,
-            lastName: params.lastName,
-            email: params.email,
+            firstName: updateObj.firstName,
+            lastName: updateObj.lastName,
+            email: updateObj.email,
           },
         },
       },
       { new: true }
     );
 
-    console.log(adminUser);
+    console.log(adminUserDoc);
 
-    return adminUser;
+    return adminUserDoc;
   } catch (error) {
     return { removeAdminUser: error };
   }
@@ -179,7 +180,7 @@ export const createNewPlayer = async (reqObj) => {
   }
 };
 
-// check if one player already exists by teamId
+// check if players document exists by teamId
 export const findPlayersByTeamId = async (id) => {
   try {
     const player = await TeamPlayersSchema.findOne({
@@ -208,78 +209,71 @@ export const checkForPlayersAndUpdate = async (filter, updateObj) => {
   }
 };
 
-// get and update a specific
+// get and update a specific player
 export const updatePlayer = async (filter, updateObj) => {
-  console.log("updatePlayer_____filter_____", filter);
-  console.log("updatePlayer_____updateObj_____", updateObj);
+  // console.log("updatePlayer_____filter_____", filter);
+  // console.log("updatePlayer_____updateObj_____", updateObj);
 
   try {
+    // variables
+    let updateData = {};
     let playerNumber = updateObj.newNumber
       ? updateObj.newNumber
       : updateObj.number;
-    console.log("updatePlayer_____playerNumber", playerNumber);
-
+    // console.log("updatePlayer_____playerNumber", playerNumber);
     let update;
+    let updatedPlayersDoc;
+    updateData.number = playerNumber;
 
-    let updatedPlayer;
-
+    // update player data in mongodb
     if (updateObj.headshotImg) {
-      update = {
-        $set: {
-          // "players.$.number": playerNumber,
-          "players.$.headshotImg.secureURL": updateObj.headshotImg.secureURL,
-          "players.$.headshotImg.publicId": updateObj.headshotImg.publicId,
-        },
-      };
+      updateData.headshotSecureURL = updateObj.headshotImg.secureURL;
+      updateData.headshotPublicId = updateObj.headshotImg.publicId;
     }
 
-    if (updateObj.headshotImg && updateObj.offenseImg) {
-      update = {
-        $set: {
-          // "players.$.number": playerNumber,
-          "players.$.headshotImg.secureURL": updateObj.headshotImg.secureURL,
-          "players.$.headshotImg.publicId": updateObj.headshotImg.publicId,
-          "players.$.offenseImg.secureURL": updateObj.offenseImg.secureURL,
-          "players.$.offenseImg.publicId": updateObj.offenseImg.publicId,
-        },
-      };
+    if (updateObj.offenseImg) {
+      updateData.offenseSecureURL = updateObj.offenseImg.secureURL;
+      updateData.offensePublicId = updateObj.offenseImg.publicId;
     }
 
-    if (updateObj.headshotImg && updateObj.offenseImg && updateObj.defenseImg) {
-      update = {
-        $set: {
-          // "players.$.number": playerNumber,
-          "players.$.headshotImg.secureURL": updateObj.headshotImg.secureURL,
-          "players.$.headshotImg.publicId": updateObj.headshotImg.publicId,
-          "players.$.offenseImg.secureURL": updateObj.offenseImg.secureURL,
-          "players.$.offenseImg.publicId": updateObj.offenseImg.publicId,
-          "players.$.defenseImg.secureURL": updateObj.defenseImg.secureURL,
-          "players.$.defenseImg.publicId": updateObj.defenseImg.publicId,
-        },
-      };
+    if (updateObj.defenseImg) {
+      updateData.defenseSecureURL = updateObj.defenseImg.secureURL;
+      updateData.defensePublicId = updateObj.defenseImg.publicId;
     }
 
     update = {
       $set: {
-        "players.$.number": playerNumber,
+        "players.$.number": updateData.number && updateData.number,
+        "players.$.headshotImg.secureURL":
+          updateData.headshotSecureURL && updateData.headshotSecureURL,
+        "players.$.headshotImg.publicId":
+          updateData.headshotPublicId && updateData.headshotPublicId,
+        "players.$.offense.secureURL":
+          updateData.offenseSecureURL && updateData.offenseSecureURL,
+        "players.$.offense.publicId":
+          updateData.offensePublicId && updateData.offensePublicId,
+        "players.$.defense.secureURL":
+          updateData.defenseSecureURL && updateData.defenseSecureURL,
+        "players.$.defense.publicId":
+          updateData.defensePublicId && updateData.defensePublicId,
       },
     };
 
-    updatedPlayer = await TeamPlayersSchema.findOneAndUpdate(filter, update, {
-      returnOriginal: false,
-    });
+    // console.log(
+    //   "updateData>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",
+    //   updateData
+    // );
 
-    // returns an array with only the updated player object
-    // let myPlayer = updatedPlayer.players.filter((player) => {
-    //   if (
-    //     player.number === updateObj.newNumber ||
-    //     player.number === updateObj.number
-    //   ) {
-    //     return player;
-    //   }
-    // });
-   console.log('fuckyou', updatedPlayer)
-    return updatedPlayer;
+    updatedPlayersDoc = await TeamPlayersSchema.findOneAndUpdate(
+      filter,
+      update,
+      {
+        returnOriginal: false,
+      }
+    );
+
+    // returns updated playersdoc
+    return updatedPlayersDoc;
   } catch (error) {
     console.log(error);
     return error;
@@ -288,7 +282,7 @@ export const updatePlayer = async (filter, updateObj) => {
 
 // COACHES CONTROLLER FUNCTIONS - admin adds coaches
 
-// create a new coach
+// create a new coach document
 export const createNewCoach = async (reqObj) => {
   try {
     const newCoach = await TeamCoachesSchema.create(reqObj);
@@ -298,7 +292,7 @@ export const createNewCoach = async (reqObj) => {
   }
 };
 
-// check if any coaches already exist.
+// check if coaches document exists
 export const findCoachesByTeamId = async (id) => {
   try {
     const coach = await TeamCoachesSchema.findOne({
@@ -310,6 +304,7 @@ export const findCoachesByTeamId = async (id) => {
   }
 };
 
+// add a coach to the existing coach document
 export const checkForCoachesAndUpdate = async (filter, updateObj) => {
   try {
     const updatedCoaches = await TeamCoachesSchema.findOneAndUpdate(
@@ -323,6 +318,50 @@ export const checkForCoachesAndUpdate = async (filter, updateObj) => {
   } catch (error) {
     return { checkForCoachesAndUpdate: error };
   }
+};
+
+// update single coach data
+export const updateCoach = async (filter, updateObj) => {
+  let hello = "hello from updateCoach";
+  console.log(hello);
+
+  // let updateData = { filter, updateObj };
+  // console.log("updateData______________", updateData)
+  let update;
+  let updatedCoachesDoc;
+
+  // update only image
+  if (updateObj.headshotImg.secureURL !== null && !updateObj.email) {
+    update = {
+      $set: {
+        "coaches.$.headshotImg.secureURL": updateObj.headshotImg.secureURL,
+        "coaches.$.headshotImg.publicId": updateObj.headshotImg.publicId,
+      },
+    };
+    // update image and email
+  } else if (updateObj.headshotImg.secureURL !== null && updateObj.email) {
+    update = {
+      $set: {
+        "coaches.$.headshotImg.secureURL": updateObj.headshotImg.secureURL,
+        "coaches.$.headshotImg.publicId": updateObj.headshotImg.publicId,
+        "coaches.$.email": updateObj.email,
+      },
+    };
+    // update email only
+  } else {
+    update = {
+      $set: {
+        "coaches.$.email": updateObj.email,
+      },
+    };
+  }
+
+  updatedCoachesDoc = await TeamCoachesSchema.findOneAndUpdate(filter, update, {
+    returnOriginal: false,
+  });
+
+  // returns updated coachDoc
+  return updatedCoachesDoc;
 };
 
 // SCHEDULE CONTROLLER FUNCTIONS

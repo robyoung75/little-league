@@ -24,11 +24,13 @@ import { createJwtToken, maxAge } from "./createJWT.js";
 const adminUser_post = async (req, res) => {
   req.body.teamId = "teamId not set";
 
+  // req.body destructured
   let { firstName, lastName, email, teamName, teamUserName, password, teamId } =
     req.body;
-
+  // hash the password
   let hashedPassword = await hashPassword(password);
 
+  // adminUser object for upload to mongodb
   let adminUser = {
     firstName,
     lastName,
@@ -128,9 +130,10 @@ const adminUserUpdateRemoveUser_delete = async (req, res) => {
       console.log({ allAdminUsers_get: req.error.message });
       throw req.error;
     }
-    console.log({ adminUserUpdateRemoveUser_delete: req.params });
+    // console.log({ adminUserUpdateRemoveUser_delete: req.params });
 
     const { id } = req.userId;
+    const { userId, email, firstName, lastName } = req.params;
 
     const adminUsers = await findAdminUserById(id);
 
@@ -146,7 +149,12 @@ const adminUserUpdateRemoveUser_delete = async (req, res) => {
       );
     }
 
-    let updatedAdminUsers = await removeAdminUser(req.params);
+    const updatedAdminUsers = await removeAdminUser({
+      userId,
+      email,
+      firstName,
+      lastName,
+    });
     res.status(200).json(updatedAdminUsers);
   } catch (error) {
     console.log(error);
@@ -157,13 +165,12 @@ const adminUserUpdateRemoveUser_delete = async (req, res) => {
 
 // user sign in
 const signInAdminUser_post = async (req, res) => {
-  const { email, password } = req.body;
-
-  console.log("req.teamId >>>>>>>>>>>>>>>>>>>>>", req.teamId);
-
-  const authUser = await TeamAdminSchema.login(email, password);
-
   try {
+    const { email, password } = req.body;
+    // console.log("req.teamId >>>>>>>>>>>>>>>>>>>>>", req.teamId);
+
+    const authUser = await TeamAdminSchema.login(email, password);
+
     if (authUser.error) throw authUser.error;
 
     // create jwt token

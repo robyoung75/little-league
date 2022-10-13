@@ -185,6 +185,12 @@ const players_get = async (req, res) => {
 // UPDATE PLAYER INFO AND IMAGES
 const updatePlayerData_put = async (req, res) => {
   try {
+    // If no req.userId an error will be thrown req.userId means user is authenticated as admin
+    if (req.error) {
+      console.log({ updatePlayerData_put: req.error });
+      throw req.error;
+    }
+
     let {
       headshotPublicId,
       offensePublicId,
@@ -201,7 +207,7 @@ const updatePlayerData_put = async (req, res) => {
     // console.log({reqUserTeamId: req.userTeamId, reqUserPlayerId: req.userPlayerId})
 
     // variables
-    console.log(req.userId);
+    // console.log(req.userId);
     const { id } = req.userId;
     // const teamId = req.userTeamId;
     const { playerId } = req.query;
@@ -216,9 +222,10 @@ const updatePlayerData_put = async (req, res) => {
       newNumber: Number(newNumber),
     };
 
+    // to update the player filter by admin id for the correct team of players then by player._id
     let filter = { id: id, "players._id": playerId };
 
-    console.log("filter", filter);
+    // console.log("filter", filter);
 
     // get admin user data
     const adminUser = await findAdminUserById(id);

@@ -80,6 +80,8 @@ export const handleErrors = (err) => {
     errors.adminUser = err.message;
   }
 
+ 
+
   console.log({ errors: errors });
 
   return errors;

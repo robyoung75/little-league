@@ -26,7 +26,7 @@ const CoachSchema = new Schema({
     validate: [isEmail, "Please enter a valid email"],
   },
   headshotImg: {
-    type: String,
+    type: Object,
   },
   teamId: {
       type: String,

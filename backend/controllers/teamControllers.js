@@ -97,7 +97,7 @@ const team_get = async (req, res) => {
   } catch (error) {
     console.log(error);
     const errors = handleErrors(error);
-    res.status(400).json({ error });
+    res.status(400).json({ errors });
   }
 };
 
