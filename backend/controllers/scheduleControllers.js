@@ -5,6 +5,7 @@ import {
   createNewSchedule,
   findAdminUserById,
   findTeamSchedule,
+  updateScheduleDate,
   updateTeamSchedule,
 } from "../utilities/controllerFunctions.js";
 
@@ -73,5 +74,29 @@ export const schedule_get = async (req, res) => {
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });
+  }
+};
+
+// UPDATE SCHEDULE
+export const updateSchedule_put = async (req, res) => {
+  try {
+    if (req.error) {
+      console.log({ scheduleUpdate_put_req_put: error });
+      throw req.error;
+    }
+
+    const { id } = req.userId;
+    const { scheduleId } = req.query;
+
+    let updateObj = req.body;
+    let filter = { id: id, "schedule._id": scheduleId };
+
+    let updatedScheduleDoc = await updateScheduleDate(filter, updateObj);
+
+    res.json(updatedScheduleDoc);
+  } catch (error) {
+    console.log({ scheduleUpdate_put: error });
+    const errors = handleErrors(error);
+    res.status(400).json(errors);
   }
 };

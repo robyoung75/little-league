@@ -10,6 +10,7 @@ import {
 
 import {
   authPlayers_post,
+  deletePlayer_delete,
   players_get,
   updatePlayerData_put,
 } from "../controllers/playersControllers.js";
@@ -29,12 +30,15 @@ import {
 import {
   authSchedule_post,
   schedule_get,
+  updateSchedule_put,
 } from "../controllers/scheduleControllers.js";
 
 import {
   authNewUser_post,
   userCreateUser_post,
   signInUser_post,
+  users_get,
+  deleteUser_delete,
 } from "../controllers/userControllers.js";
 
 import {
@@ -58,11 +62,13 @@ router.param("playerId", getPlayerById);
 router.post("/api/createAdminUser", requiresAuth, adminUser_post);
 router.get("/api/admin/adminUsers", requiresAuth, allAdminUsers_get);
 router.post("/api/admin/createUser", requiresAuth, authNewUser_post);
+router.get("/api/admin/users", requiresAuth, users_get);
 router.delete(
   "/api/admin/updateRemoveAdminUser/:userId/:email/:firstName/:lastName",
   requiresAuth,
   adminUserUpdateRemoveUser_delete
 );
+// router.delete("/api/admin/users/deleteUser/:teamId", requiresAuth, deleteUser_delete);
 
 // ADMIN USER AND USER SIGN IN SIGNOUT ROUTES
 router.post("/api/admin/signin", signInAdminUser_post);
@@ -94,6 +100,11 @@ router.put(
   multerUploadsMultiple,
   updatePlayerData_put
 );
+router.delete(
+  "/api/admin/players/delete/:teamId",
+  requiresAuth,
+  deletePlayer_delete
+);
 
 // COACHES ROUTES
 router.post(
@@ -113,8 +124,15 @@ router.put(
 // SCHEDULE ROUTES
 router.post("/api/admin/schedule", requiresAuth, authSchedule_post);
 router.get("/api/admin/schedule/:teamId", requiresAuth, schedule_get);
+router.put(
+  "/api/admin/schedule/updateSchedule",
+  requiresAuth,
+  updateSchedule_put
+);
 
 // USER ROUTES
-router.post("/api/userCreateUser", userCreateUser_post);
+
+router.post("/api/user/createUser", userCreateUser_post);
+router.delete("/api/users/delete/:teamId", requiresAuth, deleteUser_delete);
 
 export { router as authRoute };

@@ -19,6 +19,7 @@ import {
   findUsersById,
   createNewUser,
   addToExistingUsers,
+  deleteUser,
 } from "../utilities/controllerFunctions.js";
 
 // Admin creates users
@@ -145,17 +146,60 @@ export const userCreateUser_post = async (req, res) => {
   }
 };
 
+// read all users
+export const users_get = async (req, res) => {
+  try {
+    if (req.error) {
+      console.log({ users_get: req.error });
+      throw req.error;
+    }
+
+    const { id } = req.userId;
+
+    let users = await findUsersById(id);
+
+    // res.json({ users_get: "quieres fumar mota?", users_get: req.body, users });
+    res.status(200).json(users);
+  } catch (error) {
+    const errors = handleErrors(error);
+    res.status(400).json({ errors });
+  }
+};
+
+// delete user
+export const deleteUser_delete = async (req, res) => {
+  try {
+    if (req.error) {
+      console.log({ adminDeleteUser: req.error });
+      throw req.error;
+    }
+
+    let { teamId } = req.params;
+    let { userId } = req.query;
+
+    let deletedUser = await deleteUser(teamId, userId);
+    res.json({ adminDeleteUser_deletedUser: deletedUser });
+
+    // res.status(200).json({teamId, id, userId})
+  } catch (error) {
+    console.log({ adminDeleteUser: error });
+    const errors = handleErrors(error);
+    res.status(400).handleErrors(errors);
+  }
+};
+
 // user signin
 export const signInUser_post = async (req, res) => {
-  const { email, password } = req.body;
-  console.log(req.body);
-
-  const authUser = await TeamUserSchema.login(email, password);
   try {
+    const { email, password } = req.body;
+    console.log(req.body);
+
+    const authUser = await TeamUserSchema.login(email, password);
     if (authUser.error) throw authUser.error;
 
     // create jwt token
     const token = createJwtToken(authUser._id);
+    // console.log('usersigninjsontoken', token)
 
     // send token as a cookie
     res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });

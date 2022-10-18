@@ -13,6 +13,7 @@ import {
   checkForPlayersAndUpdate,
   createNewPlayer,
   updatePlayer,
+  deletePlayer,
 } from "../utilities/controllerFunctions.js";
 
 // CREATE TEAM PLAYERS
@@ -336,4 +337,20 @@ const updatePlayerData_put = async (req, res) => {
   }
 };
 
-export { authPlayers_post, players_get, updatePlayerData_put };
+const deletePlayer_delete = async (req, res) => {
+  console.log(req.params);
+  console.log(req.query);
+
+  let { teamId } = req.params;
+  let { playerId } = req.query;
+
+  let deletedPlayer = await deletePlayer(teamId, playerId);
+  res.status(200).json(deletedPlayer);
+};
+
+export {
+  authPlayers_post,
+  players_get,
+  updatePlayerData_put,
+  deletePlayer_delete,
+};

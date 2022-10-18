@@ -5,6 +5,7 @@ import TeamSchema from "../models/team.js";
 import TeamsScheduleSchema from "../models/teamSchedule.js";
 import TeamUsersSchema from "../models/teamUsers.js";
 import team from "../models/team.js";
+import UserSchema from "../models/user.js";
 
 // MONGO DB ADMIN USER FUNCTIONS
 
@@ -16,6 +17,7 @@ export const findTeamByTeamUserName = async (teamUserName) => {
     });
     return existingTeam;
   } catch (error) {
+    console.log({ findTeamByTeamUserName: error });
     return { findTeamByTeamUserName: error };
   }
 };
@@ -26,6 +28,7 @@ export const createNewAdminUser = async (reqObj) => {
     const newAdminUser = await TeamAdminSchema.create(reqObj);
     return newAdminUser;
   } catch (error) {
+    console.log({ createNewAdminUser: error });
     return { createNewAdminUser: error };
   }
 };
@@ -36,6 +39,7 @@ export const findAdminUsersByTeamId = async (id) => {
     let users = await TeamAdminSchema.find({ teamId: id });
     return users;
   } catch (error) {
+    console.log({ findAdminUsersByTeamUserName: error });
     return { findAdminUsersByTeamUserName: error };
   }
 };
@@ -46,6 +50,7 @@ export const findAdminUserById = async (id) => {
     const user = await TeamAdminSchema.findById(id);
     return user;
   } catch (error) {
+    console.log({ findAdminUserById: error });
     return { findAdminUserById: error };
   }
 };
@@ -62,6 +67,7 @@ export const createSecondAdminUser = async (filter, updateObj) => {
     await secondAdmin.save();
     return secondAdmin;
   } catch (error) {
+    console.log({ createSecondAdminUser: error });
     return { createSecondAdminUser: error };
   }
 };
@@ -76,6 +82,7 @@ export const setTeamId = async (id) => {
     );
     return teamId;
   } catch (error) {
+    console.log({ setTeamId: error });
     return { setTeamId: error };
   }
 };
@@ -90,6 +97,7 @@ export const setAdminUserTeamId = async (id) => {
 
     return authUser;
   } catch (error) {
+    console.log({ setAdminUserTeamId: error });
     return { setAdminUserTeamId: error };
   }
 };
@@ -111,10 +119,11 @@ export const removeAdminUser = async (updateObj) => {
       { new: true }
     );
 
-    console.log(adminUserDoc);
+    // console.log(adminUserDoc);
 
     return adminUserDoc;
   } catch (error) {
+    console.log({ removeAdminUser: error });
     return { removeAdminUser: error };
   }
 };
@@ -127,6 +136,7 @@ export const createNewTeam = async (reqObj) => {
     const newTeam = await TeamSchema.create(reqObj);
     return newTeam;
   } catch (error) {
+    console.log({ createNewTeam: error });
     return { createNewTeam: error };
   }
 };
@@ -140,6 +150,7 @@ export const findTeamById = async (id) => {
     console.log("findTeamById_existingTeam", existingTeam);
     return existingTeam;
   } catch (error) {
+    console.log({ findTeamById: error });
     return { findTeamById: error };
   }
 };
@@ -152,6 +163,7 @@ export const updateTeamLogo = async (filter, updateObj) => {
     });
     return updatedLogo;
   } catch (error) {
+    console.log({ updatedLogo: error });
     return { updatedLogo: error };
   }
 };
@@ -164,6 +176,7 @@ export const updateTeamColors = async (filter, updateObj) => {
     });
     return updatedColors;
   } catch (error) {
+    console.log({ updateTeamColors: error });
     return { updateTeamColors: error };
   }
 };
@@ -176,6 +189,7 @@ export const createNewPlayer = async (reqObj) => {
     const newPlayer = await TeamPlayersSchema.create(reqObj);
     return newPlayer;
   } catch (error) {
+    console.log({ createNewPlayer: error });
     return { createNewPlayer: error };
   }
 };
@@ -188,6 +202,7 @@ export const findPlayersByTeamId = async (id) => {
     });
     return player;
   } catch (error) {
+    console.log({ findPlayersByTeamId: error });
     return { findPlayersByTeamId: error };
   }
 };
@@ -205,6 +220,7 @@ export const checkForPlayersAndUpdate = async (filter, updateObj) => {
     await updatedPlayers.save();
     return updatedPlayers;
   } catch (error) {
+    console.log({ checkForPlayersAndUpdate: error });
     return { checkForPlayersAndUpdate: error };
   }
 };
@@ -259,11 +275,6 @@ export const updatePlayer = async (filter, updateObj) => {
       },
     };
 
-    // console.log(
-    //   "updateData>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",
-    //   updateData
-    // );
-
     updatedPlayersDoc = await TeamPlayersSchema.findOneAndUpdate(
       filter,
       update,
@@ -275,8 +286,30 @@ export const updatePlayer = async (filter, updateObj) => {
     // returns updated playersdoc
     return updatedPlayersDoc;
   } catch (error) {
-    console.log(error);
-    return error;
+    console.log({ updatePlayer: error });
+    return { updatePlayer: error };
+  }
+};
+
+// delete a player
+export const deletePlayer = async (teamId, playerId) => {
+  try {
+    const playerdoc = await TeamPlayersSchema.findOneAndUpdate(
+      { teamId: teamId },
+      {
+        $pull: {
+          players: {
+            _id: playerId,
+          },
+        },
+      },
+      { new: true }
+    );
+
+    return playerdoc;
+  } catch (error) {
+    console.log({ deletePlayer: error });
+    return { deletePlayer: error };
   }
 };
 
@@ -288,6 +321,7 @@ export const createNewCoach = async (reqObj) => {
     const newCoach = await TeamCoachesSchema.create(reqObj);
     return newCoach;
   } catch (error) {
+    console.log({ createNewCoach: error });
     return { createNewCoach: error };
   }
 };
@@ -300,6 +334,7 @@ export const findCoachesByTeamId = async (id) => {
     });
     return coach;
   } catch (error) {
+    console.log({ findCoachesByTeamId: error });
     return { findCoachesByTeamId: error };
   }
 };
@@ -316,52 +351,51 @@ export const checkForCoachesAndUpdate = async (filter, updateObj) => {
     await updatedCoaches.save();
     return updatedCoaches;
   } catch (error) {
+    console.log({ checkForCoachesAndUpdate: error });
     return { checkForCoachesAndUpdate: error };
   }
 };
 
 // update single coach data
 export const updateCoach = async (filter, updateObj) => {
-  let hello = "hello from updateCoach";
-  console.log(hello);
+  try {
+    let updateData = {};
+    let update;
 
-  // let updateData = { filter, updateObj };
-  // console.log("updateData______________", updateData)
-  let update;
-  let updatedCoachesDoc;
+    let updatedCoachesDoc;
+    let coachEmail = updateObj.newEmail ? updateObj.newEmail : updateObj.email;
+    updateData.email = coachEmail;
 
-  // update only image
-  if (updateObj.headshotImg.secureURL !== null && !updateObj.email) {
+    // update only image
+    if (updateObj.headshotImg.secureURL) {
+      updateData.headshotSecureURL = updateObj.headshotImg.secureURL;
+      updateData.headshotPublicId = updateObj.headshotImg.publicId;
+    }
+
     update = {
       $set: {
-        "coaches.$.headshotImg.secureURL": updateObj.headshotImg.secureURL,
-        "coaches.$.headshotImg.publicId": updateObj.headshotImg.publicId,
+        "coaches.$.headshotImg.secureURL":
+          updateData.headshotSecureURL && updateData.headshotSecureURL,
+        "coaches.$.headshotImg.publicId":
+          updateData.headshotPublicId && updateData.headshotPublicId,
+        "coaches.$.email": updateData.email && updateData.email,
       },
     };
-    // update image and email
-  } else if (updateObj.headshotImg.secureURL !== null && updateObj.email) {
-    update = {
-      $set: {
-        "coaches.$.headshotImg.secureURL": updateObj.headshotImg.secureURL,
-        "coaches.$.headshotImg.publicId": updateObj.headshotImg.publicId,
-        "coaches.$.email": updateObj.email,
-      },
-    };
-    // update email only
-  } else {
-    update = {
-      $set: {
-        "coaches.$.email": updateObj.email,
-      },
-    };
+
+    updatedCoachesDoc = await TeamCoachesSchema.findOneAndUpdate(
+      filter,
+      update,
+      {
+        returnOriginal: false,
+      }
+    );
+
+    // returns updated coachDoc
+    return updatedCoachesDoc;
+  } catch (error) {
+    console.log({ updatedCoachesDoc: error });
+    return { updatedCoachesDoc: error };
   }
-
-  updatedCoachesDoc = await TeamCoachesSchema.findOneAndUpdate(filter, update, {
-    returnOriginal: false,
-  });
-
-  // returns updated coachDoc
-  return updatedCoachesDoc;
 };
 
 // SCHEDULE CONTROLLER FUNCTIONS
@@ -372,6 +406,7 @@ export const createNewSchedule = async (reqObj) => {
     const newGame = await TeamsScheduleSchema.create(reqObj);
     return newGame;
   } catch (error) {
+    console.log({ createNewSchedule: error });
     return { createNewSchedule: error };
   }
 };
@@ -384,10 +419,12 @@ export const findTeamSchedule = async (id) => {
     });
     return existingSchedule;
   } catch (error) {
+    console.log({ findTeamSchedule: error });
     return { findTeamSchedule: error };
   }
 };
 
+// UPDATE SCHEDULE, ADD A SCHEDULE DATE TO AN EXISTING SCHEDULE DOCUMENT
 export const updateTeamSchedule = async (filter, updateObj) => {
   try {
     const updatedSchedule = await TeamsScheduleSchema.findOneAndUpdate(
@@ -398,7 +435,68 @@ export const updateTeamSchedule = async (filter, updateObj) => {
     await updatedSchedule.save();
     return updatedSchedule;
   } catch (error) {
+    console.log({ updateTeamSchedule: error });
     return { updateTeamSchedule: error };
+  }
+};
+
+// UPDATE AN INDIVIDUAL SCHEDULED DATE IN SCHEDULE DOCUMENT
+export const updateScheduleDate = async (filter, updateObj) => {
+  try {
+    // console.log({ updateScheduleDate: filter, updateScheduleDate: updateObj });
+
+    let updateData = {};
+    let update;
+
+    switch (updateObj) {
+      case updateObj.opponent:
+        updateData.opponent = updateObj.opponent;
+      case updateObj.date:
+        updateData.date = updateObj.date;
+      case updateObj.gameTime:
+        updateData.gameTime = updateObj.gameTime;
+      case updateObj.arrivalTime:
+        updateData.arrivalTime = updateObj.arrivalTime;
+      case updateObj.address:
+        updateData.address = updateObj.address;
+      case updateObj.city:
+        updateData.city = updateObj.city;
+      case updateObj.zipCode:
+        updateData.zipCode = updateObj.zipCode;
+      case updateObj.homeAway:
+        updateData.homeAway = updateObj.homeAway;
+      case updateObj.uniformColor:
+        updateData.uniformColor = updateObj.uniformColor;
+      default:
+        updateData = updateObj;
+    }
+
+    update = {
+      $set: {
+        "schedule.$.opponent": updateData.opponent && updateData.opponent,
+        "schedule.$.date": updateData.date && updateData.date,
+        "schedule.$.gameTime": updateData.gameTime && updateData.gameTime,
+        "schedule.$.arrivalTime":
+          updateData.arrivalTime && updateData.arrivalTime,
+        "schedule.$.address": updateData.address && updateData.address,
+        "schedule.$.city": updateData.city && updateData.city,
+        "schedule.$.zipCode": updateData.zipCode && updateData.zipCode,
+        "schedule.$.homeAway": updateData.homeAway && updateData.homeAway,
+        "schedule.$.uniformColor":
+          updateData.uniformColor && updateData.uniformColor,
+      },
+    };
+
+    const updatedScheduleDate = await TeamsScheduleSchema.findOneAndUpdate(
+      filter,
+      update,
+      { returnOriginal: false }
+    );
+
+    return updatedScheduleDate;
+  } catch (error) {
+    console.log({ updateScheduleDate: error });
+    return { updateScheduleDate: error };
   }
 };
 
@@ -409,6 +507,7 @@ export const findUsersByTeamUserName = async (teamUserName) => {
     const users = await TeamUsersSchema.findOne({ teamUserName });
     return users;
   } catch (error) {
+    console.log({ findUsersByTeamUserName: error });
     return { findUsersByTeamUserName: error };
   }
 };
@@ -421,6 +520,7 @@ export const findUsersById = async (id) => {
     });
     return users;
   } catch (error) {
+    console.log({ findUsersById: error });
     return { findUsersById: error };
   }
 };
@@ -431,6 +531,7 @@ export const createNewUser = async (reqObj) => {
     const newUser = await TeamUsersSchema.create(reqObj);
     return newUser;
   } catch (error) {
+    console.log({ createNewUser: error });
     return { createNewUser: error };
   }
 };
@@ -446,6 +547,30 @@ export const addToExistingUsers = async (filter, updateObj) => {
     await updatedUsers.save();
     return updatedUsers;
   } catch (error) {
+    console.log({ updateTeamSchedule: error.message });
     return { updateTeamSchedule: error.message };
+  }
+};
+
+// delete user
+export const deleteUser = async (teamId, userId) => {
+  console.log(teamId);
+  try {
+    const userDoc = await TeamUsersSchema.findOneAndUpdate(
+      { teamId: teamId },
+      {
+        $pull: {
+          users: {
+            _id: userId,
+          },
+        },
+      },
+      { new: true }
+    );
+
+    return userDoc;
+  } catch (error) {
+    console.log({ deleteUser: error });
+    return { deleteUser: error.message };
   }
 };
