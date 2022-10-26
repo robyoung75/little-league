@@ -13,6 +13,7 @@ import {
   checkForCoachesAndUpdate,
   createNewCoach,
   updateCoach,
+  deleteCoach,
 } from "../utilities/controllerFunctions.js";
 
 // CONTROLLERS FOR ADMIN to Create Coaches
@@ -27,23 +28,33 @@ export const authCoaches_post = async (req, res) => {
 
     // destructured req.userId from auth middleware
     const { id } = req.userId;
+    const userTeamId = req.userTeamId;
+    const { coachId } = req.query;
+
+    console.log({
+      "req.params": req.params,
+      "req.userTeamId": req.userTeamId,
+      userTeamId,
+    });
+
+    // destructured req.body variables
+    let { firstName, lastName, email } = req.body;
+
+    // variables
+    let coachImage;
+    let imgTags = [];
+    let imgUploadResponse;
+    let imgPublicId;
+    let imgSecurecUrl;
 
     // admin user
     const adminUser = await findAdminUserById(id);
 
     // list of coaches for adminUsers team
-    const authUserCoaches = await findCoachesByTeamId(adminUser.teamId);
-
-    // destructured req.body variables
-    let { firstName, lastName, email } = req.body;
-
-    // variablse
-    let imgTags = [];
-    let imgUploadResponse;
-    let coachImage = {};
+    const authUserCoaches = await findCoachesByTeamId(userTeamId);
 
     // coaches upload to mongodb object
-    let coachData = {
+    let updateObj = {
       firstName,
       lastName,
       email,
@@ -52,7 +63,7 @@ export const authCoaches_post = async (req, res) => {
     };
 
     // HANDLE AND UPLOAD IMAGES TO CLOUDINARY
-    if (adminUser && req.file) {
+    if (req.file) {
       let fileResize = await sharpImgResize(req.file);
       coachImage = { img: fileResize, lastName };
 
@@ -74,8 +85,10 @@ export const authCoaches_post = async (req, res) => {
         imgTags
       );
 
-      coachData.headshotImg.secureURL = imgUploadResponse.secure_url;
-      coachData.headshotImg.publicId = imgUploadResponse.public_id;
+      imgPublicId = imgUploadResponse.public_id;
+      imgSecurecUrl = imgUploadResponse.secure_url;
+      updateObj.headshotImg.publicId = imgPublicId;
+      updateObj.headshotImg.secureURL = imgSecurecUrl;
     }
 
     if (adminUser && !authUserCoaches) {
@@ -83,24 +96,17 @@ export const authCoaches_post = async (req, res) => {
         teamId: adminUser.teamId,
         teamUserName: adminUser.teamUserName,
         teamName: adminUser.teamName,
-        coaches: coachData,
+        coaches: updateObj,
       });
 
       res.status(200).json(authCoachesDoc);
     }
 
     if (adminUser && authUserCoaches) {
-      const filter = {
-        teamId: authUserCoaches.teamId,
-        "coaches.email": { $ne: email },
-      };
-      const update = {
-        $push: {
-          coaches: coachData,
-        },
-      };
-
-      const updatedCoachesDoc = await checkForCoachesAndUpdate(filter, update);
+      const updatedCoachesDoc = await checkForCoachesAndUpdate(
+        userTeamId,
+        updateObj
+      );
 
       if (!updatedCoachesDoc) {
         throw new Error("A user with this email already exists");
@@ -143,10 +149,9 @@ export const updateCoachData_put = async (req, res) => {
     }
 
     let { headshotPublicId, firstName, lastName, email } = req.body;
-
     const { id } = req.userId;
-
     const { coachId } = req.query;
+    const userTeamId = req.userTeamId;
 
     // variables
     let imgTags = [];
@@ -155,8 +160,6 @@ export const updateCoachData_put = async (req, res) => {
     let deleteResults;
     let updateObj = { email, headshotImg: { secureURL: null, publicId: null } };
 
-    // to update the coach filter coaches doc by admin id (the teamId) and then by coaches._id
-    const filter = { id: id, "coaches._id": coachId };
 
     // get admin user doc
     const adminUserDoc = await findAdminUserById(id);
@@ -203,9 +206,27 @@ export const updateCoachData_put = async (req, res) => {
       console.log({ updateCoachData_put_____updateObj: updateObj });
     }
 
-    const updatedCoachDoc = await updateCoach(filter, updateObj);
+    const updatedCoachDoc = await updateCoach(userTeamId, coachId, updateObj);
 
-    res.send(updatedCoachDoc);
+    res.status(200).json(updatedCoachDoc);
+  } catch (error) {
+    const errors = handleErrors(error);
+    res.status(400).json({ errors });
+  }
+};
+
+// delete coach
+export const deleteCoach_delete = async (req, res) => {
+  try {
+    const { headshotPublicId } = req.body;
+    const { teamId } = req.params;
+    const { coachId } = req.query;
+
+    await async_cloudinaryDeleteImg(headshotPublicId);
+
+    const coachesDoc = await deleteCoach(teamId, coachId);
+
+    res.status(200).json(coachesDoc);
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });

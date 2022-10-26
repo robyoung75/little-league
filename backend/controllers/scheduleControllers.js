@@ -3,6 +3,7 @@ import { handleErrors } from "../errors/errors.js";
 // helper functions
 import {
   createNewSchedule,
+  deleteScheduleDate,
   findAdminUserById,
   findTeamSchedule,
   updateScheduleDate,
@@ -18,13 +19,13 @@ export const authSchedule_post = async (req, res) => {
     }
 
     const { id } = req.userId;
-
     let schedule = req.body;
+    let teamUserId = req.userTeamId;
 
     // console.log("ID SCHEDULE CREATE", id);
 
     const authUser = await findAdminUserById(id);
-    const existingSchedule = await findTeamSchedule(authUser.teamId);
+    const existingSchedule = await findTeamSchedule(teamUserId);
 
     // console.log("AUTHUSER_SCEHDULE", authUser);
     schedule.teamId = authUser.teamId;
@@ -43,13 +44,7 @@ export const authSchedule_post = async (req, res) => {
       res.status(200).json(scheduleDoc);
     }
     if (existingSchedule && authUser) {
-      const filter = { teamId: schedule.teamId };
-      const update = {
-        $push: {
-          schedule: schedule,
-        },
-      };
-      const updatedSchedule = await updateTeamSchedule(filter, update);
+      const updatedSchedule = await updateTeamSchedule(teamUserId, schedule);
 
       res.status(200).json(updatedSchedule);
     }
@@ -68,7 +63,12 @@ export const schedule_get = async (req, res) => {
       throw req.error;
     }
 
-    const schedule = await findTeamSchedule(req.userTeamId);
+    // req.param middleware returns req.teamUserId
+    let teamUserId = req.userTeamId;
+
+    const schedule = await findTeamSchedule(teamUserId);
+
+    console.log({ teamUserId });
 
     res.status(200).json(schedule);
   } catch (error) {
@@ -85,17 +85,41 @@ export const updateSchedule_put = async (req, res) => {
       throw req.error;
     }
 
-    const { id } = req.userId;
     const { scheduleId } = req.query;
-
+    const teamUserId = req.userTeamId;
     let updateObj = req.body;
-    let filter = { id: id, "schedule._id": scheduleId };
 
-    let updatedScheduleDoc = await updateScheduleDate(filter, updateObj);
+    console.log({ teamUserId, scheduleId, updateObj });
+
+    let updatedScheduleDoc = await updateScheduleDate(
+      teamUserId,
+      scheduleId,
+      updateObj
+    );
 
     res.json(updatedScheduleDoc);
   } catch (error) {
     console.log({ scheduleUpdate_put: error });
+    const errors = handleErrors(error);
+    res.status(400).json(errors);
+  }
+};
+
+// DELETE SCHEDULE
+export const deleteScheduleDate_delete = async (req, res) => {
+  try {
+    if (req.error) {
+      console.log({ deleteScheduleDate_delete: error });
+      throw req.error;
+    }
+    const { scheduleId } = req.query;
+    const teamUserId = req.userTeamId;
+
+    let updatedScheduleDoc = await deleteScheduleDate(teamUserId, scheduleId);
+
+    res.status(200).json(updatedScheduleDoc);
+  } catch (error) {
+    console.log({ deleteScheduleDate_delete: error });
     const errors = handleErrors(error);
     res.status(400).json(errors);
   }

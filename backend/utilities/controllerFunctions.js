@@ -4,6 +4,7 @@ import TeamCoachesSchema from "../models/teamCoaches.js";
 import TeamSchema from "../models/team.js";
 import TeamsScheduleSchema from "../models/teamSchedule.js";
 import TeamUsersSchema from "../models/teamUsers.js";
+import TeamPostsSchema from "../models/teamPost.js";
 import team from "../models/team.js";
 import UserSchema from "../models/user.js";
 
@@ -340,11 +341,14 @@ export const findCoachesByTeamId = async (id) => {
 };
 
 // add a coach to the existing coach document
-export const checkForCoachesAndUpdate = async (filter, updateObj) => {
+export const checkForCoachesAndUpdate = async (userTeamId, updateObj) => {
   try {
+    console.log({
+      checkForCoachesAndUpdate: { req: { userTeamId, updateObj } },
+    });
     const updatedCoaches = await TeamCoachesSchema.findOneAndUpdate(
-      filter,
-      updateObj,
+      { teamId: userTeamId },
+      { $push: { coaches: updateObj } },
       { returnOriginal: false }
     );
     // i use save to cause my mongoose middleware to fire on a push to a sub document
@@ -357,11 +361,9 @@ export const checkForCoachesAndUpdate = async (filter, updateObj) => {
 };
 
 // update single coach data
-export const updateCoach = async (filter, updateObj) => {
+export const updateCoach = async (userTeamId, coachId, updateObj) => {
   try {
     let updateData = {};
-    let update;
-
     let updatedCoachesDoc;
     let coachEmail = updateObj.newEmail ? updateObj.newEmail : updateObj.email;
     updateData.email = coachEmail;
@@ -372,19 +374,17 @@ export const updateCoach = async (filter, updateObj) => {
       updateData.headshotPublicId = updateObj.headshotImg.publicId;
     }
 
-    update = {
-      $set: {
-        "coaches.$.headshotImg.secureURL":
-          updateData.headshotSecureURL && updateData.headshotSecureURL,
-        "coaches.$.headshotImg.publicId":
-          updateData.headshotPublicId && updateData.headshotPublicId,
-        "coaches.$.email": updateData.email && updateData.email,
-      },
-    };
-
     updatedCoachesDoc = await TeamCoachesSchema.findOneAndUpdate(
-      filter,
-      update,
+      { teamId: userTeamId, "coaches._id": coachId },
+      {
+        $set: {
+          "coaches.$.headshotImg.secureURL":
+            updateData.headshotSecureURL && updateData.headshotSecureURL,
+          "coaches.$.headshotImg.publicId":
+            updateData.headshotPublicId && updateData.headshotPublicId,
+          "coaches.$.email": updateData.email && updateData.email,
+        },
+      },
       {
         returnOriginal: false,
       }
@@ -395,6 +395,28 @@ export const updateCoach = async (filter, updateObj) => {
   } catch (error) {
     console.log({ updatedCoachesDoc: error });
     return { updatedCoachesDoc: error };
+  }
+};
+
+// delete a coach
+export const deleteCoach = async (teamId, coachId) => {
+  try {
+    const coachDoc = await TeamCoachesSchema.findOneAndUpdate(
+      { teamId: teamId },
+      {
+        $pull: {
+          coaches: {
+            _id: coachId,
+          },
+        },
+      },
+      { new: true }
+    );
+
+    return coachDoc;
+  } catch (error) {
+    console.log({ deleteCoach: error });
+    return { deleteCoach: error };
   }
 };
 
@@ -412,10 +434,10 @@ export const createNewSchedule = async (reqObj) => {
 };
 
 // check if existing teamSchedule exists
-export const findTeamSchedule = async (id) => {
+export const findTeamSchedule = async (teamUserId) => {
   try {
     const existingSchedule = await TeamsScheduleSchema.findOne({
-      teamId: id,
+      teamId: teamUserId,
     });
     return existingSchedule;
   } catch (error) {
@@ -425,11 +447,15 @@ export const findTeamSchedule = async (id) => {
 };
 
 // UPDATE SCHEDULE, ADD A SCHEDULE DATE TO AN EXISTING SCHEDULE DOCUMENT
-export const updateTeamSchedule = async (filter, updateObj) => {
+export const updateTeamSchedule = async (teamUserId, updateObj) => {
   try {
     const updatedSchedule = await TeamsScheduleSchema.findOneAndUpdate(
-      filter,
-      updateObj,
+      { teamId: teamUserId },
+      {
+        $push: {
+          schedule: updateObj,
+        },
+      },
       { returnOriginal: false }
     );
     await updatedSchedule.save();
@@ -441,7 +467,7 @@ export const updateTeamSchedule = async (filter, updateObj) => {
 };
 
 // UPDATE AN INDIVIDUAL SCHEDULED DATE IN SCHEDULE DOCUMENT
-export const updateScheduleDate = async (filter, updateObj) => {
+export const updateScheduleDate = async (teamUserId, scheduleId, updateObj) => {
   try {
     // console.log({ updateScheduleDate: filter, updateScheduleDate: updateObj });
 
@@ -488,7 +514,7 @@ export const updateScheduleDate = async (filter, updateObj) => {
     };
 
     const updatedScheduleDate = await TeamsScheduleSchema.findOneAndUpdate(
-      filter,
+      { teamId: teamUserId, "schedule._id": scheduleId },
       update,
       { returnOriginal: false }
     );
@@ -497,6 +523,29 @@ export const updateScheduleDate = async (filter, updateObj) => {
   } catch (error) {
     console.log({ updateScheduleDate: error });
     return { updateScheduleDate: error };
+  }
+};
+
+// delete schedule date
+export const deleteScheduleDate = async (teamId, scheduleId) => {
+  try {
+    console.log({ hello: "hello from deleteScheduleDate", teamId, scheduleId });
+    const scheduleDoc = await TeamsScheduleSchema.findOneAndUpdate(
+      { teamId: teamId },
+      {
+        $pull: {
+          schedule: {
+            _id: scheduleId,
+          },
+        },
+      },
+      { new: true }
+    );
+
+    return scheduleDoc;
+  } catch (error) {
+    console.log({ deleteCoach: error });
+    return { deleteCoach: error };
   }
 };
 
@@ -513,10 +562,10 @@ export const findUsersByTeamUserName = async (teamUserName) => {
 };
 
 // check if users already exist.
-export const findUsersById = async (id) => {
+export const findUsersById = async (teamId) => {
   try {
     const users = await TeamUsersSchema.findOne({
-      teamId: id,
+      teamId: teamId,
     });
     return users;
   } catch (error) {
@@ -537,18 +586,18 @@ export const createNewUser = async (reqObj) => {
 };
 
 // add to existing users
-export const addToExistingUsers = async (filter, updateObj) => {
+export const addToExistingUsers = async (teamId, userObj) => {
   try {
     const updatedUsers = await TeamUsersSchema.findOneAndUpdate(
-      filter,
-      updateObj,
+      { teamId: teamId, "users.email": { $ne: userObj.email } },
+      { $push: { users: userObj } },
       { returnOriginal: false }
     );
     await updatedUsers.save();
     return updatedUsers;
   } catch (error) {
-    console.log({ updateTeamSchedule: error.message });
-    return { updateTeamSchedule: error.message };
+    console.log({ addToExistingUsers: error.message });
+    return { addToExistingUsers: error.message };
   }
 };
 
@@ -573,4 +622,17 @@ export const deleteUser = async (teamId, userId) => {
     console.log({ deleteUser: error });
     return { deleteUser: error.message };
   }
+};
+
+// USER POST CONTROLLER FUNCTIONS
+
+// create a user post
+export const userCreatePost = async (updateObj) => {
+
+  console.log({userCreatePost: updateObj})
+
+  let postsDoc = await TeamPostsSchema.create(updateObj)
+
+  return postsDoc
+ 
 };

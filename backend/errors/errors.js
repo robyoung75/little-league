@@ -41,6 +41,7 @@ export const handleErrors = (err) => {
   ) {
     errors.adminUser = err.message;
   }
+  
 
   if (err.message.includes("A team with this id already exists")) {
     errors.adminTeamPost = err.message;

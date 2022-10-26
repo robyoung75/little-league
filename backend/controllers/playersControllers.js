@@ -38,7 +38,7 @@ const authPlayers_post = async (req, res) => {
     let imageUploadResult;
     let playerImages = [];
 
-    const { firstName, lastName, number, positions, battingStance } = req.body;
+    const { firstName, lastName, number, positions, battingStance, teamUserName } = req.body;
 
     let playerData = {
       firstName,
@@ -52,6 +52,7 @@ const authPlayers_post = async (req, res) => {
     // if files resize and push to playerImages array for upload to cloudinary
     if (req.files.headshotImg) {
       playerImages.push({
+        teamUserName,
         imageTitle: "headshot",
         firstName,
         lastName,
@@ -62,6 +63,7 @@ const authPlayers_post = async (req, res) => {
 
     if (req.files.offenseImg) {
       playerImages.push({
+        teamUserName,
         imageTitle: "offense",
         firstName,
         lastName,
@@ -72,6 +74,7 @@ const authPlayers_post = async (req, res) => {
 
     if (req.files.defenseImg) {
       playerImages.push({
+        teamUserName,
         imageTitle: "defense",
         firstName,
         lastName,
@@ -95,8 +98,7 @@ const authPlayers_post = async (req, res) => {
 
       // upload multiple images to cloudinary
       imageUploadResult = await async_cloudinaryStreamImgs(
-        playerImages,
-        adminUser,
+        playerImages,       
         imgTags
       );
 
@@ -337,15 +339,38 @@ const updatePlayerData_put = async (req, res) => {
   }
 };
 
+// delete a player
 const deletePlayer_delete = async (req, res) => {
-  console.log(req.params);
-  console.log(req.query);
+  try {
+    const { headshotPublicId, offensePublicId, defensePublicId } = req.body;
+    const { teamId } = req.params;
+    const { playerId } = req.query;
 
-  let { teamId } = req.params;
-  let { playerId } = req.query;
+    console.log({ headshotPublicId, offensePublicId, defensePublicId });
 
-  let deletedPlayer = await deletePlayer(teamId, playerId);
-  res.status(200).json(deletedPlayer);
+    let publicIdArray = [];
+
+    // delete cloudinary images
+    // delete images by public_id argument to delete multiple images is and array of public_id
+
+    headshotPublicId && publicIdArray.push(headshotPublicId);
+
+    offensePublicId && publicIdArray.push(offensePublicId);
+
+    defensePublicId && publicIdArray.push(defensePublicId);
+
+    // CLOUDINARY DELETE MULTIPLE IMAGES
+    if (publicIdArray !== []) {
+      console.log(publicIdArray);
+      await async_cloudinaryDeleteMultipleImages(publicIdArray);
+    }
+
+    const deletedPlayer = await deletePlayer(teamId, playerId);
+    res.status(200).json(deletedPlayer);
+  } catch (error) {
+    const errors = handleErrors(error);
+    res.status(400).json({ errors });
+  }
 };
 
 export {

@@ -24,11 +24,13 @@ import {
 import {
   authCoaches_post,
   coaches_get,
+  deleteCoach_delete,
   updateCoachData_put,
 } from "../controllers/coachesControllers.js";
 
 import {
   authSchedule_post,
+  deleteScheduleDate_delete,
   schedule_get,
   updateSchedule_put,
 } from "../controllers/scheduleControllers.js";
@@ -41,6 +43,8 @@ import {
   deleteUser_delete,
 } from "../controllers/userControllers.js";
 
+import { userCreatePost_post } from "../controllers/userPostControllers.js";
+
 import {
   requiresAuth,
   getTeamByTeamId,
@@ -50,6 +54,7 @@ import {
   multerUploadsTeam,
   multerUploadsMultiple,
   multerUploadsCoach,
+  multerUploadsPosts,
 } from "../middleware/multer.js";
 
 const router = Router();
@@ -61,7 +66,7 @@ router.param("playerId", getPlayerById);
 // ADMIN ROUTES
 router.post("/api/createAdminUser", requiresAuth, adminUser_post);
 router.get("/api/admin/adminUsers", requiresAuth, allAdminUsers_get);
-router.post("/api/admin/createUser", requiresAuth, authNewUser_post);
+router.post("/api/admin/createUser/:teamId", requiresAuth, authNewUser_post);
 router.get("/api/admin/users", requiresAuth, users_get);
 router.delete(
   "/api/admin/updateRemoveAdminUser/:userId/:email/:firstName/:lastName",
@@ -108,31 +113,54 @@ router.delete(
 
 // COACHES ROUTES
 router.post(
-  "/api/admin/coaches/createCoach",
+  "/api/admin/coaches/createCoach/:teamId",
   requiresAuth,
   multerUploadsCoach,
   authCoaches_post
 );
 router.get("/api/admin/coaches/:teamId", coaches_get);
 router.put(
-  "/api/admin/coaches/updateCoach",
+  "/api/admin/coaches/updateCoach/:teamId",
   requiresAuth,
   multerUploadsCoach,
   updateCoachData_put
 );
+router.delete(
+  "/api/admin/coaches/delete/:teamId",
+  requiresAuth,
+  deleteCoach_delete
+);
 
 // SCHEDULE ROUTES
-router.post("/api/admin/schedule", requiresAuth, authSchedule_post);
+router.post(
+  "/api/admin/createSchedule/:teamId",
+  requiresAuth,
+  authSchedule_post
+);
 router.get("/api/admin/schedule/:teamId", requiresAuth, schedule_get);
 router.put(
-  "/api/admin/schedule/updateSchedule",
+  "/api/admin/schedule/updateSchedule/:teamId",
   requiresAuth,
   updateSchedule_put
+);
+
+router.delete(
+  "/api/admin/schedule/delete/:teamId",
+  requiresAuth,
+  deleteScheduleDate_delete
 );
 
 // USER ROUTES
 
 router.post("/api/user/createUser", userCreateUser_post);
 router.delete("/api/users/delete/:teamId", requiresAuth, deleteUser_delete);
+
+// POSTS ROUTES
+router.post(
+  "/api/user/posts/:teamId",
+  requiresAuth,
+  multerUploadsPosts,
+  userCreatePost_post
+);
 
 export { router as authRoute };

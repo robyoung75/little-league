@@ -31,9 +31,13 @@ export const authNewUser_post = async (req, res) => {
     }
 
     const { id } = req.userId;
-
+    const teamId = req.userTeamId;
+    let { firstName, lastName, email, password } = req.body;
+    let user = { firstName, lastName, email, teamId };
     // check for auth admin user
     const authUser = await findAdminUserById(id);
+
+    user.password = await hashPassword(password);
 
     if (!authUser) {
       const error = new Error("You must be an admin user to post new user");
@@ -41,16 +45,11 @@ export const authNewUser_post = async (req, res) => {
     }
 
     // check for existing users
-    const existingUsers = await findUsersById(authUser.teamId);
-
-    let { firstName, lastName, email, password } = req.body;
-    const teamId = authUser.teamId;
-    let user = { firstName, lastName, email, teamId };
-    user.password = await hashPassword(password);
+    const existingUsers = await findUsersById(teamId);
 
     if (!existingUsers && authUser) {
       const newUserDoc = await createNewUser({
-        teamId: authUser.teamId,
+        teamId: teamId,
         teamUserName: authUser.teamUserName,
         teamName: authUser.teamName,
         users: user,
@@ -59,13 +58,7 @@ export const authNewUser_post = async (req, res) => {
     }
 
     if (existingUsers && authUser) {
-      const filter = { teamId, "users.email": { $ne: email } };
-      const update = {
-        $push: {
-          users: user,
-        },
-      };
-      const updatedUsersDoc = await addToExistingUsers(filter, update);
+      const updatedUsersDoc = await addToExistingUsers(teamId, user);
 
       if (!updatedUsersDoc) {
         throw new Error("A user with this email already exists");
@@ -90,16 +83,16 @@ export const userCreateUser_post = async (req, res) => {
     // check for existing users...
     const existingUsers = await findUsersByTeamUserName(teamUserName);
 
-    const teamId = existingTeam.teamId;
-    let user = { firstName, lastName, email, teamId };
-    user.password = await hashPassword(password);
-
     if (!existingTeam) {
       const error = new Error(
         "Authorization denied, no existing team found check credentials"
       );
       throw error;
     }
+
+    const teamId = existingTeam.teamId;
+    let user = { firstName, lastName, email, teamId };
+    user.password = await hashPassword(password);
 
     if (existingTeam && !existingUsers) {
       const newUserDoc = await createNewUser({
@@ -120,13 +113,7 @@ export const userCreateUser_post = async (req, res) => {
     if (existingTeam && existingUsers) {
       // let teamId = user.teamId;
 
-      const filter = { teamId: user.teamId, "users.email": { $ne: email } };
-      const update = {
-        $push: {
-          users: user,
-        },
-      };
-      const updatedUsersDoc = await addToExistingUsers(filter, update);
+      const updatedUsersDoc = await addToExistingUsers(teamId, user);
 
       if (!updatedUsersDoc) {
         throw new Error("A user with this email already exists");
