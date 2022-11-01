@@ -12,6 +12,7 @@ export const handleErrors = (err) => {
     adminUser: "",
     adminTeamPost: "",
     player: "",
+    posts: "",
   };
 
   // validation errors from UserSchema validators
@@ -79,6 +80,10 @@ export const handleErrors = (err) => {
     err.message.includes("You only have one admin user that cannot be deleted.")
   ) {
     errors.adminUser = err.message;
+  }
+
+  if (err.message.includes('No images are attached for upload, try again')) {
+    errors.posts = err.message
   }
 
  

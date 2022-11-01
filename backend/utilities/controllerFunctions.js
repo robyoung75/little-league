@@ -626,13 +626,73 @@ export const deleteUser = async (teamId, userId) => {
 
 // USER POST CONTROLLER FUNCTIONS
 
-// create a user post
+// assigns the correct secure url and public_id from imageUploadResult to update object for mongodb
+export const userPostCreateSecureURL = async (
+  postImgFileArr,
+  imageUploadResultArr
+) => {
+  let imgDataArr = [];
+
+  for (let i = 0; i < imageUploadResultArr.length; i++) {
+    for (let j = 0; j < postImgFileArr.length; j++) {
+      if (
+        imageUploadResultArr[i]["secure_url"].includes(
+          postImgFileArr[j]["imageTitle"]
+        )
+      ) {
+        imgDataArr.push({
+          secureURL: imageUploadResultArr[i]["secure_url"],
+          publicId: imageUploadResultArr[i]["public_id"],
+          originalName: postImgFileArr[j]["imageTitle"],
+        });
+      }
+    }
+  }
+
+  return imgDataArr;
+};
+
+// check if existing team posts exist
+export const getTeamPosts = async (teamId) => {
+  try {
+    const postsDoc = await TeamPostsSchema.findOne({
+      teamId: teamId,
+    });
+    console.log({ getTeamPosts: "hello" });
+    return postsDoc;
+  } catch (error) {
+    console.log({ getTeamPosts: error });
+    return { getTeamPosts: error };
+  }
+};
+
+// create a user post if no user posts exist
 export const userCreatePost = async (updateObj) => {
+  console.log({ userCreatePost: updateObj });
 
-  console.log({userCreatePost: updateObj})
+  try {
+    const postsDoc = await TeamPostsSchema.create(updateObj);
+    return postsDoc;
+  } catch (error) {
+    console.log({ userCreatePost: error });
+    return { userCreatePost: error.message };
+  }
+};
 
-  let postsDoc = await TeamPostsSchema.create(updateObj)
+// update posts, add a post to existing team posts
+export const userAddPost = async (teamId, updateObj) => {
+  console.log({ userAddPost: "hell fucking o...", updateObj });
 
-  return postsDoc
- 
+  try {
+    const updatedPosts = await TeamPostsSchema.findOneAndUpdate(
+      { teamId: teamId },
+      { $push: { posts: updateObj } },
+      { returnOriginal: false }
+    );
+    await updatedPosts.save();
+    return updatedPosts;
+  } catch (error) {
+    console.log({ userAddPost: error });
+    return { userAddPost: error };
+  }
 };
