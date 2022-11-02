@@ -26,10 +26,12 @@ const PostSchema = new Schema({
   post: {
     type: String,
   },
-  teamId: {
+
+  userId: {
     type: String,
-    required: true,
+    // required: true,
   },
+
   postImages: {
     type: Array,
   },

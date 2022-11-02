@@ -21,7 +21,7 @@ const CoachSchema = new Schema({
   },
   email: {
     type: String,
-    required: [true, "Please enter your email"],   
+    // required: [true, "Please enter your email"],   
     lowercase: true,
     validate: [isEmail, "Please enter a valid email"],
   },
@@ -30,7 +30,7 @@ const CoachSchema = new Schema({
   },
   teamId: {
       type: String,
-      required: [true, "Team id is required"]
+      // required: [true, "Team id is required"]
   },
   date: {
     type: Date,

@@ -5,45 +5,45 @@ const Schema = mongoose.Schema;
 const ScheduleSchema = new Schema({
   teamName: {
     type: String,
-    required: [true, "Admin user must be signed in and provide the teamName"],
+    // required: [true, "Admin user must be signed in and provide the teamName"],
   },
   teamUserName: {
     type: String,
-    required: [
-      true,
-      "Admin user must be signed in and provide the teamUserName",
-    ],
+    // required: [
+    //   true,
+    //   "Admin user must be signed in and provide the teamUserName",
+    // ],
   },
   teamId: {
     type: String,
-    required: [true, "Admin user must be signed in and provide the teamId"],
+    // required: [true, "Admin user must be signed in and provide the teamId"],
   },
   opponent: {
     type: String,
     lowercase: true,
-    required: [
-      true,
-      "Please enter an opponent with a minimum of two characters",
-    ],
+    // required: [
+    //   true,
+    //   "Please enter an opponent with a minimum of two characters",
+    // ],
   },
   date: {
     type: String,
-    required: [true, "Please enter a valid date"],
+    // required: [true, "Please enter a valid date"],
   },
   gameTime: {
     type: String,
-    required: [true, "Please enter a valid game time"],
+    // required: [true, "Please enter a valid game time"],
   },
   arrivalTime: {
     type: String,
-    required: [true, "Please enter a valid arrival time"],
+    // required: [true, "Please enter a valid arrival time"],
   },
   address: {
     type: String,
   },
   city: {
     type: String,
-    required: [true, "Please enter a valid City"],
+    // required: [true, "Please enter a valid City"],
   },
   state: {
     type: String,

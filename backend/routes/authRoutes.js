@@ -1,11 +1,12 @@
 import Router, { application } from "express";
 
 import {
-  adminUser_post,
-  allAdminUsers_get,
-  adminUserUpdateRemoveUser_delete,
+  createAdminUser_post,
+  getAllAdminUsers_get,
+  deleteAdminUser_delete,
   signInAdminUser_post,
   signOutUser_get,
+  updateAdminUsers_put,
 } from "../controllers/authControllers.js";
 
 import {
@@ -43,12 +44,17 @@ import {
   deleteUser_delete,
 } from "../controllers/userControllers.js";
 
-import { userCreatePost_post } from "../controllers/userPostControllers.js";
+import {
+  deletePost_delete,
+  teamPosts_get,
+  userCreatePost_post,
+} from "../controllers/userPostControllers.js";
 
 import {
   requiresAuth,
   getTeamByTeamId,
   getPlayerById,
+  getPostById,
 } from "../middleware/authMiddleware.js";
 import {
   multerUploadsTeam,
@@ -62,17 +68,26 @@ const router = Router();
 //  PARAM MIDDLEWARE WILL RUN ANY TIME THE PARAMETER IS TEAMID and set req.userTeamId to the teamId parameter
 router.param("teamId", getTeamByTeamId);
 router.param("playerId", getPlayerById);
+router.param("postId", getPostById);
 
 // ADMIN ROUTES
-router.post("/api/createAdminUser", requiresAuth, adminUser_post);
-router.get("/api/admin/adminUsers", requiresAuth, allAdminUsers_get);
+router.post("/api/createAdminUser", createAdminUser_post);
+router.get("/api/admin/adminUsers/:teamId", requiresAuth, getAllAdminUsers_get);
+router.put(
+  "/api/admin/updateAdminUsers/:teamId",
+  requiresAuth,
+  updateAdminUsers_put
+);
+router.delete(
+  "/api/admin/updateRemoveAdminUser/:teamId",
+  requiresAuth,
+  deleteAdminUser_delete
+);
+
+// admin routes for admin to work with user accounts
 router.post("/api/admin/createUser/:teamId", requiresAuth, authNewUser_post);
 router.get("/api/admin/users", requiresAuth, users_get);
-router.delete(
-  "/api/admin/updateRemoveAdminUser/:userId/:email/:firstName/:lastName",
-  requiresAuth,
-  adminUserUpdateRemoveUser_delete
-);
+
 // router.delete("/api/admin/users/deleteUser/:teamId", requiresAuth, deleteUser_delete);
 
 // ADMIN USER AND USER SIGN IN SIGNOUT ROUTES
@@ -161,6 +176,14 @@ router.post(
   requiresAuth,
   multerUploadsPosts,
   userCreatePost_post
+);
+
+router.get("/api/user/posts/:teamId", requiresAuth, teamPosts_get);
+
+router.delete(
+  "/api/user/posts/delete/:teamId",
+  requiresAuth,
+  deletePost_delete
 );
 
 export { router as authRoute };

@@ -20,12 +20,12 @@ const TeamSchema = new Schema({
   primaryColor: {
     type: String,
     minlength: 7,
-    required: [true, "Please select a primary color"],
+    // required: [true, "Please select a primary color"],
   },
   secondaryColor: {
     type: String,
     minlength: 7,
-    required: [true, "Please select a secondary color"],
+    // required: [true, "Please select a secondary color"],
   },
   teamId: {
     type: String,

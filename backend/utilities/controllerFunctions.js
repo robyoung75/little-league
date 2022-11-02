@@ -34,6 +34,34 @@ export const createNewAdminUser = async (reqObj) => {
   }
 };
 
+// configure database
+export const configureDatabase = async (reqObj) => {
+  try {
+    const teamDoc = await createNewTeam(reqObj);
+    const coachDoc = await createNewCoach(reqObj);
+    const playerDoc = await createNewPlayer(reqObj);
+    const scheduleDoc = await createNewSchedule(reqObj);
+    const postDoc = await userCreatePost(reqObj);
+    const userDoc = await createNewUser(reqObj);
+
+    if (
+      !teamDoc ||
+      !coachDoc ||
+      !playerDoc ||
+      !scheduleDoc ||
+      !postDoc ||
+      !userDoc
+    ) {
+      throw new Error("eat shit from configure database");
+    }
+    console.log("successful db configuration");
+    return "successful db configuration";
+  } catch (error) {
+    console.log({ configureDatabase: error });
+    return error;
+  }
+};
+
 // find admin users by team name
 export const findAdminUsersByTeamId = async (id) => {
   try {
@@ -57,19 +85,19 @@ export const findAdminUserById = async (id) => {
 };
 
 // if admin is < 2 in length add another admin user
-export const createSecondAdminUser = async (filter, updateObj) => {
+export const updateAdminUsers = async (teamId, updateObj) => {
   try {
     const secondAdmin = await TeamAdminSchema.findOneAndUpdate(
-      filter,
-      updateObj,
+      { teamId: teamId, "admin.email": { $ne: updateObj.email } },
+      { $push: { admin: updateObj } },
       { returnOriginal: false }
     );
     // saving after the push update to the sub document saves the doc thus calling mongoose middleware
-    await secondAdmin.save();
+    // await secondAdmin.save();
     return secondAdmin;
   } catch (error) {
-    console.log({ createSecondAdminUser: error });
-    return { createSecondAdminUser: error };
+    console.log({ updateAdminUsers: error });
+    return { updateAdminUsers: error };
   }
 };
 
@@ -104,16 +132,14 @@ export const setAdminUserTeamId = async (id) => {
 };
 
 // delete and existing admin user
-export const removeAdminUser = async (updateObj) => {
+export const deleteAdminUser = async (teamId, adminId) => {
   try {
     const adminUserDoc = await TeamAdminSchema.findOneAndUpdate(
-      { _id: updateObj.userId },
+      { teamId: teamId },
       {
         $pull: {
           admin: {
-            firstName: updateObj.firstName,
-            lastName: updateObj.lastName,
-            email: updateObj.email,
+            _id: adminId,
           },
         },
       },
@@ -124,8 +150,8 @@ export const removeAdminUser = async (updateObj) => {
 
     return adminUserDoc;
   } catch (error) {
-    console.log({ removeAdminUser: error });
-    return { removeAdminUser: error };
+    console.log({ deleteAdminUser: error });
+    return { deleteAdminUser: error };
   }
 };
 
@@ -187,7 +213,13 @@ export const updateTeamColors = async (filter, updateObj) => {
 // create a new player
 export const createNewPlayer = async (reqObj) => {
   try {
-    const newPlayer = await TeamPlayersSchema.create(reqObj);
+    let update = {
+      teamId: reqObj.teamId,
+      teamUserName: reqObj.teamUserName,
+      teamName: reqObj.teamName,
+      players: [],
+    };
+    const newPlayer = await TeamPlayersSchema.create(update);
     return newPlayer;
   } catch (error) {
     console.log({ createNewPlayer: error });
@@ -319,7 +351,13 @@ export const deletePlayer = async (teamId, playerId) => {
 // create a new coach document
 export const createNewCoach = async (reqObj) => {
   try {
-    const newCoach = await TeamCoachesSchema.create(reqObj);
+    let update = {
+      teamId: reqObj.teamId,
+      teamUserName: reqObj.teamUserName,
+      teamName: reqObj.teamName,
+      coaches: [],
+    };
+    const newCoach = await TeamCoachesSchema.create(update);
     return newCoach;
   } catch (error) {
     console.log({ createNewCoach: error });
@@ -425,7 +463,13 @@ export const deleteCoach = async (teamId, coachId) => {
 // create new schedule
 export const createNewSchedule = async (reqObj) => {
   try {
-    const newGame = await TeamsScheduleSchema.create(reqObj);
+    let update = {
+      teamId: reqObj.teamId,
+      teamUserName: reqObj.teamUserName,
+      teamName: reqObj.teamName,
+      schedule: [],
+    };
+    const newGame = await TeamsScheduleSchema.create(update);
     return newGame;
   } catch (error) {
     console.log({ createNewSchedule: error });
@@ -577,7 +621,13 @@ export const findUsersById = async (teamId) => {
 // create new user
 export const createNewUser = async (reqObj) => {
   try {
-    const newUser = await TeamUsersSchema.create(reqObj);
+    let update = {
+      teamId: reqObj.teamId,
+      teamUserName: reqObj.teamUserName,
+      teamName: reqObj.teamName,
+      users: [],
+    };
+    const newUser = await TeamUsersSchema.create(update);
     return newUser;
   } catch (error) {
     console.log({ createNewUser: error });
@@ -652,7 +702,7 @@ export const userPostCreateSecureURL = async (
   return imgDataArr;
 };
 
-// check if existing team posts exist
+// Read posts if they exist
 export const getTeamPosts = async (teamId) => {
   try {
     const postsDoc = await TeamPostsSchema.findOne({
@@ -671,7 +721,13 @@ export const userCreatePost = async (updateObj) => {
   console.log({ userCreatePost: updateObj });
 
   try {
-    const postsDoc = await TeamPostsSchema.create(updateObj);
+    let update = {
+      teamId: updateObj.teamId,
+      teamUserName: updateObj.teamUserName,
+      teamName: updateObj.teamName,
+      posts: [],
+    };
+    const postsDoc = await TeamPostsSchema.create(update);
     return postsDoc;
   } catch (error) {
     console.log({ userCreatePost: error });
@@ -681,8 +737,6 @@ export const userCreatePost = async (updateObj) => {
 
 // update posts, add a post to existing team posts
 export const userAddPost = async (teamId, updateObj) => {
-  console.log({ userAddPost: "hell fucking o...", updateObj });
-
   try {
     const updatedPosts = await TeamPostsSchema.findOneAndUpdate(
       { teamId: teamId },
@@ -694,5 +748,28 @@ export const userAddPost = async (teamId, updateObj) => {
   } catch (error) {
     console.log({ userAddPost: error });
     return { userAddPost: error };
+  }
+};
+
+// delete post
+export const deletePost = async (userId, teamId, postId) => {
+  try {
+    const postDoc = await TeamPostsSchema.findOneAndUpdate(
+      // { teamId: teamId },
+      { teamId: teamId, "posts.userId": { $eq: userId } },
+      {
+        $pull: {
+          posts: {
+            _id: postId,
+          },
+        },
+      },
+      { new: true }
+    );
+
+    return postDoc;
+  } catch (error) {
+    console.log({ deletePost: error });
+    return { deletePost: error.message };
   }
 };

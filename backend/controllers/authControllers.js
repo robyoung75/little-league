@@ -8,10 +8,12 @@ import { hashPassword } from "../utilities/bcrypt.js";
 import {
   createNewAdminUser,
   findAdminUserById,
-  createSecondAdminUser,
   setAdminUserTeamId,
   setTeamId,
-  removeAdminUser,
+  deleteAdminUser,
+  createNewPlayer,
+  configureDatabase,
+  updateAdminUsers,
 } from "../utilities/controllerFunctions.js";
 
 // import errors functions from errors/errors.js
@@ -21,80 +23,58 @@ import { handleErrors } from "../errors/errors.js";
 import { createJwtToken, maxAge } from "./createJWT.js";
 
 // CREATE ADMIN USER
-const adminUser_post = async (req, res) => {
-  req.body.teamId = "teamId not set";
-
-  // req.body destructured
-  let { firstName, lastName, email, teamName, teamUserName, password, teamId } =
-    req.body;
-  // hash the password
-  let hashedPassword = await hashPassword(password);
-
-  // adminUser object for upload to mongodb
-  let adminUser = {
-    firstName,
-    lastName,
-    email,
-    password: hashedPassword,
-    teamName,
-    teamUserName,
-    teamId,
-  };
-
+const createAdminUser_post = async (req, res) => {
   try {
-    // if one admin user already exists add the second admin user
-    if (req.userId) {
-      const { id } = req.userId;
-      const existingAdmin = await findAdminUserById(id);
-      adminUser.teamId = existingAdmin.teamId;
+    req.body.teamId = "teamId not set";
 
-      // if there are are less than two admin users create the second admin user
-      if (existingAdmin.admin.length < 2) {
-        let { teamId, email } = adminUser;
-        const filter = { teamId, "admin.email": { $ne: email } };
-        const update = {
-          $push: {
-            admin: adminUser,
-          },
-        };
-        const secondAdmin = await createSecondAdminUser(filter, update);
+    // req.body destructured
+    let {
+      firstName,
+      lastName,
+      email,
+      teamName,
+      teamUserName,
+      password,
+      teamId,
+    } = req.body;
+    // hash the password
+    let hashedPassword = await hashPassword(password);
 
-        if (!secondAdmin) {
-          throw new Error("A user with this email already exists");
-        }
-        res.status(200).json(secondAdmin);
-      }
+    // adminUser object for upload to mongodb
+    let adminUser = {
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      teamName,
+      teamUserName,
+      teamId,
+    };
 
-      // if existing admin already has two users throw an error as only two admins are allowed
-      if (existingAdmin.admin.length >= 2) {
-        throw Error(
-          `you have exceeded the maximum allowed of two admin users. ${existingAdmin.admin.map(
-            (user, index) => {
-              return ` user ${index + 1}: ${user.firstName} ${user.lastName} ${
-                user.teamName
-              }`;
-            }
-          )}`
-        );
-      }
-    }
-    // create a brand new admin user who will build the team data
-    if (!req.userId) {
-      const teamAdmin = { teamName, teamUserName, teamId, admin: adminUser };
+    // obj used to create new admin user document in mongodb
+    const teamAdmin = { teamName, teamUserName, teamId, admin: adminUser };
 
-      const newAdmin = await createNewAdminUser(teamAdmin);
-      let updatedTeamId = await setTeamId(newAdmin._id);
+    const newAdmin = await createNewAdminUser(teamAdmin);
+    // update new adminuser doc to include the team id. team id is the same as the document object
+    const updatedTeamId = await setTeamId(newAdmin._id);
+    // updated admin user doc including the team id
+    // const updatedAdmin = await setAdminUserTeamId(newAdmin._id);
+    console.log(updatedTeamId._id);
+    // configures the db documents: coaches, players, posts, schedules, teams, users
+    const userDbConfig = await configureDatabase({
+      teamId: updatedTeamId._id,
+      teamUserName,
+      teamName,
+    });
 
-      let updatedAdmin = await setAdminUserTeamId(newAdmin._id);
+    // JWT AUTHENTICATION
+    if (updatedTeamId && userDbConfig) {
+      // create a jwt token
+      const token = createJwtToken(newAdmin._id);
 
-      if (updatedAdmin) {
-        // create a jwt token
-        const token = createJwtToken(newAdmin._id);
-
-        // send token as a cookie
-        res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
-        res.status(200).json(updatedAdmin);
-      }
+      // send token as a cookie
+      res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
+      res.status(200).json(updatedTeamId);
     }
   } catch (error) {
     const errors = handleErrors(error);
@@ -105,26 +85,80 @@ const adminUser_post = async (req, res) => {
 // READ ADMIN USERS
 // there are only two admin users allowed.
 
-const allAdminUsers_get = async (req, res) => {
+const getAllAdminUsers_get = async (req, res) => {
   try {
     if (req.error) {
-      console.log({ allAdminUsers_get: req.error.message });
+      console.log({ getAllAdminUsers_get: req.error.message });
       throw req.error;
     }
 
     const { id } = req.userId;
 
-    const adminUsers = await findAdminUserById(id);
+    const adminUsersDoc = await findAdminUserById(id);
 
-    res.status(200).json(adminUsers);
+    res.status(200).json(adminUsersDoc);
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });
   }
 };
 
-// UPDATE ARRAY OF ADMIN USERS, DELETE ONE USER
-const adminUserUpdateRemoveUser_delete = async (req, res) => {
+// UPDATE ADMIN + ADD SECOND ADMIN
+const updateAdminUsers_put = async (req, res) => {
+  try {
+    if (req.error) {
+      throw req.error;
+    }
+
+    // returned from auth middleware
+    const { id } = req.userId;
+
+    // returned from params middleware
+    const teamId = req.userTeamId;
+
+    // req.body destructured
+    const { firstName, lastName, email, teamName, teamUserName, password } =
+      req.body;
+
+    const existingAdmin = await findAdminUserById(id);
+    // check the length of existin admin, only two users allowed
+    if (existingAdmin.admin.length >= 2) {
+      throw Error(
+        `you have exceeded the maximum allowed of two admin users. ${existingAdmin.admin.map(
+          (user, index) => {
+            return ` user ${index + 1}: ${user.firstName} ${user.lastName} ${
+              user.teamName
+            } please delete one admin user`;
+          }
+        )}`
+      );
+    }
+
+    // hash the password
+    const hashedPassword = await hashPassword(password);
+
+    // adminUser object for upload to mongodb
+    const adminUser = {
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      teamName,
+      teamUserName,
+      teamId,
+    };
+
+    const adminUserDoc = await updateAdminUsers(teamId, adminUser);
+
+    res.status(200).json(adminUserDoc);
+  } catch (error) {
+    const errors = handleErrors(error);
+    res.status(400).json({ errors });
+  }
+};
+
+// DELETE ONE ADMIN USER
+const deleteAdminUser_delete = async (req, res) => {
   try {
     if (req.error) {
       console.log({ allAdminUsers_get: req.error.message });
@@ -133,7 +167,11 @@ const adminUserUpdateRemoveUser_delete = async (req, res) => {
     // console.log({ adminUserUpdateRemoveUser_delete: req.params });
 
     const { id } = req.userId;
-    const { userId, email, firstName, lastName } = req.params;
+    const { userId } = req.query;
+
+    const teamId = req.userTeamId;
+
+    console.log({ id, userId, teamId });
 
     const adminUsers = await findAdminUserById(id);
 
@@ -149,12 +187,8 @@ const adminUserUpdateRemoveUser_delete = async (req, res) => {
       );
     }
 
-    const updatedAdminUsers = await removeAdminUser({
-      userId,
-      email,
-      firstName,
-      lastName,
-    });
+    const updatedAdminUsers = await deleteAdminUser(teamId, userId);
+
     res.status(200).json(updatedAdminUsers);
   } catch (error) {
     console.log(error);
@@ -196,9 +230,10 @@ const signOutUser_get = async (req, res) => {
 };
 
 export {
-  adminUser_post,
-  allAdminUsers_get,
-  adminUserUpdateRemoveUser_delete,
+  createAdminUser_post,
+  updateAdminUsers_put,
+  getAllAdminUsers_get,
+  deleteAdminUser_delete,
   signInAdminUser_post,
   signOutUser_get,
 };

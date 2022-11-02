@@ -8,35 +8,35 @@ const Schema = mongoose.Schema;
 const UserSchema = new Schema({
   firstName: {
     type: String,
-    required: [true, "Please enter your first name"],
+    // required: [true, "Please enter your first name"],
     lowercase: true,
     maxlength: 20,
     minlength: 2,
   },
   lastName: {
     type: String,
-    required: [true, "Please enter your last name"],
+    // required: [true, "Please enter your last name"],
     lowercase: true,
     maxlength: 20,
     minlength: 2,
   },
   email: {
     type: String,
-    required: [true, "Please enter your email"],
+    // required: [true, "Please enter your email"],
     lowercase: true,
     validate: [isEmail, "Please enter a valid email"],
   },
 
   password: {
     type: String,
-    required: [true, `Please enter your password`],
+    // required: [true, `Please enter your password`],
     maxlength: 1024,
     minlength: [6, `Minimum password length 6 characters`],
   },
 
   teamId: {
     type: String,
-    required: [true, "You do not have an account administrator"],
+    // required: [true, "You do not have an account administrator"],
   },
 
   date: {

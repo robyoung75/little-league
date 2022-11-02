@@ -24,9 +24,7 @@ const TeamCoachesSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-  ass: {
-    type: String
-  }
+
 });
 
 

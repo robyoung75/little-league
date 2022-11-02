@@ -29,4 +29,10 @@ const getPlayerById = (req, res, next, playerId) => {
   next();
 };
 
-export { requiresAuth, getTeamByTeamId, getPlayerById };
+// params middleware to find post id
+const getPostById = (req, res, next, postId) => {
+  req.userPostId = postId;
+  next();
+};
+
+export { requiresAuth, getTeamByTeamId, getPlayerById, getPostById };

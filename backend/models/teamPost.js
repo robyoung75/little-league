@@ -6,21 +6,21 @@ const Schema = mongoose.Schema;
 const TeamPostsSchema = new Schema({
   teamId: {
     type: String,
-    // required: [true, "You do not have an account administrator"],
+    required: [true, "You do not have an account administrator"],
   },
 
   teamUserName: {
     type: String,
     lowercase: true,
     minlength: 6,
-    // required: [true, "Please login as an authorized admin user"],
+    required: [true, "Please login as an authorized admin user"],
   },
 
   teamName: {
     type: String,
     lowercase: true,
     minlength: 3,
-    // required: [true, "Please enter a team name"],
+    required: [true, "Please enter a team name"],
   },
 
   posts: [PostSchema],

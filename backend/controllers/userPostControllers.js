@@ -1,7 +1,11 @@
 // USER POSTS
 import { handleErrors } from "../errors/errors.js";
-import { async_cloudinaryStreamImgs } from "../utilities/cloudinaryFuctions.js";
 import {
+  async_cloudinaryDeleteMultipleImages,
+  async_cloudinaryStreamImgs,
+} from "../utilities/cloudinaryFuctions.js";
+import {
+  deletePost,
   getTeamPosts,
   userAddPost,
   userCreatePost,
@@ -27,6 +31,7 @@ export const userCreatePost_post = async (req, res) => {
     }
 
     const { id } = req.userId;
+    console.log("id.......................................", id);
     const teamUserId = req.userTeamId;
     console.log({ id: id, teamUserId: teamUserId });
 
@@ -55,7 +60,7 @@ export const userCreatePost_post = async (req, res) => {
       firstName,
       lastName,
       number,
-      teamId: teamUserId,
+      userId: id,
       post,
       postImages,
     };
@@ -123,7 +128,62 @@ export const userCreatePost_post = async (req, res) => {
 };
 
 // READ POST
+export const teamPosts_get = async (req, res) => {
+  try {
+    if (req.error) {
+      console.log({ teamPosts_get: req.error });
+      throw req.error;
+    }
+
+    const teamPosts = await getTeamPosts(req.userTeamId);
+
+    if (!teamPosts) {
+      throw new Error(
+        "No team posts were found please sign in or confirm that a team exists"
+      );
+    }
+    res.status(200).send(teamPosts);
+  } catch (error) {
+    const errors = handleErrors(error);
+    res.status(400).json({ errors });
+  }
+};
 
 // UPDATE POST
 
 // DELETE POST
+export const deletePost_delete = async (req, res) => {
+  try {
+    if (req.error) {
+      console.log({ deletePost_delete: req.error });
+      throw req.error;
+    }
+
+    // img_1...all will be a public id for the cloudinary image
+    const { img_1, img_2, img_3, img_4, img_5 } = req.body;
+
+    const teamId = req.userTeamId;
+    const postId = req.query.postId;
+    const { id } = req.userId;
+
+    let publicIdArr = [];
+
+    // delete cloudinary images by public id
+    img_1 && publicIdArr.push(img_1);
+    img_2 && publicIdArr.push(img_2);
+    img_3 && publicIdArr.push(img_3);
+    img_4 && publicIdArr.push(img_4);
+    img_5 && publicIdArr.push(img_4);
+
+    if (publicIdArr !== []) {
+      await async_cloudinaryDeleteMultipleImages(publicIdArr);
+    }
+
+    const postsDoc = await deletePost(id, teamId, postId);
+
+    res.status(200).send(postsDoc);
+  } catch (error) {
+    const errors = handleErrors(error);
+    res.status(400).json({ errors });
+  }
+};

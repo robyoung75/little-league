@@ -40,7 +40,7 @@ const PlayerSchema = new Schema({
   },
   teamId: {
     type: String,
-    required: true,
+    // required: true,
   },
   headshotImg: {
     type: Object,

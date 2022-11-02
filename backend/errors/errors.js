@@ -42,7 +42,6 @@ export const handleErrors = (err) => {
   ) {
     errors.adminUser = err.message;
   }
-  
 
   if (err.message.includes("A team with this id already exists")) {
     errors.adminTeamPost = err.message;
@@ -82,11 +81,13 @@ export const handleErrors = (err) => {
     errors.adminUser = err.message;
   }
 
-  if (err.message.includes('No images are attached for upload, try again')) {
-    errors.posts = err.message
+  if (err.message.includes("No images are attached for upload, try again")) {
+    errors.posts = err.message;
   }
 
- 
+  if (err.message.includes("No team posts were found")) {
+    errors.posts = err.message;
+  }
 
   console.log({ errors: errors });
 
