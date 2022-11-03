@@ -8,7 +8,7 @@ import {
 } from "../utilities/cloudinaryFuctions.js";
 import { sharpImgResize } from "../utilities/sharpFunctions.js";
 import {
-  findAdminUserById,
+  getAdminUsersById,
   findPlayersByTeamId,
   checkForPlayersAndUpdate,
   createNewPlayer,
@@ -30,7 +30,7 @@ const authPlayers_post = async (req, res) => {
 
     // req.userId returns from auth middleware
     const { id } = req.userId;
-    const adminUser = await findAdminUserById(id);
+    const adminUser = await getAdminUsersById(id);
     const authUserPlayers = await findPlayersByTeamId(adminUser.teamId);
 
     // image variables

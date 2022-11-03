@@ -17,7 +17,7 @@ import {
 } from "../controllers/playersControllers.js";
 
 import {
-  authTeam_post,
+  createTeam_post,
   team_get,
   teamUdpdate_put,
 } from "../controllers/teamControllers.js";
@@ -96,10 +96,10 @@ router.post("/api/user/signin", signInUser_post);
 router.get("/api/signout", signOutUser_get);
 
 // TEAM ROUTES
-router.post("/api/admin/team", requiresAuth, multerUploadsTeam, authTeam_post);
+router.post("/api/admin/team", requiresAuth, multerUploadsTeam, createTeam_post);
 router.get("/api/admin/team/:teamId", requiresAuth, team_get);
 router.put(
-  "/api/admin/team/updateImage/:teamId",
+  "/api/admin/team/updateImage/:team",
   requiresAuth,
   multerUploadsTeam,
   teamUdpdate_put

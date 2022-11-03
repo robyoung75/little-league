@@ -15,7 +15,7 @@ import { createJwtToken, maxAge } from "./createJWT.js";
 import {
   findTeamByTeamUserName,
   findUsersByTeamUserName,
-  findAdminUserById,
+  getAdminUsersById,
   findUsersById,
   createNewUser,
   addToExistingUsers,
@@ -35,7 +35,7 @@ export const authNewUser_post = async (req, res) => {
     let { firstName, lastName, email, password } = req.body;
     let user = { firstName, lastName, email, teamId };
     // check for auth admin user
-    const authUser = await findAdminUserById(id);
+    const authUser = await getAdminUsersById(id);
 
     user.password = await hashPassword(password);
 

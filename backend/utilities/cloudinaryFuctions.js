@@ -52,10 +52,7 @@ const createCloudinaryStream = (
   });
 };
 
-const createCloudinaryStreamMultiple = (
-  imgFileBufferArray,
-  imgTagsArray
-) => {
+const createCloudinaryStreamMultiple = (imgFileBufferArray, imgTagsArray) => {
   // the last item in the tags array with be the file folder location name in cloudinary
   let fileFolderName = imgTagsArray[imgTagsArray.length - 1];
 

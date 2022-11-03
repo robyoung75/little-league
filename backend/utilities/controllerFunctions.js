@@ -7,8 +7,21 @@ import TeamUsersSchema from "../models/teamUsers.js";
 import TeamPostsSchema from "../models/teamPost.js";
 import team from "../models/team.js";
 import UserSchema from "../models/user.js";
+import { sharpImgResize } from "./sharpFunctions.js";
+import { async_cloudinaryStreamImg } from "./cloudinaryFuctions.js";
 
 // MONGO DB ADMIN USER FUNCTIONS
+
+// create a new admin user
+export const createNewAdminUser = async (reqObj) => {
+  try {
+    const newAdminUser = await TeamAdminSchema.create(reqObj);
+    return newAdminUser;
+  } catch (error) {
+    console.log({ createNewAdminUser: error });
+    return { createNewAdminUser: error };
+  }
+};
 
 // find a team by teamUserName
 export const findTeamByTeamUserName = async (teamUserName) => {
@@ -20,17 +33,6 @@ export const findTeamByTeamUserName = async (teamUserName) => {
   } catch (error) {
     console.log({ findTeamByTeamUserName: error });
     return { findTeamByTeamUserName: error };
-  }
-};
-
-// create a new admin user
-export const createNewAdminUser = async (reqObj) => {
-  try {
-    const newAdminUser = await TeamAdminSchema.create(reqObj);
-    return newAdminUser;
-  } catch (error) {
-    console.log({ createNewAdminUser: error });
-    return { createNewAdminUser: error };
   }
 };
 
@@ -62,19 +64,19 @@ export const configureDatabase = async (reqObj) => {
   }
 };
 
-// find admin users by team name
-export const findAdminUsersByTeamId = async (id) => {
-  try {
-    let users = await TeamAdminSchema.find({ teamId: id });
-    return users;
-  } catch (error) {
-    console.log({ findAdminUsersByTeamUserName: error });
-    return { findAdminUsersByTeamUserName: error };
-  }
-};
+// // find admin users by team name
+// export const findAdminUsersByTeamId = async (id) => {
+//   try {
+//     let users = await TeamAdminSchema.find({ teamId: id });
+//     return users;
+//   } catch (error) {
+//     console.log({ findAdminUsersByTeamUserName: error });
+//     return { findAdminUsersByTeamUserName: error };
+//   }
+// };
 
 // find admin user by id
-export const findAdminUserById = async (id) => {
+export const getAdminUsersById = async (id) => {
   try {
     const user = await TeamAdminSchema.findById(id);
     return user;
@@ -116,20 +118,20 @@ export const setTeamId = async (id) => {
   }
 };
 
-export const setAdminUserTeamId = async (id) => {
-  try {
-    let authUser = TeamAdminSchema.findOneAndUpdate(
-      { id, "admin.teamId": "teamId not set" },
-      { $set: { "admin.$.teamId": id } },
-      { new: true }
-    );
+// export const setAdminUserTeamId = async (id) => {
+//   try {
+//     let authUser = TeamAdminSchema.findOneAndUpdate(
+//       { id, "admin.teamId": "teamId not set" },
+//       { $set: { "admin.$.teamId": id } },
+//       { new: true }
+//     );
 
-    return authUser;
-  } catch (error) {
-    console.log({ setAdminUserTeamId: error });
-    return { setAdminUserTeamId: error };
-  }
-};
+//     return authUser;
+//   } catch (error) {
+//     console.log({ setAdminUserTeamId: error });
+//     return { setAdminUserTeamId: error };
+//   }
+// };
 
 // delete and existing admin user
 export const deleteAdminUser = async (teamId, adminId) => {
@@ -168,26 +170,26 @@ export const createNewTeam = async (reqObj) => {
   }
 };
 
-// check if team already exists
-export const findTeamById = async (id) => {
-  console.log("findTeamById>>>>>>>>>>>>>>>>>>>>>>", id);
-
-  try {
-    const existingTeam = await TeamSchema.findOne({ teamId: id });
-    console.log("findTeamById_existingTeam", existingTeam);
-    return existingTeam;
-  } catch (error) {
-    console.log({ findTeamById: error });
-    return { findTeamById: error };
-  }
-};
-
 // update teamLogo
-export const updateTeamLogo = async (filter, updateObj) => {
+export const updateTeamLogo = async (teamId, updateObj) => {
+  console.log(updateObj);
   try {
-    const updatedLogo = await TeamSchema.findOneAndUpdate(filter, updateObj, {
-      new: true,
-    });
+    const updatedLogo = await TeamSchema.findOneAndUpdate(
+      { teamId: teamId },
+      {
+        $currentDate: {
+          lastModified: true,
+          lastModified: { $type: "date" },
+        },
+        $set: {
+          teamLogo: updateObj.teamLogo,
+          teamLogoPublicId: updateObj.teamLogoPublicId,
+        },
+      },
+      {
+        new: true,
+      }
+    );
     return updatedLogo;
   } catch (error) {
     console.log({ updatedLogo: error });
@@ -196,15 +198,42 @@ export const updateTeamLogo = async (filter, updateObj) => {
 };
 
 // update team colors
-export const updateTeamColors = async (filter, updateObj) => {
+export const updateTeamColors = async (id, updateObj) => {
   try {
-    const updatedColors = await TeamSchema.findOneAndUpdate(filter, updateObj, {
-      new: true,
-    });
+    const updatedColors = await TeamSchema.findOneAndUpdate(
+      { teamId: id },
+      {
+        $currentDate: {
+          lastModified: true,
+          lastModified: { $type: "date" },
+        },
+        $set: {
+          primaryColor: updateObj.primaryColor,
+          secondaryColor: updateObj.secondaryColor,
+        },
+      },
+      {
+        new: true,
+      }
+    );
     return updatedColors;
   } catch (error) {
     console.log({ updateTeamColors: error });
     return { updateTeamColors: error };
+  }
+};
+
+// check if team already exists
+export const getTeamById = async (id) => {
+  console.log("getTeamById >>>>>>>>>>>>>>>>>>>>>>", id);
+
+  try {
+    const teamDoc = await TeamSchema.findOne({ teamId: id });
+    console.log("getTeamById_teamDoc", teamDoc);
+    return teamDoc;
+  } catch (error) {
+    console.log({ getTeamById: error });
+    return { getTeamById: error };
   }
 };
 
@@ -771,5 +800,50 @@ export const deletePost = async (userId, teamId, postId) => {
   } catch (error) {
     console.log({ deletePost: error });
     return { deletePost: error.message };
+  }
+};
+
+// HELPER FUNCTIONS
+
+export const handleSingleImageUpload = async (imgUpData) => {
+  try {
+    let teamLogo;
+    let imgUploadResponse;
+    let imgData = {};
+    let teamUpdate = {
+      logoUpdate: "",
+      colorUpdate: "",
+    };
+
+    // destructured imgUpData object, the request object...
+    let { id, teamUserName, teamName, imgFile, imgTagName } = imgUpData;
+
+    // used to set the files name and location with cloudinary
+    const adminUserObject = { id, teamUserName, teamName };
+
+    // sharp to reduce image size for db storage
+    const fileResize = await sharpImgResize(imgFile);
+    teamLogo = { img: fileResize };
+
+    // tags used in cloudinary
+    const imgTags = [id, teamUserName, teamName, imgTagName];
+
+    // cloudinary upload new image
+    imgUploadResponse = await async_cloudinaryStreamImg(
+      teamLogo,
+      adminUserObject,
+      imgTags
+    );
+
+    // set imageData
+    imgData.teamLogo = imgUploadResponse.secure_url;
+    imgData.teamLogoPublicId = imgUploadResponse.public_id;
+    // upload new img data to teamDoc
+    teamUpdate.logoUpdate = await updateTeamLogo(id, imgData);
+
+    return teamUpdate;
+  } catch (error) {
+    console.log({ handleSingleImageUpload: error });
+    return { handleSingleImageUpload: error };
   }
 };

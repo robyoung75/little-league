@@ -7,13 +7,13 @@ import { hashPassword } from "../utilities/bcrypt.js";
 // Mongodb helper functions
 import {
   createNewAdminUser,
-  findAdminUserById,
-  setAdminUserTeamId,
+  
   setTeamId,
   deleteAdminUser,
   createNewPlayer,
   configureDatabase,
   updateAdminUsers,
+  getAdminUsersById,
 } from "../utilities/controllerFunctions.js";
 
 // import errors functions from errors/errors.js
@@ -94,7 +94,7 @@ const getAllAdminUsers_get = async (req, res) => {
 
     const { id } = req.userId;
 
-    const adminUsersDoc = await findAdminUserById(id);
+    const adminUsersDoc = await getAdminUsersById(id);
 
     res.status(200).json(adminUsersDoc);
   } catch (error) {
@@ -206,7 +206,7 @@ const signInAdminUser_post = async (req, res) => {
     const authUser = await TeamAdminSchema.login(email, password);
 
     if (authUser.error) throw authUser.error;
-
+    console.log(authUser);
     // create jwt token
     const token = createJwtToken(authUser._id);
 

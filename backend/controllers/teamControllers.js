@@ -1,24 +1,20 @@
 // import errors functions from errors/errors.js
 import { handleErrors } from "../errors/errors.js";
 
-// helper functions
+// cloudinary functions
+import { async_cloudinaryDeleteImg } from "../utilities/cloudinaryFuctions.js";
+
+// controller functions
 import {
-  async_cloudinaryStreamImg,
-  async_cloudinaryDeleteImg,
-} from "../utilities/cloudinaryFuctions.js";
-import { sharpImgResize } from "../utilities/sharpFunctions.js";
-import {
-  findAdminUserById,
-  createNewTeam,
-  findTeamById,
-  updateTeamLogo,
+  getTeamById,
+  updateTeamColors,
+  handleSingleImageUpload,
 } from "../utilities/controllerFunctions.js";
 
 // CONTROLLERS FOR ADMIN TO CREATE A TEAM
-// create team
-const authTeam_post = async (req, res) => {
-  console.log("authTeam_post_req.file", req.file);
+// create team, set team colors and logo image
 
+const createTeam_post = async (req, res) => {
   try {
     if (req.error) {
       console.log({ authTeam_post: req.error });
@@ -28,61 +24,31 @@ const authTeam_post = async (req, res) => {
     // req.userId returns from auth middleware
     const { id } = req.userId;
 
-    console.log("authTeam_post", id);
+    let { primaryColor, secondaryColor, teamUserName, teamName } = req.body;
 
-    const adminUser = await findAdminUserById(id);
-    console.log("authTeam_post", adminUser);
-    const existingTeam = await findTeamById(adminUser.teamId);
+    let teamUpdate = {
+      logoUpdate: "",
+      colorUpdate: "",
+    };
 
-    let { primaryColor, secondaryColor } = req.body;
-    let teamLogo;
-    let imgUploadResponse;
-    let imgPublicId;
+    let imgUpData = {
+      id,
+      teamUserName,
+      teamName,
+      imgFile: req.file,
+      imgTagName: "teamLogo",
+    };
 
-    if (adminUser && existingTeam) {
-      throw Error("A team with this id already exists");
-    }
+    // handle image and upload to cloudinary and publicId and url to mongodb
+    teamUpdate.logoUpdate = await handleSingleImageUpload(imgUpData);
 
-    // HANDLE AND UPLOAD IMAGES TO CLOUDINARY
-    if (adminUser && req.file) {
-      // sharp to reduce image size for db storage
-      let fileResize = await sharpImgResize(req.file);
-      teamLogo = { img: fileResize };
+    // handle team colors and send to mongodb
+    teamUpdate.colorUpdate = await updateTeamColors(id, {
+      primaryColor,
+      secondaryColor,
+    });
 
-      const imgTags = [
-        adminUser.teamId,
-        adminUser.teamUserName,
-        adminUser.teamName,
-        "teamLogo",
-      ];
-
-      // cloudinary upload image returning a result
-      imgUploadResponse = await async_cloudinaryStreamImg(
-        teamLogo,
-        adminUser,
-        imgTags
-      );
-
-      imgPublicId = imgUploadResponse.public_id;
-    }
-
-
-
-    if (adminUser && !existingTeam) {
-      const authTeamDoc = await createNewTeam({
-        teamName: adminUser.teamName,
-        teamUserName: adminUser.teamUserName,
-        teamId: adminUser.teamId,
-        primaryColor,
-        secondaryColor,
-        teamLogo: imgUploadResponse ? imgUploadResponse.secure_url : null,
-        teamLogoPublicId: imgUploadResponse
-          ? imgUploadResponse.public_id
-          : null,
-      });
-
-      res.status(200).json(authTeamDoc);
-    }
+    res.status(200).json(teamUpdate);
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });
@@ -92,10 +58,10 @@ const authTeam_post = async (req, res) => {
 // READ TEAM
 const team_get = async (req, res) => {
   try {
-    const team = await findTeamById(req.userTeamId);
+    const team = await getTeamById(req.userTeamId);
     res.status(200).json(team);
   } catch (error) {
-    console.log(error);
+    console.log({ team_get: error });
     const errors = handleErrors(error);
     res.status(400).json({ errors });
   }
@@ -111,77 +77,45 @@ const teamUdpdate_put = async (req, res) => {
 
     // req.userId returns from auth middleware
     const { id } = req.userId;
+    const { teamLogoPublicId } = req.query;
+    let { primaryColor, secondaryColor, teamUserName, teamName } = req.body;
 
     // variables
-    let teamLogo;
-    let imgUploadResponse;
-    let updatedTeam;
-
-    // get admin user data
-    const adminUser = await findAdminUserById(id);
-
-    // check if existing team exists
-    let existingTeam = await findTeamById(id);
-
-    // delete existing cloudinary image, add new image
-    if (adminUser && existingTeam && req.file) {
-      // delete existing image from cloudinary
-      const result = await async_cloudinaryDeleteImg(
-        existingTeam.teamLogoPublicId
-      );
-      console.log("teamUpdate_put_result", result);
-
-      // sharp to reduce image size for db storage
-      let fileResize = await sharpImgResize(req.file);
-      teamLogo = { img: fileResize };
-
-      // tags used in cloudinary
-      const imgTags = [
-        adminUser.teamId,
-        adminUser.teamUserName,
-        adminUser.teamName,
-        "teamLogo",
-      ];
-
-      // cloudinary upload new image
-      imgUploadResponse = await async_cloudinaryStreamImg(
-        teamLogo,
-        adminUser,
-        imgTags
-      );
-    }
-
-    // filter and update object arguments defining new teamlogo and team colors
-    const filter = { teamLogoPublicId: existingTeam.teamLogoPublicId };
-    const updateObj = {
-      $currentDate: {
-        lastModified: true,
-        "lastModified": { $type: "date" }
-     },
-      $set: {
-        teamLogo: imgUploadResponse
-          ? imgUploadResponse.secure_url
-          : existingTeam.teamLogo,
-        teamLogoPublicId: imgUploadResponse.public_id
-          ? imgUploadResponse.public_id
-          : existingTeam.teamLogoPublicId,
-        primaryColor: req.body.primaryColor
-          ? req.body.primaryColor
-          : existingTeam.primaryColor,
-        secondaryColor: req.body.secondaryColor
-          ? req.body.secondaryColor
-          : existingTeam.secondaryColor,
-      },
+    let teamUpdate = {
+      logoUpdate: "",
+      colorUpdate: "",
     };
 
-    // updateTeamLogo function
-    updatedTeam = await updateTeamLogo(filter, updateObj);
+    let imgUpData = {
+      id,
+      teamUserName,
+      teamName,
+      imgFile: req.file,
+      imgTagName: "teamLogo",
+    };
 
-    res.status(200).json(updatedTeam);
+    // delete existing cloudinary image, add new image
+    if (req.file) {
+      // delete existing image from cloudinary
+      const result = await async_cloudinaryDeleteImg(teamLogoPublicId);
+      console.log("teamUpdate_put_result", result);
+
+      // handle image and upload to cloudinary and publicId and url to mongodb
+      teamUpdate.logoUpdate = await handleSingleImageUpload(imgUpData);
+    }
+
+    if (primaryColor && secondaryColor) {
+      teamUpdate.colorUpdate = await updateTeamColors(id, {
+        primaryColor,
+        secondaryColor,
+      });
+    }
+
+    res.status(200).json(teamUpdate);
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });
   }
 };
 
-export { authTeam_post, team_get, teamUdpdate_put };
+export { createTeam_post, team_get, teamUdpdate_put };

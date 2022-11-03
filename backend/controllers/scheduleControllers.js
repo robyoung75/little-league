@@ -4,7 +4,7 @@ import { handleErrors } from "../errors/errors.js";
 import {
   createNewSchedule,
   deleteScheduleDate,
-  findAdminUserById,
+  getAdminUsersById,
   findTeamSchedule,
   updateScheduleDate,
   updateTeamSchedule,
@@ -24,7 +24,7 @@ export const authSchedule_post = async (req, res) => {
 
     // console.log("ID SCHEDULE CREATE", id);
 
-    const authUser = await findAdminUserById(id);
+    const authUser = await getAdminUsersById(id);
     const existingSchedule = await findTeamSchedule(teamUserId);
 
     // console.log("AUTHUSER_SCEHDULE", authUser);

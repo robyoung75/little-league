@@ -8,7 +8,7 @@ import {
 } from "../utilities/cloudinaryFuctions.js";
 import { sharpImgResize } from "../utilities/sharpFunctions.js";
 import {
-  findAdminUserById,
+  getAdminUsersById,
   findCoachesByTeamId,
   checkForCoachesAndUpdate,
   createNewCoach,
@@ -48,7 +48,7 @@ export const authCoaches_post = async (req, res) => {
     let imgSecurecUrl;
 
     // admin user
-    const adminUser = await findAdminUserById(id);
+    const adminUser = await getAdminUsersById(id);
 
     // list of coaches for adminUsers team
     const authUserCoaches = await findCoachesByTeamId(userTeamId);
@@ -63,57 +63,57 @@ export const authCoaches_post = async (req, res) => {
     };
 
     // HANDLE AND UPLOAD IMAGES TO CLOUDINARY
-    if (req.file) {
-      let fileResize = await sharpImgResize(req.file);
-      coachImage = { img: fileResize, lastName };
+    // if (req.file) {
+    //   let fileResize = await sharpImgResize(req.file);
+    //   coachImage = { img: fileResize, lastName };
 
-      // image tags for cloudinary
-      imgTags = [
-        adminUser.teamId,
-        adminUser.teamUserName,
-        adminUser.teamName,
-        firstName,
-        lastName,
-        email,
-        "coaches",
-      ];
+    //   // image tags for cloudinary
+    //   imgTags = [
+    //     adminUser.teamId,
+    //     adminUser.teamUserName,
+    //     adminUser.teamName,
+    //     firstName,
+    //     lastName,
+    //     email,
+    //     "coaches",
+    //   ];
 
-      // upload response from cloudinary, single image stream
-      imgUploadResponse = await async_cloudinaryStreamImg(
-        coachImage,
-        adminUser,
-        imgTags
-      );
+    //   // upload response from cloudinary, single image stream
+    //   imgUploadResponse = await async_cloudinaryStreamImg(
+    //     coachImage,
+    //     adminUser,
+    //     imgTags
+    //   );
 
-      imgPublicId = imgUploadResponse.public_id;
-      imgSecurecUrl = imgUploadResponse.secure_url;
-      updateObj.headshotImg.publicId = imgPublicId;
-      updateObj.headshotImg.secureURL = imgSecurecUrl;
-    }
+    //   imgPublicId = imgUploadResponse.public_id;
+    //   imgSecurecUrl = imgUploadResponse.secure_url;
+    //   updateObj.headshotImg.publicId = imgPublicId;
+    //   updateObj.headshotImg.secureURL = imgSecurecUrl;
+    // }
 
-    if (adminUser && !authUserCoaches) {
-      const authCoachesDoc = await createNewCoach({
-        teamId: adminUser.teamId,
-        teamUserName: adminUser.teamUserName,
-        teamName: adminUser.teamName,
-        coaches: updateObj,
-      });
+    // if (adminUser && !authUserCoaches) {
+    //   const authCoachesDoc = await createNewCoach({
+    //     teamId: adminUser.teamId,
+    //     teamUserName: adminUser.teamUserName,
+    //     teamName: adminUser.teamName,
+    //     coaches: updateObj,
+    //   });
 
-      res.status(200).json(authCoachesDoc);
-    }
+    //   res.status(200).json(authCoachesDoc);
+    // }
 
-    if (adminUser && authUserCoaches) {
-      const updatedCoachesDoc = await checkForCoachesAndUpdate(
-        userTeamId,
-        updateObj
-      );
+    // if (adminUser && authUserCoaches) {
+    //   const updatedCoachesDoc = await checkForCoachesAndUpdate(
+    //     userTeamId,
+    //     updateObj
+    //   );
 
-      if (!updatedCoachesDoc) {
-        throw new Error("A user with this email already exists");
-      }
+    //   if (!updatedCoachesDoc) {
+    //     throw new Error("A user with this email already exists");
+    //   }
 
-      res.status(200).json(updatedCoachesDoc);
-    }
+    //   res.status(200).json(updatedCoachesDoc);
+    // }
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });
