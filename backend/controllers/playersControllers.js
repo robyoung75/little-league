@@ -9,158 +9,82 @@ import {
 import { sharpImgResize } from "../utilities/sharpFunctions.js";
 import {
   getAdminUsersById,
-  findPlayersByTeamId,
-  checkForPlayersAndUpdate,
-  createNewPlayer,
+  getPlayersById,
+  createPlayer,
+  createPlayers,
   updatePlayer,
   deletePlayer,
+  getReqFilesFieldNames,
+  handleMultipleImageUploads,
+  createImgObjMongoDbUpload,
 } from "../utilities/controllerFunctions.js";
 
 // CREATE TEAM PLAYERS
-const authPlayers_post = async (req, res) => {
-  // console.log({ authPlayers_post_req_body: req.body });
-  // console.log({ authPlayers_post_req_files: req.files });
-
+const createPlayer_post = async (req, res) => {
   try {
-    // If no req.userId an error will be thrown req.userId means user is authenticated as admin
     if (req.error) {
-      console.log({ authPlayers_post: req.error });
+      console.log({ createPlayer_post: req.error });
       throw req.error;
     }
 
     // req.userId returns from auth middleware
     const { id } = req.userId;
-    const adminUser = await getAdminUsersById(id);
-    const authUserPlayers = await findPlayersByTeamId(adminUser.teamId);
 
-    // image variables
-    let imgTags = [];
-    let imageUploadResult;
-    let playerImages = [];
+    // variables
+    // destructured req.body
+    const {
+      firstName,
+      lastName,
+      number,
+      positions,
+      battingStance,
+      teamUserName,
+      teamName,
+    } = req.body;
 
-    const { firstName, lastName, number, positions, battingStance, teamUserName } = req.body;
-
+    // player data object upload to mongoDB
     let playerData = {
       firstName,
       lastName,
       number,
       positions,
       battingStance,
-      teamId: adminUser.teamId,
+      teamId: id,
     };
 
-    // if files resize and push to playerImages array for upload to cloudinary
-    if (req.files.headshotImg) {
-      playerImages.push({
-        teamUserName,
-        imageTitle: "headshot",
-        firstName,
-        lastName,
-        number,
-        image: await sharpImgResize(req.files["headshotImg"][0]),
-      });
-    }
+    // image upload to cloudinary object
+    let imgUpData = {
+      id,
+      firstName,
+      lastName,
+      number,
+      teamUserName,
+      teamName,
+      imgFiles: req.files,
+      imgTagName: "players",
+    };
 
-    if (req.files.offenseImg) {
-      playerImages.push({
-        teamUserName,
-        imageTitle: "offense",
-        firstName,
-        lastName,
-        number,
-        image: await sharpImgResize(req.files["offenseImg"][0]),
-      });
-    }
+    // imgNames is an array of objects including the req.files fieldname for each file
+    let imgNames = ["headshotImg", "offenseImg", "defenseImg"];
 
-    if (req.files.defenseImg) {
-      playerImages.push({
-        teamUserName,
-        imageTitle: "defense",
-        firstName,
-        lastName,
-        number,
-        image: await sharpImgResize(req.files["defenseImg"][0]),
-      });
-    }
+    let mongoDbImgData;
 
-    // HANDLE AND UPLOAD IMAGES TO CLOUDINARY IF PLAYERIMAGES IS NOT AN EMPTY ARRAY
-    if (adminUser && playerImages !== []) {
-      // assign image tags to each image
-      imgTags = [
-        adminUser.teamId,
-        adminUser.teamUserName,
-        adminUser.teamName,
-        firstName,
-        lastName,
-        number,
-        "players",
-      ];
+    // UPLOAD IMAGES TO CLOUDINARY
+    const imgUploadResponse = await handleMultipleImageUploads(imgUpData);
 
-      // upload multiple images to cloudinary
-      imageUploadResult = await async_cloudinaryStreamImgs(
-        playerImages,       
-        imgTags
-      );
+    // ASSIGN CLOUDINARY URL, PUBLICID, ORIGINAL NAME TO PLAYER DATA
+    // for upload to mongodb.
+    mongoDbImgData = createImgObjMongoDbUpload(imgUploadResponse, imgNames);
 
-      // set playerData object images url and public id
-      imageUploadResult.map((item) => {
-        if (item.secure_url.includes("headshot")) {
-          playerData.headshotImg = {
-            secureURL: item.secure_url,
-            publicId: item.public_id,
-          };
-        }
+    playerData.headshotImg = mongoDbImgData.headshotImg;
+    playerData.offenseImg = mongoDbImgData.offenseImg;
+    playerData.defenseImg = mongoDbImgData.defenseImg;
 
-        if (item.secure_url.includes("offense")) {
-          playerData.offenseImg = {
-            secureURL: item.secure_url,
-            publicId: item.public_id,
-          };
-        }
+    const playersDoc = await createPlayer(id, playerData);
 
-        if (item.secure_url.includes("defense")) {
-          playerData.defenseImg = {
-            secureURL: item.secure_url,
-            publicId: item.public_id,
-          };
-        }
-        return;
-      });
-    }
-
-    // if adminUser and no authUserPlayerDoc create a teamsPlayersDoc
-    if (adminUser && !authUserPlayers) {
-      // create new team players post
-      const authPlayerDoc = await createNewPlayer({
-        teamId: adminUser._id,
-        teamUserName: adminUser.teamUserName,
-        teamName: adminUser.teamName,
-        players: playerData,
-      });
-
-      res.status(200).json(authPlayerDoc);
-    }
-    // if adminUser and authUserPlayers then update the existing authUserPlayersDoc
-    if (adminUser && authUserPlayers) {
-      const filter = {
-        teamId: authUserPlayers.teamId,
-        "players.number": { $ne: number },
-      };
-      const update = {
-        $push: {
-          players: playerData,
-        },
-      };
-      const updatedPlayersdoc = await checkForPlayersAndUpdate(filter, update);
-
-      if (!updatedPlayersdoc) {
-        throw new Error("A player with this number already exists");
-      }
-
-      res.status(200).json(updatedPlayersdoc);
-    }
+    res.send(playersDoc);
   } catch (error) {
-    console.log("authPlayers_post ERROR >>>>>", error);
+    console.log("createPlayer_post ERROR >>>>>", error);
     const errors = handleErrors(error);
     res.status(400).json({ errors });
   }
@@ -177,7 +101,7 @@ const players_get = async (req, res) => {
     // req.userTeamId is returned from authMiddlware function getTeamById()
     const userTeamId = req.userTeamId;
 
-    const players = await findPlayersByTeamId(userTeamId);
+    const players = await getPlayersById(userTeamId);
     res.status(200).json(players);
   } catch (error) {
     const errors = handleErrors(error);
@@ -202,137 +126,80 @@ const updatePlayerData_put = async (req, res) => {
       lastName,
       number,
       newNumber,
+      teamName,
+      teamUserName,
     } = req.body;
 
-    // console.log(req.body);
-    // console.log("updatePlayerData_put req.files >>>>> ", req.files);
-    // console.log('req.params ____________________________ ', req.params)
-    // console.log({reqUserTeamId: req.userTeamId, reqUserPlayerId: req.userPlayerId})
-
-    // variables
-    // console.log(req.userId);
+    // VARIABLES
+    // req variables
     const { id } = req.userId;
-    // const teamId = req.userTeamId;
     const { playerId } = req.query;
 
-    let imgTags = [];
-    let imageUploadResult;
-    let playerImages = [];
+    // IMG VARIABLES
+    let imgUploadResponse;
     let publicIdArray = [];
+    let mongoDbImgData;
 
-    let updateObj = {
+    // PLAYER UPLOAD INFORMATION / DATA
+    let playerData = {
       number: Number(number),
       newNumber: Number(newNumber),
     };
 
-    // to update the player filter by admin id for the correct team of players then by player._id
-    let filter = { id: id, "players._id": playerId };
+    // PREPARE FILES FOR UPLOAD TO CLOUDINARY
+    let imgUpData = {
+      id,
+      firstName,
+      lastName,
+      number,
+      teamUserName,
+      teamName,
+      imgFiles: req.files,
+      imgTagName: "players",
+    };
 
-    // console.log("filter", filter);
+    let imgNames = [];
 
-    // get admin user data
-    const adminUser = await findAdminUserById(id);
-
-    // HANDLE IMAGE UPDATES
-    if (req.files) {
-      // delete images by public_id argument to delete multiple images is and array of public_id
-
-      if (headshotPublicId) {
-        publicIdArray.push(headshotPublicId);
-      }
-
-      if (offensePublicId) {
-        publicIdArray.push(offensePublicId);
-      }
-
-      if (defensePublicId) {
-        publicIdArray.push(defensePublicId);
-      }
-
-      // CLOUDINARY DELETE MULTIPLE IMAGES
-      if (publicIdArray !== []) {
-        await async_cloudinaryDeleteMultipleImages(publicIdArray);
-      }
-
-      // upload new image(s)
-      if (req.files.headshotImg) {
-        playerImages.push({
-          imageTitle: "headshot",
-          firstName,
-          lastName,
-          number,
-          image: await sharpImgResize(req.files["headshotImg"][0]),
-        });
-      }
-
-      if (req.files.offenseImg) {
-        playerImages.push({
-          imageTitle: "offense",
-          firstName,
-          lastName,
-          number,
-          image: await sharpImgResize(req.files["offenseImg"][0]),
-        });
-      }
-
-      if (req.files.defenseImg) {
-        playerImages.push({
-          imageTitle: "defense",
-          firstName,
-          lastName,
-          number,
-          image: await sharpImgResize(req.files["defenseImg"][0]),
-        });
-      }
-
-      // UPLOAD NEW IMAGE FILES
-      if (adminUser && playerImages !== []) {
-        // assign image tags to each image
-        imgTags = [
-          adminUser.teamId,
-          adminUser.teamUserName,
-          adminUser.teamName,
-          firstName,
-          lastName,
-          number,
-          "players",
-        ];
-
-        // upload multiple images to cloudinary
-        imageUploadResult = await async_cloudinaryStreamImgs(
-          playerImages,
-          adminUser,
-          imgTags
-        );
-
-        // set new url data
-        imageUploadResult.map((item) => {
-          if (item.secure_url.includes("headshot")) {
-            updateObj.headshotImg = {
-              secureURL: item.secure_url,
-              publicId: item.public_id,
-            };
-          }
-          if (item.secure_url.includes("offense")) {
-            updateObj.offenseImg = {
-              secureURL: item.secure_url,
-              publicId: item.public_id,
-            };
-          }
-          if (item.secure_url.includes("defense")) {
-            updateObj.defenseImg = {
-              secureURL: item.secure_url,
-              publicId: item.public_id,
-            };
-          }
-          return;
-        });
-      }
+    // PUSH IMG PUBLIC ID TO ARRAY TO USE WITH CLOUDINARY DELETE IMAGES
+    if (headshotPublicId) {
+      publicIdArray.push(headshotPublicId);
+      imgNames.push("headshotImg");
     }
 
-    const updatedPlayer = await updatePlayer(filter, updateObj);
+    if (offensePublicId) {
+      publicIdArray.push(offensePublicId);
+      imgNames.push("offenseImg");
+    }
 
-    res.json(updatedPlayer);
+    if (defensePublicId) {
+      publicIdArray.push(defensePublicId);
+      imgNames.push("defenseImg");
+    }
+
+    if (publicIdArray.length > 0) {
+      console.log({ publicIdArray });
+
+      // CLOUDINARY DELETE MULTIPLE IMAGES
+      // delete images from cloudinary
+      await async_cloudinaryDeleteMultipleImages(publicIdArray);
+
+      imgUploadResponse = await handleMultipleImageUploads(imgUpData);
+
+      // ASSIGN CLOUDINARY URL, PUBLICID, ORIGINAL NAME TO PLAYER DATA
+      // for upload to mongodb.
+      mongoDbImgData = createImgObjMongoDbUpload(imgUploadResponse, imgNames);
+
+      console.log({ mongoDbImgData });
+
+      playerData.headshotImg = mongoDbImgData.headshotImg;
+      playerData.offenseImg = mongoDbImgData.offenseImg;
+      playerData.defenseImg = mongoDbImgData.defenseImg;
+
+      console.log({ playerData });
+    }
+
+    const playersDoc = await updatePlayer(id, playerId, playerData);
+    res.status(200).json(playersDoc);
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });
@@ -352,21 +219,19 @@ const deletePlayer_delete = async (req, res) => {
 
     // delete cloudinary images
     // delete images by public_id argument to delete multiple images is and array of public_id
-
     headshotPublicId && publicIdArray.push(headshotPublicId);
-
     offensePublicId && publicIdArray.push(offensePublicId);
-
     defensePublicId && publicIdArray.push(defensePublicId);
 
     // CLOUDINARY DELETE MULTIPLE IMAGES
-    if (publicIdArray !== []) {
+    if (publicIdArray.length > 0) {
       console.log(publicIdArray);
       await async_cloudinaryDeleteMultipleImages(publicIdArray);
     }
 
-    const deletedPlayer = await deletePlayer(teamId, playerId);
-    res.status(200).json(deletedPlayer);
+    const updatedPlayers = await deletePlayer(teamId, playerId);
+
+    res.status(200).json(updatedPlayers);
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });
@@ -374,7 +239,7 @@ const deletePlayer_delete = async (req, res) => {
 };
 
 export {
-  authPlayers_post,
+  createPlayer_post,
   players_get,
   updatePlayerData_put,
   deletePlayer_delete,

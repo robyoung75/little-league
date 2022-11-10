@@ -10,7 +10,7 @@ import {
   
   setTeamId,
   deleteAdminUser,
-  createNewPlayer,
+  
   configureDatabase,
   updateAdminUsers,
   getAdminUsersById,

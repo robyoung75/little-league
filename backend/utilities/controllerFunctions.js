@@ -8,7 +8,10 @@ import TeamPostsSchema from "../models/teamPost.js";
 import team from "../models/team.js";
 import UserSchema from "../models/user.js";
 import { sharpImgResize } from "./sharpFunctions.js";
-import { async_cloudinaryStreamImg } from "./cloudinaryFuctions.js";
+import {
+  async_cloudinaryStreamImg,
+  async_cloudinaryStreamImgs,
+} from "./cloudinaryFuctions.js";
 
 // MONGO DB ADMIN USER FUNCTIONS
 
@@ -36,12 +39,12 @@ export const findTeamByTeamUserName = async (teamUserName) => {
   }
 };
 
-// configure database
+// configure database when admin user is set up
 export const configureDatabase = async (reqObj) => {
   try {
-    const teamDoc = await createNewTeam(reqObj);
-    const coachDoc = await createNewCoach(reqObj);
-    const playerDoc = await createNewPlayer(reqObj);
+    const teamDoc = await createTeam(reqObj);
+    const coachDoc = await createCoaches(reqObj);
+    const playerDoc = await createPlayers(reqObj);
     const scheduleDoc = await createNewSchedule(reqObj);
     const postDoc = await userCreatePost(reqObj);
     const userDoc = await createNewUser(reqObj);
@@ -160,13 +163,13 @@ export const deleteAdminUser = async (teamId, adminId) => {
 // TEAM CONTROLLER FUNCTIONS - set team colors and name
 
 // create a new team
-export const createNewTeam = async (reqObj) => {
+export const createTeam = async (reqObj) => {
   try {
     const newTeam = await TeamSchema.create(reqObj);
     return newTeam;
   } catch (error) {
-    console.log({ createNewTeam: error });
-    return { createNewTeam: error };
+    console.log({ createTeam: error });
+    return { createTeam: error };
   }
 };
 
@@ -174,7 +177,7 @@ export const createNewTeam = async (reqObj) => {
 export const updateTeamLogo = async (teamId, updateObj) => {
   console.log(updateObj);
   try {
-    const updatedLogo = await TeamSchema.findOneAndUpdate(
+    const teamDoc = await TeamSchema.findOneAndUpdate(
       { teamId: teamId },
       {
         $currentDate: {
@@ -190,7 +193,7 @@ export const updateTeamLogo = async (teamId, updateObj) => {
         new: true,
       }
     );
-    return updatedLogo;
+    return teamDoc;
   } catch (error) {
     console.log({ updatedLogo: error });
     return { updatedLogo: error };
@@ -200,7 +203,7 @@ export const updateTeamLogo = async (teamId, updateObj) => {
 // update team colors
 export const updateTeamColors = async (id, updateObj) => {
   try {
-    const updatedColors = await TeamSchema.findOneAndUpdate(
+    const teamDoc = await TeamSchema.findOneAndUpdate(
       { teamId: id },
       {
         $currentDate: {
@@ -216,7 +219,7 @@ export const updateTeamColors = async (id, updateObj) => {
         new: true,
       }
     );
-    return updatedColors;
+    return teamDoc;
   } catch (error) {
     console.log({ updateTeamColors: error });
     return { updateTeamColors: error };
@@ -238,9 +241,8 @@ export const getTeamById = async (id) => {
 };
 
 // PLAYERS CONTROLLER FUNCTIONS - admin adds team player information
-
-// create a new player
-export const createNewPlayer = async (reqObj) => {
+// create a new players document. function is called by configure database
+export const createPlayers = async (reqObj) => {
   try {
     let update = {
       teamId: reqObj.teamId,
@@ -251,59 +253,56 @@ export const createNewPlayer = async (reqObj) => {
     const newPlayer = await TeamPlayersSchema.create(update);
     return newPlayer;
   } catch (error) {
-    console.log({ createNewPlayer: error });
-    return { createNewPlayer: error };
+    console.log({ createPlayers: error });
+    return { createPlayers: error };
   }
 };
 
-// check if players document exists by teamId
-export const findPlayersByTeamId = async (id) => {
+// create a new player in playersDoc players array
+export const createPlayer = async (id, updateObj) => {
+  try {
+    const playersDoc = await TeamPlayersSchema.findOneAndUpdate(
+      { teamId: id, "players.number": { $ne: updateObj.number } },
+      { $push: { players: updateObj } },
+      { returnOriginal: false }
+    );
+
+    // i use save to cause my mongoose middleware to fire on a push to a sub document
+    await playersDoc.save();
+    return playersDoc;
+  } catch (error) {
+    console.log({ createPlayer: error });
+    return { createPlayer: error };
+  }
+};
+
+// get all players
+export const getPlayersById = async (id) => {
   try {
     const player = await TeamPlayersSchema.findOne({
       teamId: id,
     });
     return player;
   } catch (error) {
-    console.log({ findPlayersByTeamId: error });
-    return { findPlayersByTeamId: error };
+    console.log({ getPlayersById: error });
+    return { getPlayersById: error };
   }
 };
 
-// adds a new player to existing players
-export const checkForPlayersAndUpdate = async (filter, updateObj) => {
+// updates an existing players photos and number
+
+export const updatePlayer = async (id, playerId, updateObj) => {
+
+  console.log({id, playerId, updateObj})
   try {
-    const updatedPlayers = await TeamPlayersSchema.findOneAndUpdate(
-      filter,
-      updateObj,
-      { returnOriginal: false }
-    );
-
-    // .save() calls mongoose middleware
-    await updatedPlayers.save();
-    return updatedPlayers;
-  } catch (error) {
-    console.log({ checkForPlayersAndUpdate: error });
-    return { checkForPlayersAndUpdate: error };
-  }
-};
-
-// get and update a specific player
-export const updatePlayer = async (filter, updateObj) => {
-  // console.log("updatePlayer_____filter_____", filter);
-  // console.log("updatePlayer_____updateObj_____", updateObj);
-
-  try {
-    // variables
     let updateData = {};
+    let playersDoc;
     let playerNumber = updateObj.newNumber
       ? updateObj.newNumber
       : updateObj.number;
-    // console.log("updatePlayer_____playerNumber", playerNumber);
-    let update;
-    let updatedPlayersDoc;
     updateData.number = playerNumber;
 
-    // update player data in mongodb
+    // update only image
     if (updateObj.headshotImg) {
       updateData.headshotSecureURL = updateObj.headshotImg.secureURL;
       updateData.headshotPublicId = updateObj.headshotImg.publicId;
@@ -319,34 +318,33 @@ export const updatePlayer = async (filter, updateObj) => {
       updateData.defensePublicId = updateObj.defenseImg.publicId;
     }
 
-    update = {
-      $set: {
-        "players.$.number": updateData.number && updateData.number,
-        "players.$.headshotImg.secureURL":
-          updateData.headshotSecureURL && updateData.headshotSecureURL,
-        "players.$.headshotImg.publicId":
-          updateData.headshotPublicId && updateData.headshotPublicId,
-        "players.$.offense.secureURL":
-          updateData.offenseSecureURL && updateData.offenseSecureURL,
-        "players.$.offense.publicId":
-          updateData.offensePublicId && updateData.offensePublicId,
-        "players.$.defense.secureURL":
-          updateData.defenseSecureURL && updateData.defenseSecureURL,
-        "players.$.defense.publicId":
-          updateData.defensePublicId && updateData.defensePublicId,
-      },
-    };
+    console.log({updateData})
 
-    updatedPlayersDoc = await TeamPlayersSchema.findOneAndUpdate(
-      filter,
-      update,
+    playersDoc = await TeamPlayersSchema.findOneAndUpdate(
+      { teamId: id, "players._id": playerId },
+      {
+        $set: {
+          "players.$.number": updateData.number,
+          "players.$.headshotImg.secureURL":
+            updateData.headshotSecureURL && updateData.headshotSecureURL,
+          "players.$.headshotImg.publicId":
+            updateData.headshotPublicId && updateData.headshotPublicId,
+          "players.$.offense.secureURL":
+            updateData.offenseSecureURL && updateData.offenseSecureURL,
+          "players.$.offense.publicId":
+            updateData.offensePublicId && updateData.offensePublicId,
+          "players.$.defense.secureURL":
+            updateData.defenseSecureURL && updateData.defenseSecureURL,
+          "players.$.defense.publicId":
+            updateData.defensePublicId && updateData.defensePublicId,
+        },
+      },
       {
         returnOriginal: false,
       }
     );
 
-    // returns updated playersdoc
-    return updatedPlayersDoc;
+    return playersDoc;
   } catch (error) {
     console.log({ updatePlayer: error });
     return { updatePlayer: error };
@@ -377,8 +375,8 @@ export const deletePlayer = async (teamId, playerId) => {
 
 // COACHES CONTROLLER FUNCTIONS - admin adds coaches
 
-// create a new coach document
-export const createNewCoach = async (reqObj) => {
+// create a new coaches document. function called in database init
+export const createCoaches = async (reqObj) => {
   try {
     let update = {
       teamId: reqObj.teamId,
@@ -389,12 +387,12 @@ export const createNewCoach = async (reqObj) => {
     const newCoach = await TeamCoachesSchema.create(update);
     return newCoach;
   } catch (error) {
-    console.log({ createNewCoach: error });
-    return { createNewCoach: error };
+    console.log({ createCoaches: error });
+    return { createCoaches: error };
   }
 };
 
-// check if coaches document exists
+// get all coaches
 export const findCoachesByTeamId = async (id) => {
   try {
     const coach = await TeamCoachesSchema.findOne({
@@ -407,27 +405,28 @@ export const findCoachesByTeamId = async (id) => {
   }
 };
 
-// add a coach to the existing coach document
-export const checkForCoachesAndUpdate = async (userTeamId, updateObj) => {
+// create a new coach in the coaches document coaches array
+export const createCoach = async (userTeamId, updateObj) => {
   try {
     console.log({
       checkForCoachesAndUpdate: { req: { userTeamId, updateObj } },
     });
-    const updatedCoaches = await TeamCoachesSchema.findOneAndUpdate(
-      { teamId: userTeamId },
+    const coachesDoc = await TeamCoachesSchema.findOneAndUpdate(
+      { teamId: userTeamId, "coaches.email": { $ne: updateObj.email } },
       { $push: { coaches: updateObj } },
       { returnOriginal: false }
     );
+
     // i use save to cause my mongoose middleware to fire on a push to a sub document
-    await updatedCoaches.save();
-    return updatedCoaches;
+    await coachesDoc.save();
+    return coachesDoc;
   } catch (error) {
-    console.log({ checkForCoachesAndUpdate: error });
-    return { checkForCoachesAndUpdate: error };
+    // console.log({ createCoach: error });
+    return error;
   }
 };
 
-// update single coach data
+// update existing coach. email and headshot image can be updated
 export const updateCoach = async (userTeamId, coachId, updateObj) => {
   try {
     let updateData = {};
@@ -488,7 +487,6 @@ export const deleteCoach = async (teamId, coachId) => {
 };
 
 // SCHEDULE CONTROLLER FUNCTIONS
-
 // create new schedule
 export const createNewSchedule = async (reqObj) => {
   try {
@@ -705,32 +703,6 @@ export const deleteUser = async (teamId, userId) => {
 
 // USER POST CONTROLLER FUNCTIONS
 
-// assigns the correct secure url and public_id from imageUploadResult to update object for mongodb
-export const userPostCreateSecureURL = async (
-  postImgFileArr,
-  imageUploadResultArr
-) => {
-  let imgDataArr = [];
-
-  for (let i = 0; i < imageUploadResultArr.length; i++) {
-    for (let j = 0; j < postImgFileArr.length; j++) {
-      if (
-        imageUploadResultArr[i]["secure_url"].includes(
-          postImgFileArr[j]["imageTitle"]
-        )
-      ) {
-        imgDataArr.push({
-          secureURL: imageUploadResultArr[i]["secure_url"],
-          publicId: imageUploadResultArr[i]["public_id"],
-          originalName: postImgFileArr[j]["imageTitle"],
-        });
-      }
-    }
-  }
-
-  return imgDataArr;
-};
-
 // Read posts if they exist
 export const getTeamPosts = async (teamId) => {
   try {
@@ -805,45 +777,198 @@ export const deletePost = async (userId, teamId, postId) => {
 
 // HELPER FUNCTIONS
 
+// upload a single image to cloudinary called for create team and coach headshot images
 export const handleSingleImageUpload = async (imgUpData) => {
   try {
-    let teamLogo;
+    let userImage;
     let imgUploadResponse;
     let imgData = {};
-    let teamUpdate = {
-      logoUpdate: "",
-      colorUpdate: "",
-    };
 
     // destructured imgUpData object, the request object...
-    let { id, teamUserName, teamName, imgFile, imgTagName } = imgUpData;
+    let {
+      id,
+      firstName,
+      lastName,
+      teamUserName,
+      teamName,
+      imgFile,
+      imgTagName,
+    } = imgUpData;
 
     // used to set the files name and location with cloudinary
-    const adminUserObject = { id, teamUserName, teamName };
+    const adminUserObject = { id, teamUserName, firstName, lastName, teamName };
 
     // sharp to reduce image size for db storage
     const fileResize = await sharpImgResize(imgFile);
-    teamLogo = { img: fileResize };
+    userImage = { img: fileResize };
 
     // tags used in cloudinary
     const imgTags = [id, teamUserName, teamName, imgTagName];
 
     // cloudinary upload new image
     imgUploadResponse = await async_cloudinaryStreamImg(
-      teamLogo,
+      userImage,
       adminUserObject,
       imgTags
     );
 
     // set imageData
-    imgData.teamLogo = imgUploadResponse.secure_url;
-    imgData.teamLogoPublicId = imgUploadResponse.public_id;
+    imgData.secureURL = imgUploadResponse.secure_url;
+    imgData.publicId = imgUploadResponse.public_id;
     // upload new img data to teamDoc
-    teamUpdate.logoUpdate = await updateTeamLogo(id, imgData);
+    // update = await updateTeamLogo(id, imgData);
 
-    return teamUpdate;
+    return imgData;
   } catch (error) {
     console.log({ handleSingleImageUpload: error });
     return { handleSingleImageUpload: error };
   }
+};
+
+// function returns field names from req.files. fieldnames will be used to upload multiple images
+// called in setPlayerImgData
+export const getReqFilesFieldNames = (filesObj) => {
+  let fileList = [];
+  for (let img in filesObj) {
+    filesObj[img].forEach((file) => {
+      fileList.push({ name: file.fieldname });
+    });
+  }
+  return fileList;
+};
+
+// function creates array of objects for cloudinary image upload called in handleMultipleImageuploads
+const setPlayerImgData = async (
+  imgFiles,
+  teamName,
+  teamUserName,
+  firstName,
+  lastName
+) => {
+  const imgNames = getReqFilesFieldNames(imgFiles);
+  // console.log({ imgNames });
+
+  return await Promise.all(
+    imgNames.map(async (img) => {
+      return {
+        teamName,
+        teamUserName,
+        imageTitle: img.name,
+        firstName,
+        lastName,
+        image: await sharpImgResize(imgFiles[img.name][0]),
+      };
+    })
+  );
+};
+
+// assigns the correct secure url and public_id from imageUploadResult to update object for mongodb
+export const multiImageCreateURL = async (
+  postImgFileArr,
+  imageUploadResultArr
+) => {
+  let imgDataArr = [];
+
+  for (let i = 0; i < imageUploadResultArr.length; i++) {
+    for (let j = 0; j < postImgFileArr.length; j++) {
+      if (
+        imageUploadResultArr[i]["secure_url"].includes(
+          postImgFileArr[j]["imageTitle"]
+        )
+      ) {
+        imgDataArr.push({
+          secureURL: imageUploadResultArr[i]["secure_url"],
+          publicId: imageUploadResultArr[i]["public_id"],
+          originalName: postImgFileArr[j]["imageTitle"],
+        });
+      }
+    }
+  }
+
+  return imgDataArr;
+};
+
+// UPLOAD MULTIPLE IMAGES TO CLOUDINARY, return object sent to mongoDB
+// RETURNS AN ARRAY OF OBJECTS. EXAMPLE:
+// [
+//   {
+//       "secureURL": "https://res.cloudinary.com/dyxsxutlm/image/upload/v1667834615/cottonwoodcolts/players/cottonwoodcolts_fName_kade_lName_young_title_headshotImg.webp",
+//       "publicId": "cottonwoodcolts/players/cottonwoodcolts_fName_kade_lName_young_title_headshotImg",
+//       "originalName": "headshotImg"
+//   },
+//   {
+//       "secureURL": "https://res.cloudinary.com/dyxsxutlm/image/upload/v1667834615/cottonwoodcolts/players/cottonwoodcolts_fName_kade_lName_young_title_offenseImg.webp",
+//       "publicId": "cottonwoodcolts/players/cottonwoodcolts_fName_kade_lName_young_title_offenseImg",
+//       "originalName": "offenseImg"
+//   },
+// ]
+export const handleMultipleImageUploads = async (imgUpData) => {
+  try {
+    console.log({ handleMultipleImageUploads: imgUpData });
+
+    // variables
+    let playerImages;
+    let imgUploadResponse;
+    let imgData;
+
+    // destructure imageUpData request
+    let {
+      id,
+      firstName,
+      lastName,
+      number,
+      teamUserName,
+      teamName,
+      imgFiles,
+      imgTagName,
+    } = imgUpData;
+
+    // tags used in cloudinary
+    const imgTags = [id, teamUserName, teamName, imgTagName];
+
+    // returns an array of objects that will be used to upload images to cloudinary.
+    playerImages = await setPlayerImgData(
+      imgFiles,
+      teamName,
+      teamUserName,
+      firstName,
+      lastName
+    );
+
+    // upload to cloudinary return response
+    imgUploadResponse = await async_cloudinaryStreamImgs(playerImages, imgTags);
+
+    // creates an object for each image including url, public id, and original name.
+    // object will be uploaded to mongoDB
+    imgData = multiImageCreateURL(playerImages, imgUploadResponse);
+
+    return imgData;
+  } catch (error) {
+    console.log({ handleMultipleImageUploads: error });
+    return { handleMultipleImageUploads: error };
+  }
+};
+
+// FOR MULTIPLE IMG UPLOADS ASSIGN CLOUDINARY URL, PUBLICID, ORIGINAL NAME TO AN OBJECT FOR MONGO DB UPDATE
+export const createImgObjMongoDbUpload = (cloudinaryUploadRes, arrImgNames) => {
+  if (
+    cloudinaryUploadRes.length !== arrImgNames.length ||
+    cloudinaryUploadRes.length === 0 ||
+    arrImgNames.length === 0
+  ) {
+    return null;
+  }
+
+  let obj = {};
+
+  arrImgNames.forEach((name, i) => {
+    // console.log({ name });
+    // console.log({ i });
+    // console.log({ "cloudinaryUploadRes[i]": cloudinaryUploadRes[i] });
+
+    if (cloudinaryUploadRes[i].originalName === name) {
+      obj[name] = cloudinaryUploadRes[i];
+    }
+  });
+  return obj;
 };

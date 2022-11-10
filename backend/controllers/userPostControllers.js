@@ -9,7 +9,7 @@ import {
   getTeamPosts,
   userAddPost,
   userCreatePost,
-  userPostCreateSecureURL,
+  multiImageCreateURL,
 } from "../utilities/controllerFunctions.js";
 import { sharpImgResize } from "../utilities/sharpFunctions.js";
 
@@ -95,7 +95,7 @@ export const userCreatePost_post = async (req, res) => {
 
       // assigns the correct public_id and secure_url from imageUploadResult
       // to postImages for mongoDB post.
-      const URLS = await userPostCreateSecureURL(postImages, imageUploadResult);
+      const URLS = await multiImageCreateURL(postImages, imageUploadResult);
 
       // sets postDataImages to URLS for mongoDB reference
       postData.postImages = URLS;
@@ -110,7 +110,7 @@ export const userCreatePost_post = async (req, res) => {
 
       // assigns the correct public_id and secure_url from imageUploadResult
       // to postImages for mongoDB post.
-      const URLS = await userPostCreateSecureURL(postImages, imageUploadResult);
+      const URLS = await multiImageCreateURL(postImages, imageUploadResult);
 
       // sets postDataImages to URLS for mongoDB reference
       postData.postImages = URLS;

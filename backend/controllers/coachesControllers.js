@@ -10,111 +10,58 @@ import { sharpImgResize } from "../utilities/sharpFunctions.js";
 import {
   getAdminUsersById,
   findCoachesByTeamId,
-  checkForCoachesAndUpdate,
-  createNewCoach,
+  createCoach,
+  createCoaches,
   updateCoach,
   deleteCoach,
+  handleSingleImageUpload,
 } from "../utilities/controllerFunctions.js";
 
 // CONTROLLERS FOR ADMIN to Create Coaches
-export const authCoaches_post = async (req, res) => {
+export const createCoach_post = async (req, res) => {
   // console.log("authCoaches_post_req.file", req.file);
 
   try {
     if (req.error) {
-      console.log({ authCoaches_post: error });
+      console.log({ createCoach_post: error });
       throw req.error;
     }
 
     // destructured req.userId from auth middleware
     const { id } = req.userId;
-    const userTeamId = req.userTeamId;
-    const { coachId } = req.query;
-
-    console.log({
-      "req.params": req.params,
-      "req.userTeamId": req.userTeamId,
-      userTeamId,
-    });
 
     // destructured req.body variables
-    let { firstName, lastName, email } = req.body;
+    let { firstName, lastName, email, teamUserName, teamName } = req.body;
 
-    // variables
-    let coachImage;
-    let imgTags = [];
-    let imgUploadResponse;
-    let imgPublicId;
-    let imgSecurecUrl;
+    let imgUpData = {
+      id,
+      firstName,
+      lastName,
+      teamUserName,
+      teamName,
+      imgFile: req.file,
+      imgTagName: "coaches",
+    };
 
-    // admin user
-    const adminUser = await getAdminUsersById(id);
-
-    // list of coaches for adminUsers team
-    const authUserCoaches = await findCoachesByTeamId(userTeamId);
-
-    // coaches upload to mongodb object
     let updateObj = {
       firstName,
       lastName,
       email,
       headshotImg: {},
-      teamId: adminUser.teamId,
+      teamId: id,
     };
 
-    // HANDLE AND UPLOAD IMAGES TO CLOUDINARY
-    // if (req.file) {
-    //   let fileResize = await sharpImgResize(req.file);
-    //   coachImage = { img: fileResize, lastName };
+    // handle image and upload to cloudinary and publicId and url to mongodb
+    const imgUploadResults = await handleSingleImageUpload(imgUpData);
 
-    //   // image tags for cloudinary
-    //   imgTags = [
-    //     adminUser.teamId,
-    //     adminUser.teamUserName,
-    //     adminUser.teamName,
-    //     firstName,
-    //     lastName,
-    //     email,
-    //     "coaches",
-    //   ];
+    updateObj.headshotImg.publicId = imgUploadResults.publicId;
+    updateObj.headshotImg.secureURL = imgUploadResults.secureURL;
 
-    //   // upload response from cloudinary, single image stream
-    //   imgUploadResponse = await async_cloudinaryStreamImg(
-    //     coachImage,
-    //     adminUser,
-    //     imgTags
-    //   );
+    const newCoach = await createCoach(id, updateObj);
 
-    //   imgPublicId = imgUploadResponse.public_id;
-    //   imgSecurecUrl = imgUploadResponse.secure_url;
-    //   updateObj.headshotImg.publicId = imgPublicId;
-    //   updateObj.headshotImg.secureURL = imgSecurecUrl;
-    // }
-
-    // if (adminUser && !authUserCoaches) {
-    //   const authCoachesDoc = await createNewCoach({
-    //     teamId: adminUser.teamId,
-    //     teamUserName: adminUser.teamUserName,
-    //     teamName: adminUser.teamName,
-    //     coaches: updateObj,
-    //   });
-
-    //   res.status(200).json(authCoachesDoc);
-    // }
-
-    // if (adminUser && authUserCoaches) {
-    //   const updatedCoachesDoc = await checkForCoachesAndUpdate(
-    //     userTeamId,
-    //     updateObj
-    //   );
-
-    //   if (!updatedCoachesDoc) {
-    //     throw new Error("A user with this email already exists");
-    //   }
-
-    //   res.status(200).json(updatedCoachesDoc);
-    // }
+    res.status(200).send(newCoach);
   } catch (error) {
+    console.log(error);
     const errors = handleErrors(error);
     res.status(400).json({ errors });
   }
@@ -148,21 +95,39 @@ export const updateCoachData_put = async (req, res) => {
       throw req.error;
     }
 
-    let { headshotPublicId, firstName, lastName, email } = req.body;
+    let {
+      headshotPublicId,
+      firstName,
+      lastName,
+      email,
+      teamName,
+      teamUserName,
+    } = req.body;
+
     const { id } = req.userId;
     const { coachId } = req.query;
-    const userTeamId = req.userTeamId;
 
     // variables
-    let imgTags = [];
     let imgUploadResponse;
-    let coachImage = {};
     let deleteResults;
-    let updateObj = { email, headshotImg: { secureURL: null, publicId: null } };
 
+    let updateObj = {
+      firstName,
+      lastName,
+      email,
+      headshotImg: {},
+      teamId: id,
+    };
 
-    // get admin user doc
-    const adminUserDoc = await findAdminUserById(id);
+    let imgUpData = {
+      id,
+      firstName,
+      lastName,
+      teamUserName,
+      teamName,
+      imgFile: req.file,
+      imgTagName: "coaches",
+    };
 
     // prepare and upload file
     if (headshotPublicId && req.file) {
@@ -173,42 +138,20 @@ export const updateCoachData_put = async (req, res) => {
 
       if (deleteResults.result === "ok") {
         console.log({
-          updateCoachData_put_____deleteResults: "fuck yes delete successful",
+          updateCoachData_put_____deleteResults: "file successfully deleted",
         });
+
+        // handle image and upload to cloudinary and publicId and url to mongodb
+        imgUploadResponse = await handleSingleImageUpload(imgUpData);
+
+        updateObj.headshotImg.publicId = imgUploadResponse.publicId;
+        updateObj.headshotImg.secureURL = imgUploadResponse.secureURL;
       }
 
-      // resize image and set coachImage obj data
-      const fileResize = await sharpImgResize(req.file);
-      coachImage.img = fileResize;
-      coachImage.lastName = lastName;
-      coachImage.firstName = firstName;
+      const coachDoc = await updateCoach(id, coachId, updateObj);
 
-      imgTags = [
-        adminUserDoc.teamId,
-        adminUserDoc.teamUserName,
-        adminUserDoc.teamName,
-        firstName,
-        lastName,
-        email,
-        "coaches",
-      ];
-
-      // upload response from cloudinary, single image stream
-      imgUploadResponse = await async_cloudinaryStreamImg(
-        coachImage,
-        adminUserDoc,
-        imgTags
-      );
-
-      updateObj.headshotImg.secureURL = imgUploadResponse.secure_url;
-      updateObj.headshotImg.publicId = imgUploadResponse.public_id;
-
-      console.log({ updateCoachData_put_____updateObj: updateObj });
+      res.status(200).json(coachDoc);
     }
-
-    const updatedCoachDoc = await updateCoach(userTeamId, coachId, updateObj);
-
-    res.status(200).json(updatedCoachDoc);
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });

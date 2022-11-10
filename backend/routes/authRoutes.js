@@ -10,7 +10,7 @@ import {
 } from "../controllers/authControllers.js";
 
 import {
-  authPlayers_post,
+  createPlayer_post,
   deletePlayer_delete,
   players_get,
   updatePlayerData_put,
@@ -23,7 +23,7 @@ import {
 } from "../controllers/teamControllers.js";
 
 import {
-  authCoaches_post,
+  createCoach_post,
   coaches_get,
   deleteCoach_delete,
   updateCoachData_put,
@@ -110,7 +110,7 @@ router.post(
   "/api/admin/createPlayers",
   requiresAuth,
   multerUploadsMultiple,
-  authPlayers_post
+  createPlayer_post
 );
 
 router.get("/api/admin/players/:teamId", requiresAuth, players_get);
@@ -128,10 +128,10 @@ router.delete(
 
 // COACHES ROUTES
 router.post(
-  "/api/admin/coaches/createCoach/:teamId",
+  "/api/admin/coaches/createCoach",
   requiresAuth,
   multerUploadsCoach,
-  authCoaches_post
+  createCoach_post
 );
 router.get("/api/admin/coaches/:teamId", coaches_get);
 router.put(

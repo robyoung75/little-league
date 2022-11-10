@@ -21,7 +21,7 @@ const createCloudinaryStream = (
   imgTagsArray
 ) => {
   // console.log("imgFileBuffer >>>>> ", imgFileBuffer);
-
+  console.log({ adminUserObject });
   if (!imgFileBuffer) return;
 
   return new Promise((resolve, reject) => {
@@ -33,9 +33,13 @@ const createCloudinaryStream = (
         folder: `${adminUserObject.teamUserName}/${fileFolderName}`,
         tags: imgTagsArray,
         public_id: `${adminUserObject.teamUserName}_name_${
-          imgFileBuffer.lastName
-            ? imgFileBuffer.lastName
+          adminUserObject.lastName
+            ? adminUserObject.lastName
             : adminUserObject.teamName
+        }_${
+          adminUserObject.firstName
+            ? adminUserObject.firstName
+            : adminUserObject.teamUserName
         }_${fileFolderName}`,
       },
       (error, result) => {
@@ -53,6 +57,9 @@ const createCloudinaryStream = (
 };
 
 const createCloudinaryStreamMultiple = (imgFileBufferArray, imgTagsArray) => {
+
+  console.log("createCloudinaryStreamMultiple >>>>> imgTagsArray", imgTagsArray)
+  console.log("createCloudinaryStreamMultiple >>>>> imgFileBufferArray", imgFileBufferArray)
   // the last item in the tags array with be the file folder location name in cloudinary
   let fileFolderName = imgTagsArray[imgTagsArray.length - 1];
 
@@ -102,13 +109,13 @@ export const async_cloudinaryStreamImg = async (
 
 export const async_cloudinaryStreamImgs = async (
   imgFileBufferArray,
-  teamId,
-  teamUserName
+  imgTagsArray
 ) => {
+  console.log("async_cloudinaryStreamImgs >>>>> imgFileBufferArray", imgFileBufferArray)
+  console.log("async_cloudinaryStreamImgs >>>>> imgTagsArray", imgTagsArray)
   let results = await createCloudinaryStreamMultiple(
     imgFileBufferArray,
-    teamId,
-    teamUserName
+    imgTagsArray
   );
   // console.log("async_cloudinaryStreamImgs_results", results);
   return results;
@@ -117,10 +124,10 @@ export const async_cloudinaryStreamImgs = async (
 // DELETE AN IMAGE BY PUBLIC ID
 export const async_cloudinaryDeleteImg = async (publicId) => {
   try {
-    console.log("hello from async_cloudinaryDeleteImg");
+
 
     const result = await cloudinary.uploader.destroy(publicId);
-    console.log("result___________________", result);
+    console.log({deleteImg: result});
 
     return result;
   } catch (error) {
@@ -130,8 +137,8 @@ export const async_cloudinaryDeleteImg = async (publicId) => {
 
 // DELETE MULTIPLE IMAGES BY PUBLIC ID
 export const async_cloudinaryDeleteMultipleImages = async (publicIdArr) => {
-  console.log("hello mother fucker from async_cloudinaryDeleteMultipImages");
+  
   const result = await cloudinary.api.delete_resources(publicIdArr);
-
+  console.log({deleteMultipleImage: result})
   return result;
 };

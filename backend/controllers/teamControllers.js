@@ -9,6 +9,7 @@ import {
   getTeamById,
   updateTeamColors,
   handleSingleImageUpload,
+  updateTeamLogo,
 } from "../utilities/controllerFunctions.js";
 
 // CONTROLLERS FOR ADMIN TO CREATE A TEAM
@@ -26,11 +27,6 @@ const createTeam_post = async (req, res) => {
 
     let { primaryColor, secondaryColor, teamUserName, teamName } = req.body;
 
-    let teamUpdate = {
-      logoUpdate: "",
-      colorUpdate: "",
-    };
-
     let imgUpData = {
       id,
       teamUserName,
@@ -40,15 +36,22 @@ const createTeam_post = async (req, res) => {
     };
 
     // handle image and upload to cloudinary and publicId and url to mongodb
-    teamUpdate.logoUpdate = await handleSingleImageUpload(imgUpData);
+    const imgUploadResponse = await handleSingleImageUpload(imgUpData);
+
+    let updateObj = {
+      teamLogo: imgUploadResponse.secureURL,
+      teamLogoPublicId: imgUploadResponse.publicId,
+    };
+
+    const logoUdateMogoDb = await updateTeamLogo(id, updateObj);
 
     // handle team colors and send to mongodb
-    teamUpdate.colorUpdate = await updateTeamColors(id, {
+    const colorsUpdate = await updateTeamColors(id, {
       primaryColor,
       secondaryColor,
     });
 
-    res.status(200).json(teamUpdate);
+    res.status(200).json({ logoUdateMogoDb, colorsUpdate });
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });
@@ -80,11 +83,10 @@ const teamUdpdate_put = async (req, res) => {
     const { teamLogoPublicId } = req.query;
     let { primaryColor, secondaryColor, teamUserName, teamName } = req.body;
 
-    // variables
-    let teamUpdate = {
-      logoUpdate: "",
-      colorUpdate: "",
-    };
+    let teamLogoUpdate;
+    let teamColorsUpdate;
+    let imgUploadResponse;
+    let updateObj = {};
 
     let imgUpData = {
       id,
@@ -101,17 +103,34 @@ const teamUdpdate_put = async (req, res) => {
       console.log("teamUpdate_put_result", result);
 
       // handle image and upload to cloudinary and publicId and url to mongodb
-      teamUpdate.logoUpdate = await handleSingleImageUpload(imgUpData);
+      imgUploadResponse = await handleSingleImageUpload(imgUpData);
+
+      updateObj = {
+        teamLogo: imgUploadResponse.secureURL,
+        teamLogoPublicId: imgUploadResponse.publicId,
+      };
+
+      teamLogoUpdate = await updateTeamLogo(id, updateObj);
     }
 
     if (primaryColor && secondaryColor) {
-      teamUpdate.colorUpdate = await updateTeamColors(id, {
+      teamColorsUpdate = await updateTeamColors(id, {
         primaryColor,
         secondaryColor,
       });
     }
 
-    res.status(200).json(teamUpdate);
+    if (imgUploadResponse && teamColorsUpdate) {
+      res
+        .status(200)
+        .json({ imgUploadResponse, teamLogoUpdate, teamColorsUpdate });
+    } else if (imgUploadResponse && !teamColorsUpdate) {
+      res.status(200).json({ imgUploadResponse, teamLogoUpdate });
+    } else if (!imgUploadResponse && teamColorsUpdate) {
+      res.status(200).json({ teamColorsUpdate });
+    } else {
+      throw new Error("Please select and image or colors to update");
+    }
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });

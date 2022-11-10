@@ -11,6 +11,7 @@ export const handleErrors = (err) => {
     user: "",
     adminUser: "",
     adminTeamPost: "",
+    adminCoachPost: "",
     player: "",
     posts: "",
   };
@@ -87,6 +88,18 @@ export const handleErrors = (err) => {
 
   if (err.message.includes("No team posts were found")) {
     errors.posts = err.message;
+  }
+
+  if (err.message.includes("Please select and image or colors to update")) {
+    errors.adminTeamPost = err.message;
+  }
+  
+  if (
+    err.message.includes(
+      "The submitted email address exists for another user. Email must be unique"
+    )
+  ) {
+    errors.adminCoachPost = err.message;
   }
 
   console.log({ errors: errors });
