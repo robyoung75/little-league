@@ -45,7 +45,7 @@ export const configureDatabase = async (reqObj) => {
     const teamDoc = await createTeam(reqObj);
     const coachDoc = await createCoaches(reqObj);
     const playerDoc = await createPlayers(reqObj);
-    const scheduleDoc = await createNewSchedule(reqObj);
+    const scheduleDoc = await createSchedules(reqObj);
     const postDoc = await userCreatePost(reqObj);
     const userDoc = await createNewUser(reqObj);
 
@@ -292,8 +292,7 @@ export const getPlayersById = async (id) => {
 // updates an existing players photos and number
 
 export const updatePlayer = async (id, playerId, updateObj) => {
-
-  console.log({id, playerId, updateObj})
+  console.log({ id, playerId, updateObj });
   try {
     let updateData = {};
     let playersDoc;
@@ -318,7 +317,7 @@ export const updatePlayer = async (id, playerId, updateObj) => {
       updateData.defensePublicId = updateObj.defenseImg.publicId;
     }
 
-    console.log({updateData})
+    console.log({ updateData });
 
     playersDoc = await TeamPlayersSchema.findOneAndUpdate(
       { teamId: id, "players._id": playerId },
@@ -488,7 +487,7 @@ export const deleteCoach = async (teamId, coachId) => {
 
 // SCHEDULE CONTROLLER FUNCTIONS
 // create new schedule
-export const createNewSchedule = async (reqObj) => {
+export const createSchedules = async (reqObj) => {
   try {
     let update = {
       teamId: reqObj.teamId,
@@ -499,21 +498,43 @@ export const createNewSchedule = async (reqObj) => {
     const newGame = await TeamsScheduleSchema.create(update);
     return newGame;
   } catch (error) {
-    console.log({ createNewSchedule: error });
-    return { createNewSchedule: error };
+    console.log({ createSchedules: error });
+    return { createSchedules: error };
+  }
+};
+
+// create a new coach in the coaches document coaches array
+export const createSchedule = async (id, updateObj) => {
+  try {
+    console.log({
+      createSchedule: { req: { id, updateObj } },
+    });
+
+    const scheduleDoc = await TeamsScheduleSchema.findOneAndUpdate(
+      { teamId: id },
+      { $push: { schedule: updateObj } },
+      { returnOriginal: false }
+    );
+
+    // i use save to cause my mongoose middleware to fire on a push to a sub document
+    await scheduleDoc.save();
+    return scheduleDoc;
+  } catch (error) {
+    console.log({ createSchedule: error });
+    return error;
   }
 };
 
 // check if existing teamSchedule exists
-export const findTeamSchedule = async (teamUserId) => {
+export const getTeamSchedule = async (teamUserId) => {
   try {
-    const existingSchedule = await TeamsScheduleSchema.findOne({
+    const scheduleDoc = await TeamsScheduleSchema.findOne({
       teamId: teamUserId,
     });
-    return existingSchedule;
+    return scheduleDoc;
   } catch (error) {
-    console.log({ findTeamSchedule: error });
-    return { findTeamSchedule: error };
+    console.log({ scheduleDoc: error });
+    return { scheduleDoc: error };
   }
 };
 
@@ -538,9 +559,9 @@ export const updateTeamSchedule = async (teamUserId, updateObj) => {
 };
 
 // UPDATE AN INDIVIDUAL SCHEDULED DATE IN SCHEDULE DOCUMENT
-export const updateScheduleDate = async (teamUserId, scheduleId, updateObj) => {
+export const updateScheduleData = async (teamUserId, scheduleId, updateObj) => {
   try {
-    // console.log({ updateScheduleDate: filter, updateScheduleDate: updateObj });
+    // console.log({ updateScheduleData: filter, updateScheduleData: updateObj });
 
     let updateData = {};
     let update;
@@ -584,23 +605,24 @@ export const updateScheduleDate = async (teamUserId, scheduleId, updateObj) => {
       },
     };
 
-    const updatedScheduleDate = await TeamsScheduleSchema.findOneAndUpdate(
+    const scheduleDoc = await TeamsScheduleSchema.findOneAndUpdate(
       { teamId: teamUserId, "schedule._id": scheduleId },
       update,
       { returnOriginal: false }
     );
 
-    return updatedScheduleDate;
+    return scheduleDoc;
   } catch (error) {
-    console.log({ updateScheduleDate: error });
-    return { updateScheduleDate: error };
+    console.log({ updateScheduleData: error });
+    return { updateScheduleData: error };
   }
 };
 
 // delete schedule date
-export const deleteScheduleDate = async (teamId, scheduleId) => {
+export const deleteSchedule = async (teamId, scheduleId) => {
   try {
-    console.log({ hello: "hello from deleteScheduleDate", teamId, scheduleId });
+    console.log({ hello: "hello from deleteSchedule", teamId, scheduleId });
+    
     const scheduleDoc = await TeamsScheduleSchema.findOneAndUpdate(
       { teamId: teamId },
       {
@@ -959,16 +981,34 @@ export const createImgObjMongoDbUpload = (cloudinaryUploadRes, arrImgNames) => {
     return null;
   }
 
-  let obj = {};
+  let imgDataObj = {};
 
   arrImgNames.forEach((name, i) => {
-    // console.log({ name });
-    // console.log({ i });
-    // console.log({ "cloudinaryUploadRes[i]": cloudinaryUploadRes[i] });
-
     if (cloudinaryUploadRes[i].originalName === name) {
-      obj[name] = cloudinaryUploadRes[i];
+      imgDataObj[name] = cloudinaryUploadRes[i];
     }
   });
-  return obj;
+  console.log({ imgDataObj });
+  return imgDataObj;
 };
+
+// SAMPLE OBJECT RETURN createImgObjMongoDbUpload();
+// {
+//   imgDataObj: {
+//     headshotImg: {
+//       secureURL: 'https://res.cloudinary.com/dyxsxutlm/image/upload/v1668095874/cottonwoodcolts/players/cottonwoodcolts_fName_steve_lName_jessup_title_headshotImg.webp',
+//       publicId: 'cottonwoodcolts/players/cottonwoodcolts_fName_steve_lName_jessup_title_headshotImg',
+//       originalName: 'headshotImg'
+//     },
+//     offenseImg: {
+//       secureURL: 'https://res.cloudinary.com/dyxsxutlm/image/upload/v1668095874/cottonwoodcolts/players/cottonwoodcolts_fName_steve_lName_jessup_title_offenseImg.webp',
+//       publicId: 'cottonwoodcolts/players/cottonwoodcolts_fName_steve_lName_jessup_title_offenseImg',
+//       originalName: 'offenseImg'
+//     },
+//     defenseImg: {
+//       secureURL: 'https://res.cloudinary.com/dyxsxutlm/image/upload/v1668095874/cottonwoodcolts/players/cottonwoodcolts_fName_steve_lName_jessup_title_defenseImg.webp',
+//       publicId: 'cottonwoodcolts/players/cottonwoodcolts_fName_steve_lName_jessup_title_defenseImg',
+//       originalName: 'defenseImg'
+//     }
+//   }
+// }

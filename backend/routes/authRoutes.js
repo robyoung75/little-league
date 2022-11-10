@@ -30,8 +30,8 @@ import {
 } from "../controllers/coachesControllers.js";
 
 import {
-  authSchedule_post,
-  deleteScheduleDate_delete,
+  createSchedule_post,
+  deleteSchedule_delete,  
   schedule_get,
   updateSchedule_put,
 } from "../controllers/scheduleControllers.js";
@@ -96,7 +96,12 @@ router.post("/api/user/signin", signInUser_post);
 router.get("/api/signout", signOutUser_get);
 
 // TEAM ROUTES
-router.post("/api/admin/team", requiresAuth, multerUploadsTeam, createTeam_post);
+router.post(
+  "/api/admin/team",
+  requiresAuth,
+  multerUploadsTeam,
+  createTeam_post
+);
 router.get("/api/admin/team/:teamId", requiresAuth, team_get);
 router.put(
   "/api/admin/team/updateImage/:team",
@@ -147,22 +152,18 @@ router.delete(
 );
 
 // SCHEDULE ROUTES
-router.post(
-  "/api/admin/createSchedule/:teamId",
-  requiresAuth,
-  authSchedule_post
-);
+router.post("/api/admin/createSchedule", requiresAuth, createSchedule_post);
 router.get("/api/admin/schedule/:teamId", requiresAuth, schedule_get);
 router.put(
-  "/api/admin/schedule/updateSchedule/:teamId",
+  "/api/admin/schedule/updateSchedule",
   requiresAuth,
   updateSchedule_put
 );
 
 router.delete(
-  "/api/admin/schedule/delete/:teamId",
+  "/api/admin/schedule/delete",
   requiresAuth,
-  deleteScheduleDate_delete
+  deleteSchedule_delete
 );
 
 // USER ROUTES
