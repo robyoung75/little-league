@@ -27,6 +27,7 @@ const createTeam_post = async (req, res) => {
 
     let { primaryColor, secondaryColor, teamUserName, teamName } = req.body;
 
+    // upload object for cloudinary
     let imgUpData = {
       id,
       teamUserName,
@@ -38,20 +39,24 @@ const createTeam_post = async (req, res) => {
     // handle image and upload to cloudinary and publicId and url to mongodb
     const imgUploadResponse = await handleSingleImageUpload(imgUpData);
 
+    // mongodb update object
     let updateObj = {
       teamLogo: imgUploadResponse.secureURL,
       teamLogoPublicId: imgUploadResponse.publicId,
     };
 
-    const logoUdateMogoDb = await updateTeamLogo(id, updateObj);
+    // updates mongo db to include the new team logo
+    await updateTeamLogo(id, updateObj);
 
     // handle team colors and send to mongodb
-    const colorsUpdate = await updateTeamColors(id, {
+    await updateTeamColors(id, {
       primaryColor,
       secondaryColor,
     });
 
-    res.status(200).json({ logoUdateMogoDb, colorsUpdate });
+    const teamDoc = await getTeamById(id);
+
+    res.status(200).json(teamDoc);
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });
@@ -83,8 +88,6 @@ const teamUdpdate_put = async (req, res) => {
     const { teamLogoPublicId } = req.query;
     let { primaryColor, secondaryColor, teamUserName, teamName } = req.body;
 
-    let teamLogoUpdate;
-    let teamColorsUpdate;
     let imgUploadResponse;
     let updateObj = {};
 
@@ -99,8 +102,7 @@ const teamUdpdate_put = async (req, res) => {
     // delete existing cloudinary image, add new image
     if (req.file) {
       // delete existing image from cloudinary
-      const result = await async_cloudinaryDeleteImg(teamLogoPublicId);
-      console.log("teamUpdate_put_result", result);
+      await async_cloudinaryDeleteImg(teamLogoPublicId);
 
       // handle image and upload to cloudinary and publicId and url to mongodb
       imgUploadResponse = await handleSingleImageUpload(imgUpData);
@@ -110,27 +112,19 @@ const teamUdpdate_put = async (req, res) => {
         teamLogoPublicId: imgUploadResponse.publicId,
       };
 
-      teamLogoUpdate = await updateTeamLogo(id, updateObj);
+      await updateTeamLogo(id, updateObj);
     }
 
     if (primaryColor && secondaryColor) {
-      teamColorsUpdate = await updateTeamColors(id, {
+      await updateTeamColors(id, {
         primaryColor,
         secondaryColor,
       });
     }
 
-    if (imgUploadResponse && teamColorsUpdate) {
-      res
-        .status(200)
-        .json({ imgUploadResponse, teamLogoUpdate, teamColorsUpdate });
-    } else if (imgUploadResponse && !teamColorsUpdate) {
-      res.status(200).json({ imgUploadResponse, teamLogoUpdate });
-    } else if (!imgUploadResponse && teamColorsUpdate) {
-      res.status(200).json({ teamColorsUpdate });
-    } else {
-      throw new Error("Please select and image or colors to update");
-    }
+    const adminDoc = await getTeamById(id);
+
+    res.status(200).json(adminDoc);
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });

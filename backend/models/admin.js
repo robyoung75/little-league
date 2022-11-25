@@ -45,10 +45,10 @@ const AdminSchema = new Schema({
     required: true,
   },
 
-  // teamId: {
-  //   type: String,
-  //   required: [true],
-  // },
+  teamId: {
+    type: String,
+    required: [true],
+  },
   date: {
     type: Date,
     default: Date.now,

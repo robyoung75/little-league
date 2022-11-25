@@ -31,13 +31,13 @@ import {
 
 import {
   createSchedule_post,
-  deleteSchedule_delete,  
+  deleteSchedule_delete,
   schedule_get,
   updateSchedule_put,
 } from "../controllers/scheduleControllers.js";
 
 import {
-  authNewUser_post,
+  adminCreateUser_post,
   userCreateUser_post,
   signInUser_post,
   users_get,
@@ -84,8 +84,8 @@ router.delete(
   deleteAdminUser_delete
 );
 
-// admin routes for admin to work with user accounts
-router.post("/api/admin/createUser/:teamId", requiresAuth, authNewUser_post);
+// ADMIN ROUTES FOR USERS
+router.post("/api/admin/createUser", requiresAuth, adminCreateUser_post);
 router.get("/api/admin/users", requiresAuth, users_get);
 
 // router.delete("/api/admin/users/deleteUser/:teamId", requiresAuth, deleteUser_delete);
@@ -167,7 +167,6 @@ router.delete(
 );
 
 // USER ROUTES
-
 router.post("/api/user/createUser", userCreateUser_post);
 router.delete("/api/users/delete/:teamId", requiresAuth, deleteUser_delete);
 

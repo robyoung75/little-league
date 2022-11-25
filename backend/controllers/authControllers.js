@@ -7,13 +7,12 @@ import { hashPassword } from "../utilities/bcrypt.js";
 // Mongodb helper functions
 import {
   createNewAdminUser,
-  
   setTeamId,
   deleteAdminUser,
-  
   configureDatabase,
   updateAdminUsers,
   getAdminUsersById,
+  setAdminUserTeamId,
 } from "../utilities/controllerFunctions.js";
 
 // import errors functions from errors/errors.js
@@ -25,6 +24,7 @@ import { createJwtToken, maxAge } from "./createJWT.js";
 // CREATE ADMIN USER
 const createAdminUser_post = async (req, res) => {
   try {
+    // temporary teamId that will be set as the admin user is defined
     req.body.teamId = "teamId not set";
 
     // req.body destructured
@@ -37,8 +37,9 @@ const createAdminUser_post = async (req, res) => {
       password,
       teamId,
     } = req.body;
+
     // hash the password
-    let hashedPassword = await hashPassword(password);
+    const hashedPassword = await hashPassword(password);
 
     // adminUser object for upload to mongodb
     let adminUser = {
@@ -54,27 +55,29 @@ const createAdminUser_post = async (req, res) => {
     // obj used to create new admin user document in mongodb
     const teamAdmin = { teamName, teamUserName, teamId, admin: adminUser };
 
-    const newAdmin = await createNewAdminUser(teamAdmin);
-    // update new adminuser doc to include the team id. team id is the same as the document object
-    const updatedTeamId = await setTeamId(newAdmin._id);
-    // updated admin user doc including the team id
-    // const updatedAdmin = await setAdminUserTeamId(newAdmin._id);
-    console.log(updatedTeamId._id);
-    // configures the db documents: coaches, players, posts, schedules, teams, users
-    const userDbConfig = await configureDatabase({
-      teamId: updatedTeamId._id,
-      teamUserName,
-      teamName,
-    });
+    // create a new admin doc and user for the team
+    const adminDoc = await createNewAdminUser(teamAdmin);
 
-    // JWT AUTHENTICATION
-    if (updatedTeamId && userDbConfig) {
+    if (adminDoc) {
+      // sets admin doc team id to mongod db object id
+      const updateAdminDocTeamId = await setTeamId(adminDoc._id);
+
+      // sets users team id in the admin array of admin users
+      const updateAdminUserTeamId = await setAdminUserTeamId(adminDoc._id);
+
+      // // configures the db documents: coaches, players, posts, schedules, teams, users
+      const userDbConfig = await configureDatabase({
+        teamId: updateAdminDocTeamId._id,
+        teamUserName,
+        teamName,
+      });
+
       // create a jwt token
-      const token = createJwtToken(newAdmin._id);
+      const token = createJwtToken(adminDoc._id);
 
       // send token as a cookie
       res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
-      res.status(200).json(updatedTeamId);
+      res.status(200).json(updateAdminUserTeamId);
     }
   } catch (error) {
     const errors = handleErrors(error);
@@ -103,7 +106,7 @@ const getAllAdminUsers_get = async (req, res) => {
   }
 };
 
-// UPDATE ADMIN + ADD SECOND ADMIN
+// UPDATE ADMIN, ADD A SECOND ADMIN USER
 const updateAdminUsers_put = async (req, res) => {
   try {
     if (req.error) {
@@ -120,7 +123,8 @@ const updateAdminUsers_put = async (req, res) => {
     const { firstName, lastName, email, teamName, teamUserName, password } =
       req.body;
 
-    const existingAdmin = await findAdminUserById(id);
+    // gets existing admin doc
+    const existingAdmin = await getAdminUsersById(id);
     // check the length of existin admin, only two users allowed
     if (existingAdmin.admin.length >= 2) {
       throw Error(
@@ -148,6 +152,7 @@ const updateAdminUsers_put = async (req, res) => {
       teamId,
     };
 
+    // update the admin users array to include new user
     const adminUserDoc = await updateAdminUsers(teamId, adminUser);
 
     res.status(200).json(adminUserDoc);
@@ -173,7 +178,7 @@ const deleteAdminUser_delete = async (req, res) => {
 
     console.log({ id, userId, teamId });
 
-    const adminUsers = await findAdminUserById(id);
+    const adminUsers = await getAdminUsersById(id);
 
     if (adminUsers.admin.length < 2) {
       throw Error(

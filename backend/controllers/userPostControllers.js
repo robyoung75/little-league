@@ -7,8 +7,7 @@ import {
 import {
   deletePost,
   getTeamPosts,
-  userAddPost,
-  userCreatePost,
+  createPost,
   multiImageCreateURL,
 } from "../utilities/controllerFunctions.js";
 import { sharpImgResize } from "../utilities/sharpFunctions.js";
@@ -31,15 +30,14 @@ export const userCreatePost_post = async (req, res) => {
     }
 
     const { id } = req.userId;
-    console.log("id.......................................", id);
+
     const teamUserId = req.userTeamId;
-    console.log({ id: id, teamUserId: teamUserId });
 
     const { teamUserName, teamName, firstName, lastName, number, post } =
       req.body;
 
-    // check for existing teamPosts document in mongoDB
-    const existingPosts = await getTeamPosts(teamUserId);
+    // updated postDoc
+    let postDoc;
 
     // image variables
     let imgTags = [
@@ -64,13 +62,6 @@ export const userCreatePost_post = async (req, res) => {
       post,
       postImages,
     };
-    // posts update object for mongodb
-    let updateObj = {
-      teamId: teamUserId,
-      teamUserName: teamUserName,
-      teamName: teamName,
-      posts: postData,
-    };
 
     // resize all images for dbase space
     await Promise.all(
@@ -86,38 +77,18 @@ export const userCreatePost_post = async (req, res) => {
       })
     );
 
-    // updated postDoc
-    let postDoc;
+    // image upload result to cloudinary
+    imageUploadResult = await async_cloudinaryStreamImgs(postImages, imgTags);
 
-    if (!existingPosts) {
-      // image upload result to cloudinary
-      imageUploadResult = await async_cloudinaryStreamImgs(postImages, imgTags);
+    // assigns the correct public_id and secure_url from imageUploadResult
+    // to postImages for mongoDB post.
+    const URLS = await multiImageCreateURL(postImages, imageUploadResult);
 
-      // assigns the correct public_id and secure_url from imageUploadResult
-      // to postImages for mongoDB post.
-      const URLS = await multiImageCreateURL(postImages, imageUploadResult);
+    // sets postDataImages to URLS for mongoDB reference
+    postData.postImages = URLS;
 
-      // sets postDataImages to URLS for mongoDB reference
-      postData.postImages = URLS;
-
-      // creates a new post
-      postDoc = await userCreatePost(updateObj);
-    }
-
-    if (existingPosts) {
-      // image upload result to cloudinary
-      imageUploadResult = await async_cloudinaryStreamImgs(postImages, imgTags);
-
-      // assigns the correct public_id and secure_url from imageUploadResult
-      // to postImages for mongoDB post.
-      const URLS = await multiImageCreateURL(postImages, imageUploadResult);
-
-      // sets postDataImages to URLS for mongoDB reference
-      postData.postImages = URLS;
-
-      // pushes new posts to existing teamPosts doc if it exists.
-      postDoc = await userAddPost(teamUserId, postData);
-    }
+    // pushes new posts to existing teamPosts doc if it exists.
+    postDoc = await createPost(teamUserId, postData);
 
     res.status(200).json(postDoc);
   } catch (error) {
@@ -150,6 +121,7 @@ export const teamPosts_get = async (req, res) => {
 };
 
 // UPDATE POST
+// for now only allow for delete and repost for update. may change?
 
 // DELETE POST
 export const deletePost_delete = async (req, res) => {
@@ -173,7 +145,7 @@ export const deletePost_delete = async (req, res) => {
     img_2 && publicIdArr.push(img_2);
     img_3 && publicIdArr.push(img_3);
     img_4 && publicIdArr.push(img_4);
-    img_5 && publicIdArr.push(img_4);
+    img_5 && publicIdArr.push(img_5);
 
     if (publicIdArr !== []) {
       await async_cloudinaryDeleteMultipleImages(publicIdArr);

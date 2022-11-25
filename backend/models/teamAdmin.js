@@ -45,24 +45,25 @@ TeamAdminSchema.pre("save", async function (next) {
 
 // this function will fire after a doc is saved to the database
 TeamAdminSchema.post("save", (doc, next) => {
-  const admins = doc.admin
+  const admins = doc.admin;
   const newAdmin = admins.length - 1;
-  console.log("Hello from TeamAdminSchema: A new admin user was saved", admins[newAdmin]);
+  console.log(
+    "Hello from TeamAdminSchema: A new admin user was saved",
+    admins[newAdmin]
+  );
   next();
 });
 
 // this is a static method that can be used with the TeamAdminSchema model
 TeamAdminSchema.statics.login = async function (email, password) {
-  console.log(email, password)
-  
+  console.log(email, password);
 
   let user = await this.findOne(
     { "admin.email": email },
     { admin: { $elemMatch: { email: email } } }
   );
 
-  console.log(user)
-  
+  console.log(user);
 
   // console.log("A new user is signing in >>>>>>>>>>> ", {
   //   firstName: user.admin[0].firstName,

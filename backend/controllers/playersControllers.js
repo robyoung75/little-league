@@ -30,6 +30,9 @@ const createPlayer_post = async (req, res) => {
     // req.userId returns from auth middleware
     const { id } = req.userId;
 
+    // creates an array of object keys or file names
+    const imgNames = Object.keys(req.files);
+
     // variables
     // destructured req.body
     const {
@@ -64,9 +67,6 @@ const createPlayer_post = async (req, res) => {
       imgTagName: "players",
     };
 
-    // imgNames is an array of objects including the req.files fieldname for each file
-    let imgNames = ["headshotImg", "offenseImg", "defenseImg"];
-
     let mongoDbImgData;
 
     // UPLOAD IMAGES TO CLOUDINARY
@@ -75,7 +75,7 @@ const createPlayer_post = async (req, res) => {
     // ASSIGN CLOUDINARY URL, PUBLICID, ORIGINAL NAME TO PLAYER DATA
     // for upload to mongodb.
     mongoDbImgData = createImgObjMongoDbUpload(imgUploadResponse, imgNames);
-
+    console.log({ mongoDbImgData });
     playerData.headshotImg = mongoDbImgData.headshotImg;
     playerData.offenseImg = mongoDbImgData.offenseImg;
     playerData.defenseImg = mongoDbImgData.defenseImg;

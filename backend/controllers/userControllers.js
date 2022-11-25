@@ -13,17 +13,14 @@ import { createJwtToken, maxAge } from "./createJWT.js";
 
 // helper functions
 import {
-  findTeamByTeamUserName,
-  findUsersByTeamUserName,
-  getAdminUsersById,
   findUsersById,
   createNewUser,
-  addToExistingUsers,
   deleteUser,
+  userCreateUser,
 } from "../utilities/controllerFunctions.js";
 
 // Admin creates users
-export const authNewUser_post = async (req, res) => {
+export const adminCreateUser_post = async (req, res) => {
   try {
     if (req.error) {
       console.log({ authNewUser_post: req.error });
@@ -31,41 +28,16 @@ export const authNewUser_post = async (req, res) => {
     }
 
     const { id } = req.userId;
-    const teamId = req.userTeamId;
-    let { firstName, lastName, email, password } = req.body;
-    let user = { firstName, lastName, email, teamId };
-    // check for auth admin user
-    const authUser = await getAdminUsersById(id);
+
+    let { firstName, lastName, email, password, teamName, teamUserName } =
+      req.body;
+    let user = { firstName, lastName, email, teamName, teamUserName };
 
     user.password = await hashPassword(password);
 
-    if (!authUser) {
-      const error = new Error("You must be an admin user to post new user");
-      throw error;
-    }
+    const usersDoc = await createNewUser(id, user);
 
-    // check for existing users
-    const existingUsers = await findUsersById(teamId);
-
-    if (!existingUsers && authUser) {
-      const newUserDoc = await createNewUser({
-        teamId: teamId,
-        teamUserName: authUser.teamUserName,
-        teamName: authUser.teamName,
-        users: user,
-      });
-      res.status(200).json(newUserDoc);
-    }
-
-    if (existingUsers && authUser) {
-      const updatedUsersDoc = await addToExistingUsers(teamId, user);
-
-      if (!updatedUsersDoc) {
-        throw new Error("A user with this email already exists");
-      }
-
-      res.status(200).json(updatedUsersDoc);
-    }
+    res.status(200).json(usersDoc);
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });
@@ -77,56 +49,21 @@ export const userCreateUser_post = async (req, res) => {
   try {
     let { firstName, lastName, email, password, teamUserName } = req.body;
 
-    // check for existing team...
-    const existingTeam = await findTeamByTeamUserName(teamUserName);
-
-    // check for existing users...
-    const existingUsers = await findUsersByTeamUserName(teamUserName);
-
-    if (!existingTeam) {
-      const error = new Error(
-        "Authorization denied, no existing team found check credentials"
-      );
-      throw error;
-    }
-
-    const teamId = existingTeam.teamId;
-    let user = { firstName, lastName, email, teamId };
+    let user = { firstName, lastName, email, teamUserName };
     user.password = await hashPassword(password);
 
-    if (existingTeam && !existingUsers) {
-      const newUserDoc = await createNewUser({
-        teamId: existingTeam.teamId,
-        teamUserName: existingTeam.teamUserName,
-        teamName: existingTeam.teamName,
-        users: user,
-      });
+    const userDoc = await userCreateUser(teamUserName, user);
 
-      // create a jwt token
-      const token = createJwtToken(newUserDoc._id);
-
-      // send token as a cookie
-      res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
-      res.status(200).json(newUserDoc);
+    if (userDoc.name === "TypeError") {
+      throw { name: userDoc.name, message: userDoc.message };
     }
 
-    if (existingTeam && existingUsers) {
-      // let teamId = user.teamId;
+    // create a jwt token
+    const token = createJwtToken(userDoc._id);
 
-      const updatedUsersDoc = await addToExistingUsers(teamId, user);
-
-      if (!updatedUsersDoc) {
-        throw new Error("A user with this email already exists");
-      }
-
-      // create a jwt token
-      const token = createJwtToken(updatedUsersDoc._id);
-
-      // send token as a cookie
-      res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
-
-      res.status(200).json(updatedUsersDoc);
-    }
+    // send token as a cookie
+    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
+    res.status(200).json(userDoc);
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });
@@ -143,9 +80,8 @@ export const users_get = async (req, res) => {
 
     const { id } = req.userId;
 
-    let users = await findUsersById(id);
+    const users = await findUsersById(id);
 
-    // res.json({ users_get: "quieres fumar mota?", users_get: req.body, users });
     res.status(200).json(users);
   } catch (error) {
     const errors = handleErrors(error);
@@ -161,7 +97,7 @@ export const deleteUser_delete = async (req, res) => {
       throw req.error;
     }
 
-    let { teamId } = req.params;
+    const teamId = req.userTeamId;
     let { userId } = req.query;
 
     let deletedUser = await deleteUser(teamId, userId);

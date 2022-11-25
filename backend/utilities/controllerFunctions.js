@@ -27,17 +27,17 @@ export const createNewAdminUser = async (reqObj) => {
 };
 
 // find a team by teamUserName
-export const findTeamByTeamUserName = async (teamUserName) => {
-  try {
-    const existingTeam = await TeamAdminSchema.findOne({
-      teamUserName: teamUserName,
-    });
-    return existingTeam;
-  } catch (error) {
-    console.log({ findTeamByTeamUserName: error });
-    return { findTeamByTeamUserName: error };
-  }
-};
+// export const findTeamByTeamUserName = async (teamUserName) => {
+//   try {
+//     const existingTeam = await TeamAdminSchema.findOne({
+//       teamUserName: teamUserName,
+//     });
+//     return existingTeam;
+//   } catch (error) {
+//     console.log({ findTeamByTeamUserName: error });
+//     return { findTeamByTeamUserName: error };
+//   }
+// };
 
 // configure database when admin user is set up
 export const configureDatabase = async (reqObj) => {
@@ -46,8 +46,8 @@ export const configureDatabase = async (reqObj) => {
     const coachDoc = await createCoaches(reqObj);
     const playerDoc = await createPlayers(reqObj);
     const scheduleDoc = await createSchedules(reqObj);
-    const postDoc = await userCreatePost(reqObj);
-    const userDoc = await createNewUser(reqObj);
+    const postDoc = await createPosts(reqObj);
+    const userDoc = await createNewUsers(reqObj);
 
     if (
       !teamDoc ||
@@ -57,7 +57,7 @@ export const configureDatabase = async (reqObj) => {
       !postDoc ||
       !userDoc
     ) {
-      throw new Error("eat shit from configure database");
+      throw new Error("database failed to configure");
     }
     console.log("successful db configuration");
     return "successful db configuration";
@@ -66,17 +66,6 @@ export const configureDatabase = async (reqObj) => {
     return error;
   }
 };
-
-// // find admin users by team name
-// export const findAdminUsersByTeamId = async (id) => {
-//   try {
-//     let users = await TeamAdminSchema.find({ teamId: id });
-//     return users;
-//   } catch (error) {
-//     console.log({ findAdminUsersByTeamUserName: error });
-//     return { findAdminUsersByTeamUserName: error };
-//   }
-// };
 
 // find admin user by id
 export const getAdminUsersById = async (id) => {
@@ -92,27 +81,28 @@ export const getAdminUsersById = async (id) => {
 // if admin is < 2 in length add another admin user
 export const updateAdminUsers = async (teamId, updateObj) => {
   try {
-    const secondAdmin = await TeamAdminSchema.findOneAndUpdate(
+    const adminDoc = await TeamAdminSchema.findOneAndUpdate(
       { teamId: teamId, "admin.email": { $ne: updateObj.email } },
       { $push: { admin: updateObj } },
       { returnOriginal: false }
     );
     // saving after the push update to the sub document saves the doc thus calling mongoose middleware
-    // await secondAdmin.save();
-    return secondAdmin;
+    await adminDoc.save();
+    return adminDoc;
   } catch (error) {
     console.log({ updateAdminUsers: error });
     return { updateAdminUsers: error };
   }
 };
 
-// if no current admin and after a new admin is established setTeamId updates the new admin user to include the teamId
+// sets the team id of the document to the mongo db doc object
+// setTeamId called by createAdminUser_post
 export const setTeamId = async (id) => {
   try {
     const teamId = await TeamAdminSchema.findByIdAndUpdate(
       id,
       { teamId: id },
-      { new: true }
+      { returnOriginal: false }
     );
     return teamId;
   } catch (error) {
@@ -121,20 +111,22 @@ export const setTeamId = async (id) => {
   }
 };
 
-// export const setAdminUserTeamId = async (id) => {
-//   try {
-//     let authUser = TeamAdminSchema.findOneAndUpdate(
-//       { id, "admin.teamId": "teamId not set" },
-//       { $set: { "admin.$.teamId": id } },
-//       { new: true }
-//     );
+// sets the team id for a specific admin user found in the admin doc admin array
+// setAdminUserTeamId is called by createAdminUser_post
+export const setAdminUserTeamId = async (id) => {
+  try {
+    let authUser = TeamAdminSchema.findOneAndUpdate(
+      { id, "admin.teamId": "teamId not set" },
+      { $set: { "admin.$.teamId": id } },
+      { new: true }
+    );
 
-//     return authUser;
-//   } catch (error) {
-//     console.log({ setAdminUserTeamId: error });
-//     return { setAdminUserTeamId: error };
-//   }
-// };
+    return authUser;
+  } catch (error) {
+    console.log({ setAdminUserTeamId: error });
+    return { setAdminUserTeamId: error };
+  }
+};
 
 // delete and existing admin user
 export const deleteAdminUser = async (teamId, adminId) => {
@@ -151,8 +143,6 @@ export const deleteAdminUser = async (teamId, adminId) => {
       { new: true }
     );
 
-    // console.log(adminUserDoc);
-
     return adminUserDoc;
   } catch (error) {
     console.log({ deleteAdminUser: error });
@@ -162,7 +152,7 @@ export const deleteAdminUser = async (teamId, adminId) => {
 
 // TEAM CONTROLLER FUNCTIONS - set team colors and name
 
-// create a new team
+// create a new team document called by databaseConfiguration
 export const createTeam = async (reqObj) => {
   try {
     const newTeam = await TeamSchema.create(reqObj);
@@ -226,13 +216,11 @@ export const updateTeamColors = async (id, updateObj) => {
   }
 };
 
-// check if team already exists
+// get a team by id
 export const getTeamById = async (id) => {
-  console.log("getTeamById >>>>>>>>>>>>>>>>>>>>>>", id);
-
   try {
     const teamDoc = await TeamSchema.findOne({ teamId: id });
-    console.log("getTeamById_teamDoc", teamDoc);
+
     return teamDoc;
   } catch (error) {
     console.log({ getTeamById: error });
@@ -486,7 +474,7 @@ export const deleteCoach = async (teamId, coachId) => {
 };
 
 // SCHEDULE CONTROLLER FUNCTIONS
-// create new schedule
+// create new schedule document with db initialization
 export const createSchedules = async (reqObj) => {
   try {
     let update = {
@@ -503,7 +491,7 @@ export const createSchedules = async (reqObj) => {
   }
 };
 
-// create a new coach in the coaches document coaches array
+// create a new schedule in the schedule doc schedule array
 export const createSchedule = async (id, updateObj) => {
   try {
     console.log({
@@ -538,7 +526,7 @@ export const getTeamSchedule = async (teamUserId) => {
   }
 };
 
-// UPDATE SCHEDULE, ADD A SCHEDULE DATE TO AN EXISTING SCHEDULE DOCUMENT
+// ADD A SCHEDULE DATE TO AN EXISTING SCHEDULE DOCUMENT
 export const updateTeamSchedule = async (teamUserId, updateObj) => {
   try {
     const updatedSchedule = await TeamsScheduleSchema.findOneAndUpdate(
@@ -622,7 +610,7 @@ export const updateScheduleData = async (teamUserId, scheduleId, updateObj) => {
 export const deleteSchedule = async (teamId, scheduleId) => {
   try {
     console.log({ hello: "hello from deleteSchedule", teamId, scheduleId });
-    
+
     const scheduleDoc = await TeamsScheduleSchema.findOneAndUpdate(
       { teamId: teamId },
       {
@@ -654,7 +642,7 @@ export const findUsersByTeamUserName = async (teamUserName) => {
   }
 };
 
-// check if users already exist.
+// get all users by admin
 export const findUsersById = async (teamId) => {
   try {
     const users = await TeamUsersSchema.findOne({
@@ -667,8 +655,9 @@ export const findUsersById = async (teamId) => {
   }
 };
 
+// CREATES A NEW USER MONGO DB DOC WHIT DB INITIALIZATION
 // create new user
-export const createNewUser = async (reqObj) => {
+export const createNewUsers = async (reqObj) => {
   try {
     let update = {
       teamId: reqObj.teamId,
@@ -679,13 +668,14 @@ export const createNewUser = async (reqObj) => {
     const newUser = await TeamUsersSchema.create(update);
     return newUser;
   } catch (error) {
-    console.log({ createNewUser: error });
-    return { createNewUser: error };
+    console.log({ createNewUsers: error });
+    return { createNewUsers: error };
   }
 };
 
-// add to existing users
-export const addToExistingUsers = async (teamId, userObj) => {
+// ADD A NEW USER TO THE USER DOCUMENT USERS ARRAY
+// admin add to existing users
+export const createNewUser = async (teamId, userObj) => {
   try {
     const updatedUsers = await TeamUsersSchema.findOneAndUpdate(
       { teamId: teamId, "users.email": { $ne: userObj.email } },
@@ -695,11 +685,33 @@ export const addToExistingUsers = async (teamId, userObj) => {
     await updatedUsers.save();
     return updatedUsers;
   } catch (error) {
-    console.log({ addToExistingUsers: error.message });
-    return { addToExistingUsers: error.message };
+    console.log({ createNewUser: error.message });
+    return { createNewUser: error.message };
   }
 };
 
+// new user creates users account
+export const userCreateUser = async (teamUserName, userObj) => {
+  try {
+    const updatedUsersDoc = await TeamUsersSchema.findOneAndUpdate(
+      {
+        teamUserName: teamUserName,
+        "users.email": { $ne: userObj.email },
+      },
+      { $push: { users: userObj } },
+      { returnOriginal: false }
+    );
+
+    await updatedUsersDoc.save();
+
+    return updatedUsersDoc;
+  } catch (error) {
+    console.log({ name: error.name, message: error.message });
+    return { name: error.name, message: error.message };
+  }
+};
+
+// DELETE A USER FROM THE USER DOC USERS ARRAY
 // delete user
 export const deleteUser = async (teamId, userId) => {
   console.log(teamId);
@@ -716,7 +728,9 @@ export const deleteUser = async (teamId, userId) => {
       { new: true }
     );
 
-    return userDoc;
+    if (userDoc) {
+      return userDoc;
+    }
   } catch (error) {
     console.log({ deleteUser: error });
     return { deleteUser: error.message };
@@ -724,7 +738,6 @@ export const deleteUser = async (teamId, userId) => {
 };
 
 // USER POST CONTROLLER FUNCTIONS
-
 // Read posts if they exist
 export const getTeamPosts = async (teamId) => {
   try {
@@ -740,8 +753,8 @@ export const getTeamPosts = async (teamId) => {
 };
 
 // create a user post if no user posts exist
-export const userCreatePost = async (updateObj) => {
-  console.log({ userCreatePost: updateObj });
+export const createPosts = async (updateObj) => {
+  console.log({ createPosts: updateObj });
 
   try {
     let update = {
@@ -753,24 +766,24 @@ export const userCreatePost = async (updateObj) => {
     const postsDoc = await TeamPostsSchema.create(update);
     return postsDoc;
   } catch (error) {
-    console.log({ userCreatePost: error });
-    return { userCreatePost: error.message };
+    console.log({ createPosts: error });
+    return { createPosts: error.message };
   }
 };
 
 // update posts, add a post to existing team posts
-export const userAddPost = async (teamId, updateObj) => {
+export const createPost = async (teamId, updateObj) => {
   try {
     const updatedPosts = await TeamPostsSchema.findOneAndUpdate(
       { teamId: teamId },
       { $push: { posts: updateObj } },
       { returnOriginal: false }
     );
-    await updatedPosts.save();
+    // await updatedPosts.save();
     return updatedPosts;
   } catch (error) {
-    console.log({ userAddPost: error });
-    return { userAddPost: error };
+    console.log({ createPost: error });
+    return { createPost: error };
   }
 };
 
@@ -973,6 +986,7 @@ export const handleMultipleImageUploads = async (imgUpData) => {
 
 // FOR MULTIPLE IMG UPLOADS ASSIGN CLOUDINARY URL, PUBLICID, ORIGINAL NAME TO AN OBJECT FOR MONGO DB UPDATE
 export const createImgObjMongoDbUpload = (cloudinaryUploadRes, arrImgNames) => {
+  console.log({ cloudinaryUploadRes, arrImgNames });
   if (
     cloudinaryUploadRes.length !== arrImgNames.length ||
     cloudinaryUploadRes.length === 0 ||

@@ -11,7 +11,7 @@ import {
   createSchedule,
 } from "../utilities/controllerFunctions.js";
 
-// check if existing team schedule exists if not create new schedule else update schedule
+// CREATE A NEW SCHEDULE DATE
 export const createSchedule_post = async (req, res) => {
   try {
     if (req.error) {
@@ -41,7 +41,7 @@ export const schedule_get = async (req, res) => {
     }
 
     // req.param middleware returns req.teamUserId
-    let teamUserId = req.userTeamId;
+    const teamUserId = req.userTeamId;
 
     const schedule = await getTeamSchedule(teamUserId);
 

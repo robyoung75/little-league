@@ -93,13 +93,18 @@ export const handleErrors = (err) => {
   if (err.message.includes("Please select and image or colors to update")) {
     errors.adminTeamPost = err.message;
   }
-  
+
   if (
     err.message.includes(
       "The submitted email address exists for another user. Email must be unique"
     )
   ) {
     errors.adminCoachPost = err.message;
+  }
+
+  if (err.message.includes("Cannot read properties of null (reading 'save')")) {
+    errors.user =
+      "invalid user credentials please check user email and teamUserName";
   }
 
   console.log({ errors: errors });
