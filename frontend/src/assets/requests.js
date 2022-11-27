@@ -29,27 +29,155 @@ export const adminTeamPost = async (dataObj) => {
   }
 };
 
-// user sign in
-export const authUserSignInPost = async (dataObj) => {
-  console.log("authUserSignInPost dataObj", dataObj);
+// USER SIGN IN / SIGN OUT REQUESTS.
+// admin user sign in
+export const adminUserSignIn = async (dataObj) => {
+  console.log("adminUserSignIn dataObj", dataObj);
   try {
-    const response = await axiosInstance.post("/api/signin", dataObj);
+    const response = await axiosInstance.post("/api/admin/signin", dataObj);
     if (response) {
-      console.log("authUserSignInPost", response);
+      console.log("adminUserSignIn", response);
       return response;
     }
   } catch (error) {
-    console.log({ authUserSignInPost: error });
-    return error;
+    console.log(error);
+
+    let errorResponse = {};
+
+    if (error.response) {
+      // axios error handling
+      console.log({
+        responseData: error.response.data,
+        responseStatus: error.response.status,
+        responseHeaders: error.response.headers,
+      });
+
+      errorResponse.message = error.response.data;
+      errorResponse.status = error.response.status;
+      errorResponse.headers = error.response.headers;
+    } else if (error.request) {
+      console.log({ requestError: error.request });
+      errorResponse.request = error.request;
+    } else {
+      console.log({ Error: error.message });
+      errorResponse.ErrorMessage = error.message;
+    }
+    return errorResponse;
   }
 };
 
+// user sign in
+export const userSignIn = async (dataObj) => {
+  console.log("userSignIn dataObj >>>>> ", dataObj);
+  try {
+    const response = await axiosInstance.post("/api/user/signin", dataObj);
+    if (response) {
+      console.log("userSignInResponse >>>>> ", response);
+      return response;
+    }
+  } catch (error) {
+    console.log(error);
+
+    let errorResponse = {};
+
+    if (error.response) {
+      console.log({
+        responseData: error.response.data,
+        responseStatus: error.response.status,
+        responseHeaders: error.response.headers,
+      });
+
+      errorResponse.message = error.response.data.message;
+      errorResponse.status = error.response.status;
+      errorResponse.headers = error.response.headers;
+    } else if (error.request) {
+      console.log({ requestError: error.request });
+      errorResponse.request = error.request;
+    } else {
+      console.log({ Error: error.message });
+      errorResponse.ErrorMessage = error.message;
+    }
+    return errorResponse;
+  }
+};
 // user sign out
 export const authUserSignOut = async () => {
   try {
     const response = await axiosInstance.get("/api/signout");
     if (response) {
       console.log("you are now signed out", response);
+      return response;
+    }
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
+// GET REQUESTS
+// get team
+export const authUserGetTeam = async (teamId) => {
+  try {
+    const response = await axiosInstance.get(`/api/admin/team/${teamId}`);
+
+    if (response) {
+      console.log("authUserGetTeam__Response >>>>> ", response);
+      return response;
+    }
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
+// get players
+export const authUserGetPlayers = async (teamId) => {
+  try {
+    const response = await axiosInstance.get(`/api/admin/players/${teamId}`);
+    if (response) {
+      console.log("authUserGetPlayers__Response >>>>> ", response);
+      return response;
+    }
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
+// get coaches
+export const authUserGetCoaches = async (teamId) => {
+  try {
+    const response = await axiosInstance.get(`/api/admin/coaches/${teamId}`);
+    if (response) {
+      console.log("authUserGetCoaches__Response >>>>> ", response);
+      return response;
+    }
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
+// get schedule
+export const authUserGetSchedule = async (teamId) => {
+  try {
+    const response = await axiosInstance.get(`/api/admin/schedule/${teamId}`);
+    if (response) {
+      console.log("authUserGetSchedule__Response >>>>> ", response);
+      return response;
+    }
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
+// get posts
+export const authUserGetPosts = async (teamId) => {
+  try {
+    const response = await axiosInstance.get(`/api/user/posts/${teamId}`);
+    if (response) {
+      console.log("authUserGetPosts__Response >>>>> ", response);
       return response;
     }
   } catch (error) {

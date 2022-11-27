@@ -27,17 +27,17 @@ export const createNewAdminUser = async (reqObj) => {
 };
 
 // find a team by teamUserName
-// export const findTeamByTeamUserName = async (teamUserName) => {
-//   try {
-//     const existingTeam = await TeamAdminSchema.findOne({
-//       teamUserName: teamUserName,
-//     });
-//     return existingTeam;
-//   } catch (error) {
-//     console.log({ findTeamByTeamUserName: error });
-//     return { findTeamByTeamUserName: error };
-//   }
-// };
+export const findTeamByTeamUserName = async (teamUserName) => {
+  try {
+    const existingTeam = await TeamAdminSchema.findOne({
+      teamUserName: teamUserName,
+    });
+    return existingTeam;
+  } catch (error) {
+    console.log({ findTeamByTeamUserName: error });
+    return { findTeamByTeamUserName: error };
+  }
+};
 
 // configure database when admin user is set up
 export const configureDatabase = async (reqObj) => {
@@ -270,6 +270,7 @@ export const getPlayersById = async (id) => {
     const player = await TeamPlayersSchema.findOne({
       teamId: id,
     });
+
     return player;
   } catch (error) {
     console.log({ getPlayersById: error });
@@ -682,6 +683,7 @@ export const createNewUser = async (teamId, userObj) => {
       { $push: { users: userObj } },
       { returnOriginal: false }
     );
+
     await updatedUsers.save();
     return updatedUsers;
   } catch (error) {
@@ -693,6 +695,7 @@ export const createNewUser = async (teamId, userObj) => {
 // new user creates users account
 export const userCreateUser = async (teamUserName, userObj) => {
   try {
+    let authUser;
     const updatedUsersDoc = await TeamUsersSchema.findOneAndUpdate(
       {
         teamUserName: teamUserName,
@@ -702,9 +705,15 @@ export const userCreateUser = async (teamUserName, userObj) => {
       { returnOriginal: false }
     );
 
+    updatedUsersDoc.users.map((user) => {
+      if (user.email === userObj.email) {
+        return (authUser = user);
+      }
+    });
+
     await updatedUsersDoc.save();
 
-    return updatedUsersDoc;
+    return authUser;
   } catch (error) {
     console.log({ name: error.name, message: error.message });
     return { name: error.name, message: error.message };

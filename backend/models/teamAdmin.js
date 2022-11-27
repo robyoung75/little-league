@@ -76,7 +76,7 @@ TeamAdminSchema.statics.login = async function (email, password) {
     if (authUser) {
       return user;
     }
-    throw Error("Incorrect password");
+    throw new Error("invalid password")
   }
   throw Error("This email does not exist");
 };

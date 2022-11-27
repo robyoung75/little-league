@@ -20,6 +20,13 @@ import CompletedForm from "./pages/CompletedForm/CompletedForm";
 import SideNavbar from "./Components/SideNavbar/SideNavbar";
 import Footer from "./Components/Footer/Footer";
 import UserSignIn from "./pages/UserSignIn/UserSignIn";
+import {
+  authUserGetCoaches,
+  authUserGetPlayers,
+  authUserGetPosts,
+  authUserGetSchedule,
+  authUserGetTeam,
+} from "./assets/requests";
 
 const user_1 = "byoung@gmail.com";
 
@@ -27,14 +34,64 @@ const user_2 = "rykerk@gmail.com";
 
 function App() {
   const [
-    { theme, player, userData, teamData, posts, gameData, formData },
+    { theme, player, userData, teamData, posts, gameData, formData, authUser },
     dispatch,
   ] = useStateValue();
-  const [authUser, setAuthUser] = useState();
+  const [auth, setAuth] = useState(null);
   const [signedIn, setSignedIn] = useState(false);
   const [isActive, setActive] = useState(false);
   const [userTeam, setUserTeam] = useState(null);
   const [mobile] = useState(768);
+
+  useEffect(() => {
+
+      if (localStorage.getItem("user") && !authUser) {
+
+        dispatch({
+          type: "SET_AUTH_USER",
+          authUser: JSON.parse(localStorage.getItem("user")),
+        });
+
+      }
+   
+ 
+  
+  }, [authUser, signedIn]);
+
+  useEffect(async () => {
+    if (authUser) {
+      const team = await authUserGetTeam(authUser.teamId);
+      const players = await authUserGetPlayers(authUser.teamId);
+      const coaches = await authUserGetCoaches(authUser.teamId);
+      const schedule = await authUserGetSchedule(authUser.teamId);
+      const posts = await authUserGetPosts(authUser.teamId);
+
+      dispatch({
+        type: "SET_AUTH_TEAM",
+        authTeam: team.data,
+      });
+
+      dispatch({
+        type: "SET_AUTH_PLAYERS",
+        authPlayers: players.data,
+      });
+
+      dispatch({
+        type: "SET_AUTH_COACHES",
+        authCoaches: coaches.data,
+      });
+
+      dispatch({
+        type: "SET_AUTH_SCHEDULE",
+        authSchedule: schedule.data,
+      });
+
+      dispatch({
+        type: "SET_AUTH_POSTS",
+        authPosts: posts.data,
+      });
+    }
+  }, [localStorage.getItem("user")]);
 
   useEffect(() => {
     //  simulate the request from database for user validation
@@ -48,15 +105,15 @@ function App() {
       });
       return signedIn;
     };
-    setAuthUser(user(userData.email));
+    setAuth(user(userData.email));
   }, []);
 
   useEffect(() => {
-    if (authUser) {
+    if (auth) {
       //  simulate the request from database for team data
       const setTeam = (data) => {
         data.forEach((item) => {
-          if (item.teamId === authUser.teamId) {
+          if (item.teamId === auth.teamId) {
             data = item;
           }
         });
@@ -64,13 +121,13 @@ function App() {
       };
       setUserTeam(setTeam(data));
     }
-  }, [authUser]);
+  }, [auth]);
 
   useEffect(() => {
-    if (authUser && userTeam) {
+    if (auth && userTeam) {
       dispatch({
         type: "SET_USER",
-        userData: authUser,
+        userData: auth,
       });
       dispatch({
         type: "SET_THEME",
@@ -85,7 +142,7 @@ function App() {
         player: player,
       });
     }
-  }, [authUser, userTeam, dispatch, theme, player]);
+  }, [auth, userTeam, dispatch, theme, player]);
 
   return (
     <div className="app">

@@ -53,11 +53,11 @@ export const handleErrors = (err) => {
   }
 
   if (err.message.includes("invalid email")) {
-    errors.email = err.message;
+    errors.email = "You have entered an invalid email address, please try again or contact your administrator";
   }
 
   if (err.message.includes("invalid password")) {
-    errors.password = err.message;
+    errors.password = "You have entered an invalid password, please try again or contact your administrator";
   }
 
   if (

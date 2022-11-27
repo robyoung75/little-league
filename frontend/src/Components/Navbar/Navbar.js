@@ -11,9 +11,11 @@ import { authUserSignOut } from "../../assets/requests";
 
 import { handleUserAuthentication } from "../../assets/eventHandlers";
 
-function Navbar({ isActive, setActive, mobile, signedIn, setSignedIn }) {
-  const [{ theme, teamData }] = useStateValue();
+import { useNavigate } from "react-router-dom";
 
+function Navbar({ isActive, setActive, mobile, signedIn, setSignedIn }) {
+  const [{ theme, teamData, userData }, dispatch] = useStateValue();
+  const navigate = useNavigate();
   const handleDropdown = (e) => {
     e.preventDefault();
     console.log("handleDropdown");
@@ -32,18 +34,9 @@ function Navbar({ isActive, setActive, mobile, signedIn, setSignedIn }) {
     }
   };
 
-  const handleUserAuthentication = async (e) => {
-    e.preventDefault();
-
-    if (signedIn) {
-      setSignedIn(false);
-      await authUserSignOut();
-    }
-
-    if (!signedIn) {
-      setSignedIn(true);
-    }
-  };
+  useEffect(() => {
+    // navigate("/");
+  }, [signedIn]);
 
   useEffect(() => {
     let handleResize = () => {
@@ -113,7 +106,8 @@ function Navbar({ isActive, setActive, mobile, signedIn, setSignedIn }) {
                         e,
                         signedIn,
                         setSignedIn,
-                        authUserSignOut
+                        authUserSignOut,
+                        dispatch
                       )
                     }
                   >

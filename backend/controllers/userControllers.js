@@ -17,6 +17,7 @@ import {
   createNewUser,
   deleteUser,
   userCreateUser,
+  findTeamByTeamUserName,
 } from "../utilities/controllerFunctions.js";
 
 // Admin creates users
@@ -49,21 +50,33 @@ export const userCreateUser_post = async (req, res) => {
   try {
     let { firstName, lastName, email, password, teamUserName } = req.body;
 
-    let user = { firstName, lastName, email, teamUserName };
-    user.password = await hashPassword(password);
+    let existingTeam = await findTeamByTeamUserName(teamUserName);
 
-    const userDoc = await userCreateUser(teamUserName, user);
+    if (existingTeam) {
+      let user = {
+        firstName,
+        lastName,
+        email,
+        teamUserName,
+        teamId: existingTeam.teamId,
+      };
+      user.password = await hashPassword(password);
 
-    if (userDoc.name === "TypeError") {
-      throw { name: userDoc.name, message: userDoc.message };
+      const userDoc = await userCreateUser(teamUserName, user);
+
+      if (userDoc.name === "TypeError") {
+        throw { name: userDoc.name, message: userDoc.message };
+      }
+
+      // create a jwt token
+      const token = createJwtToken(userDoc._id);
+
+      // send token as a cookie
+      res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
+      res.status(200).json(userDoc);
+    } else {
+      throw "no team with that user name exists";
     }
-
-    // create a jwt token
-    const token = createJwtToken(userDoc._id);
-
-    // send token as a cookie
-    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
-    res.status(200).json(userDoc);
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });

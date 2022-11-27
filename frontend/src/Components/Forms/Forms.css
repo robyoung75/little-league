@@ -223,8 +223,6 @@ input[type="file"] {
   background: #e0e0e0;
   box-shadow: 20px 20px 60px #bebebe, -20px -20px 60px #ffffff;
   top: 10rem;
-
-  
 }
 
 .signIn__header {
@@ -237,7 +235,7 @@ input[type="file"] {
   flex-direction: column;
   /* background-color: pink; */
   /* padding: 1rem; */
-  min-height: 300px;
+  min-height: 350px;
   padding-top: 3rem;
   /* justify-content: center; */
   border: 1px solid #a1aaad;
@@ -246,8 +244,16 @@ input[type="file"] {
   position: relative;
 }
 
-.signIn__btn {
+.signIn__adminLabel {
+  /* background-color: red; */
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  /* margin: 1rem 0; */
+}
 
+.signIn__btn {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -255,7 +261,6 @@ input[type="file"] {
   margin-left: 0;
   margin-right: 0;
   padding: 1rem;
-  
 }
 
 @media screen and (min-width: 768px) {

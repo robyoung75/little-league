@@ -53,7 +53,7 @@ export const scheduleSchema = yup.object({
 export const teamSchema = yup.object().shape({});
 
 export const signInSchema = yup.object().shape({
-  teamUserName: yup.string().required("user name is required"),
-  email: yup.string().email().required(),
-  password: yup.string().required("user password is required"),
+  teamUserName: yup.string().required("Please enter a valid teamUserName"),
+  email: yup.string().email().required("Please enter a valid email"),
+  password: yup.string().required("Please enter a valid password"),
 });

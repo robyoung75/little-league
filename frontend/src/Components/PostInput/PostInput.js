@@ -33,13 +33,13 @@ function PostInput() {
       <ThemedHeader theme={theme} className="postInput__header">
         <input
           className="postInput__input"
-          placeholder={
-            !userData
-              ? "Welcome, sign in to post"
-              : `Welcome ${userData.firstName.slice(0, 1).toUpperCase()} ${
-                  userData.lastName
-                }`
-          }
+          // placeholder={
+          //   !userData
+          //     ? "Welcome, sign in to post"
+          //     : `Welcome ${userData.firstName.slice(0, 1).toUpperCase()} ${
+          //         userData.lastName
+          //       }`
+          // }
         />
         <div className="postInput__btns">
           <div className="postInput__btn">

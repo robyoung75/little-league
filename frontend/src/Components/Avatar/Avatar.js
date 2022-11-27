@@ -8,12 +8,12 @@ function Avatar() {
     <>
       {userData ? (
         <div className="avatar">
-          {userData && userData.image ? (
+          {/* {userData && userData.image ? (
             <img src={userData.image} alt="player" className="avatar__img" />
           ) : userData && !userData.image ? (
             userData.firstName.slice(0, 1).toUpperCase() +
             userData.lastName.slice(0, 1).toUpperCase()
-          ) : null}
+          ) : null} */}
 
           {userData ? <div className="avatar__badge"></div> : null}
         </div>

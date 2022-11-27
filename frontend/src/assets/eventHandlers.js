@@ -36,13 +36,19 @@ const handleUserAuthentication = async (
   e,
   state,
   setStateFunc,
-  submitFunction
+  submitFunction,
+  dispatch
 ) => {
   e.preventDefault();
   try {
     if (state) {
       setStateFunc(false);
       await submitFunction;
+
+      dispatch({
+        type: "SET_USER",
+        userData: null,
+      });
     }
     if (!state) {
       setStateFunc(true);
@@ -60,5 +66,5 @@ export {
   handleColor,
   handleImgPreview,
   handleImgCancel,
-  handleUserAuthentication
+  handleUserAuthentication,
 };

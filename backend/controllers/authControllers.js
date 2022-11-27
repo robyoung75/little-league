@@ -205,24 +205,32 @@ const deleteAdminUser_delete = async (req, res) => {
 // user sign in
 const signInAdminUser_post = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    // console.log("req.teamId >>>>>>>>>>>>>>>>>>>>>", req.teamId);
+    const { email, password, teamUserName } = req.body;
 
     const authUser = await TeamAdminSchema.login(email, password);
 
-    if (authUser.error) throw authUser.error;
-    console.log(authUser);
+    // if (authUser.error) throw authUser.error;
+
+    const response = {      
+      teamId: authUser.admin[0].teamId,
+      email: authUser.admin[0].email,
+      firstName: authUser.admin[0].firstName,
+      lastName: authUser.admin[0].lastName,
+      teamName: authUser.admin[0].teamName,
+    };
+
     // create jwt token
     const token = createJwtToken(authUser._id);
 
     // send token as a cookie
     res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 500 });
 
-    res.status(200).json(authUser);
+    res.status(200).json(response);
   } catch (error) {
+    console.log(error)
     const errors = handleErrors(error);
     console.log({ message: errors });
-    res.status(400).json({ message: errors });
+    res.status(400).send(errors)
   }
 };
 
