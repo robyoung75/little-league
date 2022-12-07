@@ -4,7 +4,7 @@ import { ThemedHeader, ThemedButton } from "../../utils/ThemedComponents";
 import { useStateValue } from "../../Context/stateProvider";
 import Avatar from "../Avatar/Avatar";
 function PostInput() {
-  const [{ theme, userData }] = useStateValue();
+  const [{ theme, userData, authUser }] = useStateValue();
   const [hovering_1, setHovering_1] = useState(false);
   const [hovering_2, setHovering_2] = useState(false);
 
@@ -24,22 +24,18 @@ function PostInput() {
     setHovering_2(false);
   };
 
-  useEffect(() => {
-    console.log("new user");
-  }, [userData]);
-
   return (
     <div className="postInput">
       <ThemedHeader theme={theme} className="postInput__header">
         <input
           className="postInput__input"
-          // placeholder={
-          //   !userData
-          //     ? "Welcome, sign in to post"
-          //     : `Welcome ${userData.firstName.slice(0, 1).toUpperCase()} ${
-          //         userData.lastName
-          //       }`
-          // }
+          placeholder={
+            !authUser
+              ? "Welcome, sign in to post"
+              : `Welcome ${authUser.firstName.slice(0, 1).toUpperCase()} ${
+                  authUser.lastName
+                }`
+          }
         />
         <div className="postInput__btns">
           <div className="postInput__btn">

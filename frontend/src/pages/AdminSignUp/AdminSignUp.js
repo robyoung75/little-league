@@ -4,12 +4,12 @@ import AdminForm from "../../Components/Forms/AdminForm";
 import AdminFormPreview from "../../Components/Forms/AdminFormPreview";
 import { checkLocalData } from "../../assets/functions";
 
-function AdminSignUp() {
+function AdminSignUp({setSignedIn, setAuthenticated}) {
   const [adminData, setAdminData] = useState();
   const [newAdminData, setNewAdminData] = useState(false);
 
   useEffect(() => {
-    checkLocalData("admin data", setAdminData);
+    checkLocalData("adminData", setAdminData);
 
     window.addEventListener("localAdmin", checkLocalData);
     return () => {
@@ -22,6 +22,8 @@ function AdminSignUp() {
         <AdminForm
           setNewAdminData={setNewAdminData}
           newAdminData={newAdminData}
+          setSignedIn={setSignedIn}
+          setAuthenticated={setAuthenticated}
         />
       </div>
       <div className="adminSignUp__right">      

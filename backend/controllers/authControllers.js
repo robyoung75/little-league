@@ -66,7 +66,7 @@ const createAdminUser_post = async (req, res) => {
       const updateAdminUserTeamId = await setAdminUserTeamId(adminDoc._id);
 
       // // configures the db documents: coaches, players, posts, schedules, teams, users
-      const userDbConfig = await configureDatabase({
+      await configureDatabase({
         teamId: updateAdminDocTeamId._id,
         teamUserName,
         teamName,
@@ -108,6 +108,8 @@ const getAllAdminUsers_get = async (req, res) => {
 
 // UPDATE ADMIN, ADD A SECOND ADMIN USER
 const updateAdminUsers_put = async (req, res) => {
+
+  console.log({updateAdminUsers_put: req.body})
   try {
     if (req.error) {
       throw req.error;
@@ -115,9 +117,11 @@ const updateAdminUsers_put = async (req, res) => {
 
     // returned from auth middleware
     const { id } = req.userId;
+  
 
     // returned from params middleware
     const teamId = req.userTeamId;
+   
 
     // req.body destructured
     const { firstName, lastName, email, teamName, teamUserName, password } =
@@ -153,9 +157,11 @@ const updateAdminUsers_put = async (req, res) => {
     };
 
     // update the admin users array to include new user
-    const adminUserDoc = await updateAdminUsers(teamId, adminUser);
 
-    res.status(200).json(adminUserDoc);
+    const adminUserDoc = await updateAdminUsers(teamId, adminUser);
+    
+
+    res.status(200).json(`A second admin user ${firstName}, ${lastName} has been added to the ${teamName} database`);
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json({ errors });
@@ -217,6 +223,7 @@ const signInAdminUser_post = async (req, res) => {
       firstName: authUser.admin[0].firstName,
       lastName: authUser.admin[0].lastName,
       teamName: authUser.admin[0].teamName,
+      teamUserName: authUser.admin[0].teamUserName
     };
 
     // create jwt token

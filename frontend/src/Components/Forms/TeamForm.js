@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./Forms.css";
 
 import ImgFileInput from "./ImgFileInput";
-import { imgURL, handleFirstLetterCap} from "../../assets/functions";
+import { imgURL, handleFirstLetterCap } from "../../assets/functions";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { teamSchema } from "../../Schema/FormsSchema";
@@ -26,13 +26,14 @@ function TeamForm({ newTeamData, setNewTeamData }) {
     primaryColor: "#27251f",
     secondaryColor: "#fdb827",
   };
+  const [{ theme, userData, authUser }] = useStateValue();
   const [primaryColor, setPrimaryColor] = useState(initialState.primaryColor);
   const [secondaryColor, setSecondaryColor] = useState(
     initialState.secondaryColor
   );
   const [logoPreview, setLogoPreview] = useState(null);
   const [imgFile, setImgFile] = useState(null);
-  const [{ theme, userData }] = useStateValue();
+
   const [mouseOver, setMouseOver] = useState(false);
   const [mouseOverFile, setMouseOverFile] = useState(false);
   const [mouseOverNext, setMouseOverNext] = useState(false);
@@ -47,16 +48,20 @@ function TeamForm({ newTeamData, setNewTeamData }) {
 
   const formSubmit = async (data) => {
     if (isSubmitSuccessful) {
-      data.teamLogo = logoPreview
+      data.teamLogo = logoPreview;
+      data.teamUserName = authUser.teamUserName;
+      data.teamName = authUser.teamName;
 
-      let formData = new FormData();      
+      let formData = new FormData();
+      formData.append("teamUserName", data.teamUserName);
+      formData.append("teamName", data.teamName);
       formData.append("primaryColor", data.primaryColor);
       formData.append("secondaryColor", data.secondaryColor);
       formData.append("teamLogo", imgFile);
-      
+
       await adminTeamPost(formData);
-      // localStorage.clear();
-      localStorage.setItem("team data", JSON.stringify(data));
+
+      localStorage.setItem("teamData", JSON.stringify(data));
       newTeamData ? setNewTeamData(false) : setNewTeamData(true);
       setLogoPreview(null);
       setImgFile(null);
@@ -101,7 +106,7 @@ function TeamForm({ newTeamData, setNewTeamData }) {
           htmlFor="teamLogo"
           title="Select team logo image"
           onChange={(e) => (
-            console.log('teamForm image'),
+            console.log("teamForm image"),
             handleImgPreview(e, setLogoPreview, imgURL),
             setImgFile(e.target.files[0])
           )}

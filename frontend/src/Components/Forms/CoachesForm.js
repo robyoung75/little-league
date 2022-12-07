@@ -22,7 +22,7 @@ import {
 } from "../../assets/eventHandlers";
 
 function CoachesForm({ newCoachesData, setNewCoachesData }) {
-  const [{ theme }] = useStateValue();
+  const [{ theme, authUser }] = useStateValue();
   const [headshotPreview, setHeadshotPreview] = useState(null);
   const [imgFile, setImgFile] = useState(null);
   const [mouseOverHeadShot, setMouseOverHeadShot] = useState(false);
@@ -47,15 +47,17 @@ function CoachesForm({ newCoachesData, setNewCoachesData }) {
       formData.append("lastName", data.lastName);
       formData.append("email", data.email);
       formData.append("headshotImg", imgFile);
+      formData.append("teamName", data.teamName);
+      formData.append("teamUserName", authUser.teamUserName);
 
       await adminCoachesPost(formData);
 
       let dataArr = [];
 
-      dataArr = JSON.parse(localStorage.getItem("coaches data")) || [];
+      dataArr = JSON.parse(localStorage.getItem("coachesData")) || [];
       dataArr.push(data);
 
-      localStorage.setItem("coaches data", JSON.stringify(dataArr));
+      localStorage.setItem("coachesData", JSON.stringify(dataArr));
 
       newCoachesData ? setNewCoachesData(false) : setNewCoachesData(true);
 

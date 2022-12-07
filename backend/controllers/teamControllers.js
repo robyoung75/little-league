@@ -26,6 +26,14 @@ const createTeam_post = async (req, res) => {
     const { id } = req.userId;
 
     let { primaryColor, secondaryColor, teamUserName, teamName } = req.body;
+    console.log({
+      createTeam_post_reqBody_____: {
+        primaryColor,
+        secondaryColor,
+        teamUserName,
+        teamName,
+      },
+    });
 
     // upload object for cloudinary
     let imgUpData = {

@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 import { adminUserSignIn, userSignIn } from "../../assets/requests";
 
-function SignIn({ setSignedIn }) {
+function SignIn({ setSignedIn, setAuthenticated }) {
   const [{ theme, userData }, dispatch] = useStateValue();
   const [isAdmin, setIsAdmin] = useState(false);
   const [authError, setAuthError] = useState("");
@@ -58,14 +58,14 @@ function SignIn({ setSignedIn }) {
       }
 
       if (response.data) {
-
-        localStorage.setItem("user", JSON.stringify(response.data))
+        localStorage.setItem("user", JSON.stringify(response.data));
 
         dispatch({
           type: "SET_AUTH_USER",
           authUser: response.data,
         });
         setSignedIn(true);
+        setAuthenticated(true);
 
         reset();
         navigate("/social");

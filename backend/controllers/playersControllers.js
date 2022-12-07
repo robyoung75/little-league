@@ -30,7 +30,7 @@ const createPlayer_post = async (req, res) => {
     // req.userId returns from auth middleware
     const { id } = req.userId;
 
-    // creates an array of object keys or file names
+    // creates an array of object keys to be used as file names
     const imgNames = Object.keys(req.files);
 
     // variables

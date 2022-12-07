@@ -87,7 +87,7 @@ export const updateAdminUsers = async (teamId, updateObj) => {
       { returnOriginal: false }
     );
     // saving after the push update to the sub document saves the doc thus calling mongoose middleware
-    await adminDoc.save();
+    // await adminDoc.save();
     return adminDoc;
   } catch (error) {
     console.log({ updateAdminUsers: error });
@@ -841,6 +841,8 @@ export const handleSingleImageUpload = async (imgUpData) => {
 
     // used to set the files name and location with cloudinary
     const adminUserObject = { id, teamUserName, firstName, lastName, teamName };
+
+    console.log({ handleSingleImageUpload: adminUserObject });
 
     // sharp to reduce image size for db storage
     const fileResize = await sharpImgResize(imgFile);

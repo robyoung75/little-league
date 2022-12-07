@@ -31,16 +31,18 @@ function ScheduleForm({ newScheduleData, setNewScheduleData }) {
 
   const formSubmit = async (data) => {
     if (isSubmitSuccessful) {
-      let dataArr = [];
-      dataArr = JSON.parse(localStorage.getItem("schedule data")) || [];
-      dataArr.push(data);
 
-      localStorage.setItem("schedule data", JSON.stringify(dataArr));
-
-      newScheduleData ? setNewScheduleData(false) : setNewScheduleData(true);
-      window.scroll(0, 0)
 
       await adminSchedulePost(data)
+
+      let dataArr = [];
+      dataArr = JSON.parse(localStorage.getItem("scheduleData")) || [];
+      dataArr.push(data);
+
+      localStorage.setItem("scheduleData", JSON.stringify(dataArr));
+
+      newScheduleData ? setNewScheduleData(false) : setNewScheduleData(true)
+      window.scroll(0, 0)
 
       reset();
     }

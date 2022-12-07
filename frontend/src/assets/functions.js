@@ -233,7 +233,6 @@ const months = [
 //  IMAGE HANDLING
 // returns a URL for an uploaded image
 const imgURL = (imageFile) => {
-
   return URL.createObjectURL(imageFile.target.files[0]);
 };
 
@@ -262,10 +261,18 @@ const handleDelete = (toDelete, dataArr, stateFunc, dataName) => {
   }
 };
 
-const handleFirstLetterCap = (string) => {
-  return string.charAt(0).toUpperCase() + string.slice(1)
-}
+// const setLocalStorage = ((localStorageName) => {
+//   const existingLocalStorageValue = localStorage.getItem(localStorageName);
+//   if (existingLocalStorageValue === null) {
+//     return [];
+//   } else {
+//     return JSON.parse(existingLocalStorageValue);
+//   }
+// })();
 
+const handleFirstLetterCap = (string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};
 
 export {
   battingAverages,
@@ -284,6 +291,5 @@ export {
   imgURL,
   checkLocalData,
   handleDelete,
-  handleFirstLetterCap
-  
+  handleFirstLetterCap,
 };

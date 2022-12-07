@@ -26,6 +26,7 @@ import {
   authUserGetPosts,
   authUserGetSchedule,
   authUserGetTeam,
+  authUserSignOut,
 } from "./assets/requests";
 
 const user_1 = "byoung@gmail.com";
@@ -34,64 +35,115 @@ const user_2 = "rykerk@gmail.com";
 
 function App() {
   const [
-    { theme, player, userData, teamData, posts, gameData, formData, authUser },
+    {
+      theme,
+      player,
+      userData,
+      teamData,
+      posts,
+      gameData,
+      formData,
+      authUser,
+      authTeam,
+      authPlayers,
+      authCoaches,
+      authSchedule,
+      authPosts,
+    },
     dispatch,
   ] = useStateValue();
+  const [authenticated, setAuthenticated] = useState(false);
   const [auth, setAuth] = useState(null);
   const [signedIn, setSignedIn] = useState(false);
   const [isActive, setActive] = useState(false);
   const [userTeam, setUserTeam] = useState(null);
   const [mobile] = useState(768);
 
-  useEffect(() => {
-
-      if (localStorage.getItem("user") && !authUser) {
-
-        dispatch({
-          type: "SET_AUTH_USER",
-          authUser: JSON.parse(localStorage.getItem("user")),
-        });
-
-      }
-   
- 
-  
-  }, [authUser, signedIn]);
-
+  // useEffect keeps my user state even during a page refresh.
+  // local storage is cleared on sign out
   useEffect(async () => {
-    if (authUser) {
-      const team = await authUserGetTeam(authUser.teamId);
-      const players = await authUserGetPlayers(authUser.teamId);
-      const coaches = await authUserGetCoaches(authUser.teamId);
-      const schedule = await authUserGetSchedule(authUser.teamId);
-      const posts = await authUserGetPosts(authUser.teamId);
+    if (localStorage.getItem("user") && !authUser) {
+      dispatch({
+        type: "SET_AUTH_USER",
+        authUser: JSON.parse(localStorage.getItem("user")),
+      });
+      setAuthenticated(true);
+      setSignedIn(true);
+    }
+  }, [authenticated, authUser]);
+
+  // useEffect to fetch teams data
+  useEffect(() => {
+    let isSubscribed = true;
+
+    const fetchData = async () => {
+      const teamData = await authUserGetTeam(authUser.teamId);
+      const playersData = await authUserGetPlayers(authUser.teamId);
+      const coachesData = await authUserGetCoaches(authUser.teamId);
+      const scheduleData = await authUserGetSchedule(authUser.teamId);
+      const postsData = await authUserGetPosts(authUser.teamId);
 
       dispatch({
         type: "SET_AUTH_TEAM",
-        authTeam: team.data,
+        authTeam: teamData.data,
       });
 
       dispatch({
         type: "SET_AUTH_PLAYERS",
-        authPlayers: players.data,
+        authPlayers: playersData.data,
       });
 
       dispatch({
         type: "SET_AUTH_COACHES",
-        authCoaches: coaches.data,
+        authCoaches: coachesData.data,
       });
 
       dispatch({
         type: "SET_AUTH_SCHEDULE",
-        authSchedule: schedule.data,
+        authSchedule: scheduleData.data,
       });
 
       dispatch({
         type: "SET_AUTH_POSTS",
-        authPosts: posts.data,
+        authPosts: postsData.data,
+      });
+    };
+
+    if (authenticated && authUser && isSubscribed) {
+      fetchData().catch(console.error);
+
+    } else {
+
+      dispatch({
+        type: "SET_AUTH_TEAM",
+        authTeam: null,
+      });
+
+      dispatch({
+        type: "SET_AUTH_PLAYERS",
+        authPlayers: null,
+      });
+
+      dispatch({
+        type: "SET_AUTH_COACHES",
+        authCoaches: null,
+      });
+
+      dispatch({
+        type: "SET_AUTH_SCHEDULE",
+        authSchedule: null,
+      });
+
+      dispatch({
+        type: "SET_AUTH_POSTS",
+        authPosts: null,
       });
     }
-  }, [localStorage.getItem("user")]);
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [authenticated, authUser]);
 
   useEffect(() => {
     //  simulate the request from database for user validation
@@ -100,7 +152,7 @@ function App() {
       users.forEach((item) => {
         if (item.email === userEmail) {
           signedIn = item;
-          setSignedIn(true);
+          // setSignedIn(true);
         }
       });
       return signedIn;
@@ -156,6 +208,8 @@ function App() {
               mobile={mobile}
               signedIn={signedIn}
               setSignedIn={setSignedIn}
+              authenticated={authenticated}
+              setAuthenticated={setAuthenticated}
             />
           }
         >
@@ -179,10 +233,23 @@ function App() {
           <Route path="/create_team" element={<TeamSignUpForm />} />
           <Route
             path="user_signIn"
-            element={<UserSignIn setSignedIn={setSignedIn} />}
+            element={
+              <UserSignIn
+                setSignedIn={setSignedIn}
+                setAuthenticated={setAuthenticated}
+              />
+            }
           />
           <Route path="/forms" element={<SideNavbar />}>
-            <Route path="create_admin" element={<AdminSignUp />} />
+            <Route
+              path="create_admin"
+              element={
+                <AdminSignUp
+                  setSignedIn={setSignedIn}
+                  setAuthenticated={setAuthenticated}
+                />
+              }
+            />
             <Route path="create_teamName" element={<TeamSignUp />} />
             <Route path="create_players" element={<PlayersSignUp />} />
             <Route path="create_coaches" element={<CoachesSignUp />} />

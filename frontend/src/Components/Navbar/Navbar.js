@@ -9,13 +9,21 @@ import { faBars, faX } from "@fortawesome/free-solid-svg-icons";
 
 import { authUserSignOut } from "../../assets/requests";
 
-import { handleUserAuthentication } from "../../assets/eventHandlers";
-
 import { useNavigate } from "react-router-dom";
 
-function Navbar({ isActive, setActive, mobile, signedIn, setSignedIn }) {
-  const [{ theme, teamData, userData }, dispatch] = useStateValue();
+function Navbar({
+  isActive,
+  setActive,
+  mobile,
+  signedIn,
+  setSignedIn,
+  authenticated,
+  setAuthenticated,
+}) {
+  const [{ theme, teamData, userData, authUser }, dispatch] = useStateValue();
   const navigate = useNavigate();
+
+  // dropdown event handler
   const handleDropdown = (e) => {
     e.preventDefault();
     console.log("handleDropdown");
@@ -34,9 +42,45 @@ function Navbar({ isActive, setActive, mobile, signedIn, setSignedIn }) {
     }
   };
 
-  useEffect(() => {
-    // navigate("/");
-  }, [signedIn]);
+  const handleUserAuthentication = (e) => {
+    e.preventDefault();
+
+    if (localStorage.getItem("user")) {
+      setSignedIn(false);
+      setAuthenticated(false);
+      localStorage.clear("user");
+
+      dispatch({
+        type: "SET_AUTH_USER",
+        authUser: null,
+      });
+
+      dispatch({
+        type: "SET_AUTH_TEAM",
+        authTeam: null,
+      });
+
+      dispatch({
+        type: "SET_AUTH_PLAYERS",
+        authPlayers: null,
+      });
+
+      dispatch({
+        type: "SET_AUTH_COACHES",
+        authCoaches: null,
+      });
+
+      dispatch({
+        type: "SET_AUTH_SCHEDULE",
+        authSchedule: null,
+      });
+
+      dispatch({
+        type: "SET_AUTH_POSTS",
+        authPosts: null,
+      });
+    }
+  };
 
   useEffect(() => {
     let handleResize = () => {
@@ -100,19 +144,7 @@ function Navbar({ isActive, setActive, mobile, signedIn, setSignedIn }) {
                 style={theme.style}
               >
                 {signedIn === true ? (
-                  <span
-                    onClick={(e) =>
-                      handleUserAuthentication(
-                        e,
-                        signedIn,
-                        setSignedIn,
-                        authUserSignOut,
-                        dispatch
-                      )
-                    }
-                  >
-                    Sign out
-                  </span>
+                  <span onClick={handleUserAuthentication}>Sign out</span>
                 ) : (
                   <span>Sign in</span>
                 )}

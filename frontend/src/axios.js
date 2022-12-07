@@ -5,7 +5,7 @@ export const axiosInstance = axios.create({
   withCredentials: true,
 });
 
-export const axioInstanceFormData = axios.create({
+export const axiosInstanceFormData = axios.create({
   baseURL: "http://localhost:8001",
   withCredentials: true,
 

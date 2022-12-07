@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { set, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import ImgFileInput from "./ImgFileInput";
@@ -9,7 +9,7 @@ import { ThemedButton } from "../../utils/ThemedComponents";
 import { useStateValue } from "../../Context/stateProvider";
 import { useNavigate } from "react-router-dom";
 
-import { adminPlayersPost } from "../../assets/requests";
+import { adminPlayersPost, authUserGetPlayers } from "../../assets/requests";
 
 //  eventHandlers
 import {
@@ -44,7 +44,7 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
 
   const navigate = useNavigate();
 
-  const [{ theme }] = useStateValue();
+  const [{ theme, authUser }, dispatch] = useStateValue();
 
   const {
     register,
@@ -71,12 +71,14 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
       formData.append("lastName", data.lastName);
       formData.append("positions", data.positions);
       formData.append("battingStance", data.battingStance);
+      formData.append("teamName", authUser.teamName);
+      formData.append("teamUserName", authUser.teamUserName);
 
       await adminPlayersPost(formData);
 
       let dataArr = [];
 
-      dataArr = JSON.parse(localStorage.getItem("players data")) || [];
+      dataArr = JSON.parse(localStorage.getItem("playersData")) || [];
       let localData = {
         headshotImg: playerInfo.headshotImg
           ? URL.createObjectURL(playerInfo.headshotImg)
@@ -97,7 +99,7 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
 
       dataArr.push(localData);
 
-      localStorage.setItem("players data", JSON.stringify(dataArr));
+      localStorage.setItem("playersData", JSON.stringify(dataArr));
 
       console.log({ playersForm_formSubmit: dataArr });
       setDataSubmit((prevState) => [...prevState, data]);
@@ -111,6 +113,8 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
       reset();
     }
   };
+
+ 
 
   const positions = [
     "Pitcher",

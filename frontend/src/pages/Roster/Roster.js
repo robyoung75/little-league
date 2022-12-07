@@ -5,7 +5,7 @@ import { ThemedDiv } from "../../utils/ThemedComponents";
 import PlayerCard from "../../Components/PlayerCard/PlayerCard";
 
 function Roster({ isActive }) {
-  const [{ teamData, theme }] = useStateValue();
+  const [{ teamData, theme, authPlayers }] = useStateValue();
 
   return (
     <div className={isActive ? "roster roster__active" : "roster"}>

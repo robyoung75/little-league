@@ -3,9 +3,9 @@ import './UserSignIn.css'
 import SignIn from '../../Components/Forms/SignIn'
 
 
-function UserSignIn({setSignedIn}) {
+function UserSignIn({setSignedIn, setAuthenticated}) {
   return (
-    <div className='userSignIn'><SignIn setSignedIn={setSignedIn} /></div>
+    <div className='userSignIn'><SignIn setSignedIn={setSignedIn} setAuthenticated={setAuthenticated}/></div>
   )
 }
 

@@ -6,7 +6,11 @@ import "./Forms.css";
 import { ThemedButton } from "../../utils/ThemedComponents";
 import { useStateValue } from "../../Context/stateProvider";
 import { useNavigate } from "react-router-dom";
-import { adminUserPost, authUserSignOut } from "../../assets/requests";
+import {
+  addSecondAdminUser,
+  adminUserPost,
+  authUserSignOut,
+} from "../../assets/requests";
 
 //  event handlers
 import {
@@ -16,8 +20,13 @@ import {
   handleShowPassword,
 } from "../../assets/eventHandlers";
 
-function AdminForm({ setNewAdminData, newAdminData }) {
-  const [{ theme }] = useStateValue();
+function AdminForm({
+  setNewAdminData,
+  newAdminData,
+  setSignedIn,
+  setAuthenticated,
+}) {
+  const [{ theme, authUser }, dispatch] = useStateValue();
   const [checked, setChecked] = useState(false);
   const [mouseOver, setMouseOver] = useState(false);
   const [mouseOverNext, setMouseOverNext] = useState(false);
@@ -33,21 +42,27 @@ function AdminForm({ setNewAdminData, newAdminData }) {
 
   const formSubmit = async (data) => {
     if (isSubmitSuccessful) {
-      console.log(data);
-      await adminUserPost(data);
-      localStorage.setItem("admin data", JSON.stringify(data));
-      newAdminData ? setNewAdminData(false) : setNewAdminData(true);
+      if (!authUser) {
+        const response = await adminUserPost(data);
+        localStorage.setItem("user", JSON.stringify(data));
+        newAdminData ? setNewAdminData(false) : setNewAdminData(true);
 
-      reset();
+        dispatch({
+          type: "SET_AUTH_USER",
+          authUser: response.data,
+        });
+        setSignedIn(true);
+        setAuthenticated(true);
+        reset();
+      }
+
+      if (authUser) {
+        await addSecondAdminUser(authUser.teamId, data);
+        localStorage.setItem("adminDataUser_2", JSON.stringify(data));
+        reset();
+      }
     }
   };
-
-  const handleSignOut = (e) => {
-    console.log('signingout')
-    e.preventDefault();
-    authUserSignOut()
-    
-  }
 
   return (
     <div className="adminForm form">
@@ -176,7 +191,6 @@ function AdminForm({ setNewAdminData, newAdminData }) {
           </ThemedButton>
         </div>
       </form>
-      <button onClick={handleSignOut}>sign out</button>
     </div>
   );
 }
