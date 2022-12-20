@@ -22,7 +22,7 @@ import {
 } from "../../assets/eventHandlers";
 
 function CoachesForm({ newCoachesData, setNewCoachesData }) {
-  const [{ theme, authUser }] = useStateValue();
+  const [{authTheme, authUser }] = useStateValue();
   const [headshotPreview, setHeadshotPreview] = useState(null);
   const [imgFile, setImgFile] = useState(null);
   const [mouseOverHeadShot, setMouseOverHeadShot] = useState(false);
@@ -128,7 +128,7 @@ function CoachesForm({ newCoachesData, setNewCoachesData }) {
         />
         <div className="formPreview__btns">
           <ThemedButton
-            theme={theme}
+            theme={authTheme}
             hovering={mouseOver}
             onMouseOver={() => handleMouseOver(setMouseOver)}
             onMouseOut={() => handleMouseOut(setMouseOver)}
@@ -142,7 +142,7 @@ function CoachesForm({ newCoachesData, setNewCoachesData }) {
 
         <div className="formPreview__btns">
           <ThemedButton
-            theme={theme}
+            theme={authTheme}
             hovering={mouseOverNext}
             onMouseOver={() => handleMouseOver(setMouseOverNext)}
             onMouseOut={() => handleMouseOut(setMouseOverNext)}

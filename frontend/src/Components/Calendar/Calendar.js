@@ -8,14 +8,14 @@ import CalendarDays from "./CalendarDays";
 import CalendarModal from "./CalendarModal";
 
 function Calendar({ date }) {
-  const [{ theme, gameData }] = useStateValue();
+  const [{authTheme, gameData }] = useStateValue();
 
   return (
     <div className="calendar">
       <div>
         <div className="calendar__gameLocation">
           <ThemedDiv
-            theme={theme}
+            theme={authTheme}
             className="calendar__gameLocationContent"
           ></ThemedDiv>
           <span>Home</span>

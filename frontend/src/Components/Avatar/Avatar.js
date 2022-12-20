@@ -3,7 +3,7 @@ import { useStateValue } from "../../Context/stateProvider";
 import "./Avatar.css";
 
 function Avatar() {
-  const [{ userData }] = useStateValue();
+  const [{ userData, authUser }] = useStateValue();
   return (
     <>
       {userData ? (
@@ -15,7 +15,7 @@ function Avatar() {
             userData.lastName.slice(0, 1).toUpperCase()
           ) : null} */}
 
-          {userData ? <div className="avatar__badge"></div> : null}
+          {authUser ? <div className="avatar__badge"></div> : null}
         </div>
       ) : null}
     </>

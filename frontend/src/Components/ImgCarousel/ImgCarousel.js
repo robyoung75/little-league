@@ -15,7 +15,7 @@ import PlayerCard from "../PlayerCard/PlayerCard";
 import { ThemedDiv } from "../../utils/ThemedComponents";
 
 function ImgCarousel() {
-  const [{ theme, teamData }] = useStateValue();
+  const [{ theme, teamData, authTeam }] = useStateValue();
   const [mobileActive, setMobileActive] = useState({
     boolean: true,
     slidesMobile: 1,
@@ -70,7 +70,7 @@ function ImgCarousel() {
                     number={player.number}
                     offenseImage={player.oImage}
                     defenseImage={player.dImage}
-                    logo={teamData.logo}
+                    logo={authTeam ? authTeam.teamLogo : teamData.logo}
                   />
                 </SwiperSlide>
               ) : null

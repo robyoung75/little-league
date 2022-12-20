@@ -3,8 +3,8 @@ import { ThemedButton } from "../../utils/ThemedComponents";
 import { useStateValue } from "../../Context/stateProvider";
 import { handleDelete } from "../../assets/functions";
 
-function ScheduleFormPreview({ scheduleData, setScheduleData }) {
-  const [{ theme }] = useStateValue();
+function ScheduleFormPreview({ setScheduleData }) {
+  const [{ authSchedule, authTheme }] = useStateValue();
   return (
     <div className="scheduleFormPreview formPreview form">
       <h3>Schedule data</h3>
@@ -25,8 +25,8 @@ function ScheduleFormPreview({ scheduleData, setScheduleData }) {
             </tr>
           </thead>
           <tbody>
-            {scheduleData &&
-              scheduleData.map((game) => (
+            {authSchedule &&
+              authSchedule.schedule.map((game) => (
                 <tr className="formPreview__tr" key={Math.random()}>
                   <td className="formPreview__td">
                     <div className="formPreview__content">{game.opponent}</div>
@@ -66,11 +66,10 @@ function ScheduleFormPreview({ scheduleData, setScheduleData }) {
                     <div className="formPreview__content">
                       <ThemedButton
                         className="formDelete"
-                        theme={theme}
+                        theme={authTheme}
                         onClick={(e) =>
                           handleDelete(
-                            game,
-                            scheduleData,
+                            game,                         
                             setScheduleData,
                             "schedule data"
                           )

@@ -4,9 +4,9 @@ import { useStateValue } from "../../Context/stateProvider";
 import { ThemedDiv } from "../../utils/ThemedComponents";
 
 function PlayerInfo({ firstName, lastName, number, image, position, batAve }) {
-  const [{ theme }] = useStateValue();
+  const [{ authTheme }] = useStateValue();
   return (
-    <ThemedDiv theme={theme} className="playerInfo">
+    <ThemedDiv theme={authTheme} className="playerInfo">
       <div className="playerInfo__container">
         <img className="playerInfo__img" alt="player info" src={image} />
       </div>

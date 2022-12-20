@@ -1,6 +1,8 @@
 import React from "react";
+import { useStateValue } from "../../Context/stateProvider";
 
-function TeamFormPreview({ teamData }) {
+function TeamFormPreview() {
+  const [{ authTeam }] = useStateValue();
   return (
     <div className="teamFormPreview formPreview form">
       <h3>Team data</h3>
@@ -17,15 +19,15 @@ function TeamFormPreview({ teamData }) {
             <tr className="formPreview__tr">
               <td className="formPreview__td">
                 <div className="formPreview__content">
-                  {teamData && teamData.teamName}
+                  {authTeam && authTeam.teamName}
                 </div>
               </td>
               <td className="formPreview__td">
                 <div className="formPreview__content">
-                  {teamData && teamData.primaryColor}
+                  {authTeam && authTeam.primaryColor}
                   <div
                     style={{
-                      background: teamData && teamData.primaryColor,
+                      background: authTeam && authTeam.primaryColor,
                       height: "2rem",
                       width: "100%",
                     }}
@@ -34,10 +36,10 @@ function TeamFormPreview({ teamData }) {
               </td>
               <td className="formPreview__td">
                 <div className="formPreview__content">
-                  {teamData && teamData.secondaryColor}
+                  {authTeam && authTeam.secondaryColor}
                   <div
                     style={{
-                      background: teamData && teamData.secondaryColor,
+                      background: authTeam && authTeam.secondaryColor,
                       height: "2rem",
                       width: "100%",
                     }}
@@ -51,8 +53,8 @@ function TeamFormPreview({ teamData }) {
         <div className="formPreview__contentImg">
           <h3>Team logo</h3>
           <img
-            className="imgFileInput__img"
-            src={teamData && teamData.teamLogo}
+            className="formPreview__img"
+            src={authTeam && authTeam.teamLogo}
           />
         </div>
       </div>

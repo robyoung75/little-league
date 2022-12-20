@@ -5,10 +5,10 @@ import { ThemedDiv, ThemedLink } from "../../utils/ThemedComponents";
 import "./Footer.css";
 
 function Footer() {
-  const [{ theme }] = useStateValue();
+  const [{ authTheme }] = useStateValue();
 
   return (
-    <ThemedDiv theme={theme} className="footer">
+    <ThemedDiv theme={authTheme} className="footer">
       <div className="footer__container">
         <h3>About</h3>
         <div className="footer__content">
@@ -23,16 +23,16 @@ function Footer() {
       <div className="footer__container">
         <h3>Quick Links</h3>
         <div className="footer__content">
-          <ThemedLink theme={theme} className="footer__link" route="/">
+          <ThemedLink theme={authTheme} className="footer__link" route="/">
             Home
           </ThemedLink>
-          <ThemedLink theme={theme} className="footer__link" route="/social">
+          <ThemedLink theme={authTheme} className="footer__link" route="/social">
             Social
           </ThemedLink>
-          <ThemedLink theme={theme} className="footer__link" route="/roster">
+          <ThemedLink theme={authTheme} className="footer__link" route="/roster">
             Roster
           </ThemedLink>
-          <ThemedLink theme={theme} className="footer__link" route="/schedule">
+          <ThemedLink theme={authTheme} className="footer__link" route="/schedule">
             Schedule
           </ThemedLink>
         </div>

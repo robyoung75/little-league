@@ -8,7 +8,7 @@ import { useStateValue } from "../../Context/stateProvider";
 
 function SideNavbar() {
   const [active, setActive] = useState(false);
-  const [{ theme }] = useStateValue();
+  const [{ authTheme }] = useStateValue();
 
   const handleActive = () => {
     active === true ? setActive(false) : setActive(true);
@@ -17,7 +17,7 @@ function SideNavbar() {
   return (
     <div className="sideNavbar">
       <ThemedDiv
-        theme={theme}
+        theme={authTheme}
         className={active ? "sideNavbar__active" : "sideNavbar__notActive"}
       >
         <div className="sideNavbar__iconClose">

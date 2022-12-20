@@ -20,7 +20,10 @@ function Navbar({
   authenticated,
   setAuthenticated,
 }) {
-  const [{ theme, teamData, userData, authUser }, dispatch] = useStateValue();
+  const [
+    {  teamData, userData, authUser, authTheme, authTeam },
+    dispatch,
+  ] = useStateValue();
   const navigate = useNavigate();
 
   // dropdown event handler
@@ -98,12 +101,12 @@ function Navbar({
     <div className="navbar">
       <ThemedDiv
         className={isActive ? "navbar__dropdownActive" : "navbar__dropdown"}
-        theme={theme}
+        theme={authTheme}
       >
         <ul className="navbar__list">
           <div className="navbar__listRight">
             <li className="navbar__listItem" onClick={handleCloseMobileNav}>
-              <Link className="navbar__listLink" to="/" style={theme.style}>
+              <Link className="navbar__listLink" to="/" style={authTheme.style}>
                 Home
               </Link>
             </li>
@@ -111,7 +114,7 @@ function Navbar({
               <Link
                 className="navbar__listLink"
                 to="/social"
-                style={theme.style}
+                style={authTheme.style}
               >
                 Social
               </Link>
@@ -120,7 +123,7 @@ function Navbar({
               <Link
                 className="navbar__listLink"
                 to="roster"
-                style={theme.style}
+                style={authTheme.style}
               >
                 Roster
               </Link>
@@ -132,7 +135,7 @@ function Navbar({
               <Link
                 className="navbar__listLink"
                 to="schedule"
-                style={theme.style}
+                style={authTheme.style}
               >
                 Schedule
               </Link>
@@ -141,7 +144,7 @@ function Navbar({
               <Link
                 className="navbar__listLink"
                 to="user_signIn"
-                style={theme.style}
+                style={authTheme.style}
               >
                 {signedIn === true ? (
                   <span onClick={handleUserAuthentication}>Sign out</span>
@@ -154,15 +157,15 @@ function Navbar({
         </ul>
       </ThemedDiv>
 
-      <ThemedDiv className="navbar__header" theme={theme}></ThemedDiv>
+      <ThemedDiv className="navbar__header" theme={authTheme}></ThemedDiv>
       <div className="navbar__imageContainer">
         <img
           className="navbar__listItemImage"
-          src={teamData ? teamData.logo : null}
+          src={authTeam ? authTeam.teamLogo : teamData.logo}
           alt="team logo"
         />
       </div>
-      <ThemedDiv className="navbar__hamburger" theme={theme}>
+      <ThemedDiv className="navbar__hamburger" theme={authTheme}>
         {isActive ? (
           <FontAwesomeIcon icon={faX} onClick={handleDropdown} />
         ) : (

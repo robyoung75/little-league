@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import './CompletedForm.css'
+import "./CompletedForm.css";
 import AdminFormPreview from "../../Components/Forms/AdminFormPreview";
 import CoachesFormPreview from "../../Components/Forms/CoachesFormPreview";
 import PlayersFormPreview from "../../Components/Forms/PlayersFormPreview";
@@ -11,7 +11,19 @@ import "../../Components/Forms/Forms.css";
 import { useNavigate } from "react-router-dom";
 
 function CompletedForm() {
-  const [{ theme, formData }, dispatch] = useStateValue();
+  const [
+    {
+      authUser,
+      authTeam,
+      authPlayers,
+      authCoaches,
+      authSchedule,
+      authTheme,
+     
+      formData,
+    },
+    dispatch,
+  ] = useStateValue();
   const [mouseOver, setMouseOver] = useState(false);
 
   const [admin, setAdmin] = useState(null);
@@ -73,36 +85,38 @@ function CompletedForm() {
   return (
     <div className="completedForm form">
       {formData && <h3>Data successfully submitted</h3>}
-      {admin ? (
-        <AdminFormPreview adminData={admin} />
+      {authUser ? (
+        <AdminFormPreview adminData={authUser ? authUser : admin} />
       ) : formData ? (
         <AdminFormPreview adminData={formData.admin} />
       ) : (
         <AdminFormPreview />
       )}
-      {team ? (
-        <TeamFormPreview teamData={team} />
+      {authTeam ? (
+        <TeamFormPreview teamData={authTeam ? authTeam : team} />
       ) : formData ? (
         <TeamFormPreview adminData={formData.team} />
       ) : (
         <TeamFormPreview />
       )}
-      {players ? (
-        <PlayersFormPreview playersData={players} />
+      {authPlayers ? (
+        <PlayersFormPreview playersData={authPlayers ? authPlayers : players} />
       ) : formData ? (
         <PlayersFormPreview playersData={formData.players} />
       ) : (
         <PlayersFormPreview />
       )}
-      {coaches ? (
-        <CoachesFormPreview coachesData={coaches} />
+      {authCoaches ? (
+        <CoachesFormPreview coachesData={authCoaches ? authCoaches : coaches} />
       ) : formData ? (
         <CoachesFormPreview coachesData={formData.coaches} />
       ) : (
         <CoachesFormPreview />
       )}
-      {schedule ? (
-        <ScheduleFormPreview scheduleData={schedule} />
+      {authSchedule ? (
+        <ScheduleFormPreview
+          scheduleData={authSchedule ? authSchedule : schedule}
+        />
       ) : formData ? (
         <ScheduleFormPreview scheduleData={formData.schedule} />
       ) : (
@@ -111,7 +125,7 @@ function CompletedForm() {
 
       <div className="formContainer formPreview__btns">
         <ThemedButton
-          theme={theme}
+          theme={authTheme}
           hovering={mouseOver}
           onMouseOver={handleMouseOver}
           onMouseOut={handleMouseOut}

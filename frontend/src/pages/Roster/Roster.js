@@ -5,24 +5,28 @@ import { ThemedDiv } from "../../utils/ThemedComponents";
 import PlayerCard from "../../Components/PlayerCard/PlayerCard";
 
 function Roster({ isActive }) {
-  const [{ teamData, theme, authPlayers }] = useStateValue();
+  const [{ teamData, theme, authPlayers, authTheme, authTeam }] =
+    useStateValue();
 
   return (
     <div className={isActive ? "roster roster__active" : "roster"}>
       <h1>
-        {teamData &&
-          `Meet the 2022 ${teamData.team
-            .charAt(0)
-            .toUpperCase()}${teamData.team.slice(1)}`}
+        {authTeam
+          ? `Meet the 2022 ${authTeam.teamName
+              .charAt(0)
+              .toUpperCase()}${authTeam.teamName.slice(1)}`
+          : `Meet the 2022 ${teamData.team
+              .charAt(0)
+              .toUpperCase()}${teamData.team.slice(1)}`}
       </h1>
 
       {teamData &&
         teamData.players.map((player) => (
           <div className="roster__flipCard" key={player.number}>
             <div className="roster__flipCardInner">
-              <ThemedDiv theme={theme} className="roster__flipCardFront">
+              <ThemedDiv theme={authTheme} className="roster__flipCardFront">
                 <PlayerCard
-                  logo={teamData.logo}
+                  logo={authTeam ? authTeam.teamLogo : teamData.logo}
                   offenseImage={player.oImage}
                   defenseImage={player.dImage}
                   firstName={player.firstName}
@@ -33,7 +37,7 @@ function Roster({ isActive }) {
               </ThemedDiv>
               <ThemedDiv className="roster__flipCardBack">
                 <ThemedDiv
-                  theme={theme}
+                  theme={authTheme}
                   className="roster__flipCardBackContainer"
                 >
                   <img

@@ -13,7 +13,7 @@ import post_2 from "../../assets/images/posts/post_2.jpg";
 import post_3 from "../../assets/images/posts/post_3.jpg";
 
 function PostFeed() {
-  const [{ theme, posts, userData }, dispatch] = useStateValue();
+  const [{ authTheme, posts, userData }, dispatch] = useStateValue();
   const [testPost] = useState([
     { user: "userName", date: new Date().toDateString(), post: post_1, id: 1 },
     { user: "userName", date: new Date().toDateString(), post: post_2, id: 2 },
@@ -31,8 +31,8 @@ function PostFeed() {
 
   const PostImage = ({ post, user, date }) => {
     return (
-      <ThemedDiv theme={theme} className="postImage">
-        <ThemedHeader theme={theme.style} className="postImage__header">
+      <ThemedDiv theme={authTheme} className="postImage">
+        <ThemedHeader theme={authTheme} className="postImage__header">
           <div className="postImage__info">
             <div className="postFeed__avatar">
               <Avatar />
@@ -45,7 +45,7 @@ function PostFeed() {
         {userData && (
           <div className="postImage__btnContainer">
             <div className="postImage__btn">
-              <ThemedButton theme={theme}>Delete</ThemedButton>
+              <ThemedButton theme={authTheme}>Delete</ThemedButton>
             </div>
           </div>
         )}

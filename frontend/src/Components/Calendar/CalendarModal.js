@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 
 function CalendarModal({ opponent, arrivalTime, gameTime, address, homeAway }) {
-  const [{ theme, teamData, gameData }, dispatch] = useStateValue();
+  const [{ authTheme, teamData, gameData }, dispatch] = useStateValue();
 
   const handleClose = (e) => {
     e.preventDefault();
@@ -20,7 +20,7 @@ function CalendarModal({ opponent, arrivalTime, gameTime, address, homeAway }) {
   return (
     <>
       {gameData.homeAway === "home" ? (
-        <ThemedDiv theme={theme} className="calendarModal">
+        <ThemedDiv theme={authTheme} className="calendarModal">
           <ThemedHeader className="calendarModal__header"></ThemedHeader>
           {teamData && (
             <img
@@ -37,7 +37,7 @@ function CalendarModal({ opponent, arrivalTime, gameTime, address, homeAway }) {
           </div>
 
           <FontAwesomeIcon
-            style={theme.primaryColor}
+            style={authTheme.primaryColor}
             icon={faX}
             className="calendarModal__close"
             onClick={handleClose}
@@ -46,7 +46,7 @@ function CalendarModal({ opponent, arrivalTime, gameTime, address, homeAway }) {
       ) : (
         <div className="calendarModal">
           <ThemedHeader
-            theme={theme}
+            theme={authTheme}
             className="calendarModal__header"
           ></ThemedHeader>
           {teamData && (
@@ -63,7 +63,7 @@ function CalendarModal({ opponent, arrivalTime, gameTime, address, homeAway }) {
             <p>Address: {gameData.address}</p>
           </div>
           <FontAwesomeIcon
-            style={theme.tertiaryColor}
+            style={authTheme.tertiaryColor}
             icon={faX}
             className="calendarModal__close"
             onClick={handleClose}

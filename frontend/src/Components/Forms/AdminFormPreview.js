@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { useStateValue } from "../../Context/stateProvider";
 import "./Forms.css";
 
-function AdminFormPreview({ adminData }) {
+function AdminFormPreview() {
+  const [{ authUser }] = useStateValue();
+
   return (
     <div className="adminFormPreview formPreview form">
       <h3>Admin data</h3>
@@ -20,27 +23,27 @@ function AdminFormPreview({ adminData }) {
             <tr className="formPreview__tr">
               <td className="formPreview__td">
                 <div className="formPreview__content">
-                  {adminData && adminData.firstName}
+                  {authUser && authUser.firstName}
                 </div>
               </td>
               <td className="formPreview__td">
                 <div className="formPreview__content">
-                  {adminData && adminData.lastName}
+                  {authUser && authUser.lastName}
                 </div>
               </td>
               <td className="formPreview__td">
                 <div className="formPreview__content">
-                  {adminData && adminData.email}
+                  {authUser && authUser.email}
                 </div>
               </td>
               <td className="formPreview__td">
                 <div className="formPreview__content">
-                  {adminData && adminData.teamUserName}
+                  {authUser && authUser.teamUserName}
                 </div>
               </td>
               <td className="formPreview__td">
                 <div className="formPreview__content">
-                  {adminData && adminData.password}
+                  {authUser && "password is set"}
                 </div>
               </td>
             </tr>

@@ -5,11 +5,11 @@ import PlayerInfo from "../PlayerInfo/PlayerInfo";
 import { ThemedHeader } from "../../utils/ThemedComponents";
 
 function PlayerList() {
-  const [{ theme, teamData }] = useStateValue();
+  const [{ authTheme, teamData }] = useStateValue();
   return (
     <div className="playerList">
       <div className="playerList__headerContainer">
-        <ThemedHeader theme={theme} title="Meet the Team" />
+        <ThemedHeader theme={authTheme} title="Meet the Team" />
       </div>
 
       {teamData

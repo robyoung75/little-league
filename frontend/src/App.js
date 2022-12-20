@@ -107,13 +107,46 @@ function App() {
         type: "SET_AUTH_POSTS",
         authPosts: postsData.data,
       });
+
+      dispatch({
+        type: "SET_AUTH_THEME",
+        authTheme: {
+          name: teamData.data.teamName,
+          id: teamData.data.teamId,
+          style: {
+            background: teamData.data.primaryColor,
+            color: teamData.data.secondaryColor,
+          },
+          primaryColor: {
+            color: teamData.data.primaryColor,
+          },
+          secondaryColor: {
+            color: teamData.data.secondaryColor,
+          },
+          tertiaryColor: {
+            color: "#a1aaad",
+          },
+          btn: {
+            background: teamData.data.primaryColor,
+            color: "#a1aaad",
+            // background: "linear-gradient(to right, #bd3039  50%, #a1aaad 50%) right",
+            // backgroundSize: "300%",
+            // backgroundPosition: "left",
+          },
+          btn__hover: {
+            background: "#a1aaad",
+            // background: "linear-gradient(to right, #bd3039  50%, #a1aaad 50%) right",
+            // backgroundPosition: "right",
+            // backgroundSize: "200%",
+            color: teamData.data.primaryColor,
+          },
+        },
+      });
     };
 
     if (authenticated && authUser && isSubscribed) {
       fetchData().catch(console.error);
-
     } else {
-
       dispatch({
         type: "SET_AUTH_TEAM",
         authTeam: null,
@@ -138,6 +171,35 @@ function App() {
         type: "SET_AUTH_POSTS",
         authPosts: null,
       });
+
+      dispatch({
+        type: "SET_AUTH_THEME",
+        authTheme: {
+          name: "razorBacks",
+          id: "111112",
+          style: {
+            background: "#BD3039",
+            color: "#C4CED4",
+          },
+          primaryColor: {
+            color: "#BD3039",
+          },
+          secondaryColor: {
+            color: "#C4CED4",
+          },
+          tertiaryColor: {
+            color: "#a1aaad",
+          },
+          btn: {
+            background: "#BD3039",
+            color: "#a1aaad",
+          },
+          btn__hover: {
+            background: "#a1aaad",
+            color: "#bd3039",
+          },
+        },
+      });
     }
 
     return () => {
@@ -145,56 +207,58 @@ function App() {
     };
   }, [authenticated, authUser]);
 
-  useEffect(() => {
-    //  simulate the request from database for user validation
-    const user = (userEmail) => {
-      let signedIn;
-      users.forEach((item) => {
-        if (item.email === userEmail) {
-          signedIn = item;
-          // setSignedIn(true);
-        }
-      });
-      return signedIn;
-    };
-    setAuth(user(userData.email));
-  }, []);
 
-  useEffect(() => {
-    if (auth) {
-      //  simulate the request from database for team data
-      const setTeam = (data) => {
-        data.forEach((item) => {
-          if (item.teamId === auth.teamId) {
-            data = item;
-          }
-        });
-        return data;
-      };
-      setUserTeam(setTeam(data));
-    }
-  }, [auth]);
 
-  useEffect(() => {
-    if (auth && userTeam) {
-      dispatch({
-        type: "SET_USER",
-        userData: auth,
-      });
-      dispatch({
-        type: "SET_THEME",
-        theme: theme,
-      });
-      dispatch({
-        type: "SET_TEAM",
-        teamData: userTeam,
-      });
-      dispatch({
-        type: "SET_PLAYER",
-        player: player,
-      });
-    }
-  }, [auth, userTeam, dispatch, theme, player]);
+  // useEffect(() => {
+  //   //  simulate the request from database for user validation
+  //   const user = (userEmail) => {
+  //     let signedIn;
+  //     users.forEach((item) => {
+  //       if (item.email === userEmail) {
+  //         signedIn = item;
+  //         // setSignedIn(true);
+  //       }
+  //     });
+  //     return signedIn;
+  //   };
+  //   setAuth(user(userData.email));
+  // }, []);
+
+  // useEffect(() => {
+  //   if (auth) {
+  //     //  simulate the request from database for team data
+  //     const setTeam = (data) => {
+  //       data.forEach((item) => {
+  //         if (item.teamId === auth.teamId) {
+  //           data = item;
+  //         }
+  //       });
+  //       return data;
+  //     };
+  //     setUserTeam(setTeam(data));
+  //   }
+  // }, [auth]);
+
+  // useEffect(() => {
+  //   if (auth && userTeam) {
+  //     dispatch({
+  //       type: "SET_USER",
+  //       userData: auth,
+  //     });
+  //     dispatch({
+  //       type: "SET_THEME",
+  //       theme: theme,
+  //     });
+  //     dispatch({
+  //       type: "SET_TEAM",
+  //       teamData: userTeam,
+  //     });
+  //     dispatch({
+  //       type: "SET_PLAYER",
+  //       player: player,
+  //     });
+  //   }
+  // }, [auth, userTeam, dispatch, theme, player]);
 
   return (
     <div className="app">

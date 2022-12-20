@@ -6,11 +6,11 @@ import SocialSchedule from "../SocialSchedule/SocialSchedule";
 
 import { ThemedDiv, ThemedHeader } from "../../utils/ThemedComponents";
 function ScheduleList() {
-  const [{ theme, teamData }] = useStateValue();
+  const [{ teamData, authTheme }] = useStateValue();
   return (
-    <ThemedDiv theme={theme} className="scheduleList">
+    <ThemedDiv theme={authTheme} className="scheduleList">
       <div className="scheduleList__headerContainer">
-        <ThemedHeader title="2022 Schedule" theme={theme} />
+        <ThemedHeader title="2022 Schedule" theme={authTheme} />
       </div>
 
       <table>

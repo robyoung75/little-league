@@ -146,6 +146,7 @@ input[type="file"] {
 .formPreview__th {
   font-size: 0.45rem;
   padding: 0.15rem;
+  border-bottom: none;
 }
 
 .images > h3 {
@@ -200,6 +201,18 @@ input[type="file"] {
 
 .playersFormPreview__imgs {
   margin-top: 2rem;
+}
+
+.formPreview__container {
+  width: 100%;
+  display: flex;
+}
+
+.formPreview__img {
+  height: 2rem;
+  margin-left: 0.5rem;
+  border-top-right-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
 }
 
 /* FORM REQUIREMENTS */
@@ -278,8 +291,6 @@ input[type="file"] {
   .signIn {
     width: 50%;
   }
-
-
 }
 
 @media only screen and (min-width: 992px) {
@@ -323,5 +334,4 @@ input[type="file"] {
   .signIn {
     width: 30%;
   }
-
 }

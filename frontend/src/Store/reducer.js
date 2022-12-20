@@ -11,6 +11,31 @@ export const initialState = {
   authCoaches: null,
   authSchedule: null,
   authPosts: null,
+  authTheme:  {
+    name: "razorBacks",
+    id: "111112",
+    style: {
+      background: "#BD3039",
+      color: "#C4CED4",
+    },
+    primaryColor: {
+      color: "#BD3039",
+    },
+    secondaryColor: {
+      color: "#C4CED4",
+    },
+    tertiaryColor: {
+      color: "#a1aaad",
+    },
+    btn: {
+      background: "#BD3039",
+      color: "#a1aaad",  
+    },
+    btn__hover: {
+      background: "#a1aaad",
+      color: "#bd3039",
+    },
+  },
   userData: users[0],
   teamData: data[0],
   player: null,
@@ -57,6 +82,12 @@ const reducer = (state, action) => {
       return {
         ...state,
         authPosts: action.authPosts,
+      };
+
+    case "SET_AUTH_THEME":
+      return {
+        ...state,
+        authTheme: action.authTheme,
       };
     case "SET_USER":
       return {

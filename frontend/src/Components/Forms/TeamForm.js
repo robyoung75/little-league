@@ -26,10 +26,10 @@ function TeamForm({ newTeamData, setNewTeamData }) {
     primaryColor: "#27251f",
     secondaryColor: "#fdb827",
   };
-  const [{ theme, userData, authUser }] = useStateValue();
-  const [primaryColor, setPrimaryColor] = useState(initialState.primaryColor);
+  const [{ theme, userData, authUser, authTheme }] = useStateValue();
+  const [primaryColor, setPrimaryColor] = useState(authTheme.primaryColor);
   const [secondaryColor, setSecondaryColor] = useState(
-    initialState.secondaryColor
+    authTheme.secondaryColor
   );
   const [logoPreview, setLogoPreview] = useState(null);
   const [imgFile, setImgFile] = useState(null);
@@ -120,7 +120,7 @@ function TeamForm({ newTeamData, setNewTeamData }) {
         <div className="formPreview__btns">
           <ThemedButton
             className="formPreview__btn"
-            theme={theme}
+            theme={authTheme}
             hovering={mouseOver}
             onMouseOver={() => handleMouseOver(setMouseOver)}
             onMouseOut={() => handleMouseOut(setMouseOver)}
@@ -133,7 +133,7 @@ function TeamForm({ newTeamData, setNewTeamData }) {
         <div className="formPreview__btns">
           <ThemedButton
             className="formPreview__btn"
-            theme={theme}
+            theme={authTheme}
             hovering={mouseOverNext}
             onMouseOver={() => handleMouseOver(setMouseOverNext)}
             onMouseOut={() => handleMouseOut(setMouseOverNext)}

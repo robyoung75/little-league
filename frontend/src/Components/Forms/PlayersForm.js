@@ -44,7 +44,7 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
 
   const navigate = useNavigate();
 
-  const [{ theme, authUser }, dispatch] = useStateValue();
+  const [{ authTheme, authUser }, dispatch] = useStateValue();
 
   const {
     register,
@@ -309,7 +309,7 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
 
         <div className="formPreview__btns">
           <ThemedButton
-            theme={theme}
+            theme={authTheme}
             hovering={mouseOver}
             onMouseOver={() => handleMouseOver(setMouseOver)}
             onMouseOut={() => handleMouseOut(setMouseOver)}
@@ -323,7 +323,7 @@ function PlayersForm({ newPlayersData, setNewPlayersData }) {
 
         <div className="formPreview__btns">
           <ThemedButton
-            theme={theme}
+            theme={authTheme}
             hovering={mouseOverNext}
             onMouseOver={() => handleMouseOver(setMouseOverNext)}
             onMouseOut={() => handleMouseOut(setMouseOverNext)}

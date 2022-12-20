@@ -14,7 +14,7 @@ import { ThemedButton } from "../../utils/ThemedComponents";
 import { useStateValue } from "../../Context/stateProvider";
 
 function Schedule({ mobile, isActive }) {
-  const [{ theme }] = useStateValue();
+  const [{authTheme }] = useStateValue();
   const [date, setDate] = useState("");
   const [startYear, setStartYear] = useState();
   const [endYear, setEndYear] = useState();
@@ -113,7 +113,7 @@ function Schedule({ mobile, isActive }) {
       <div className="schedule__flexContainer dateBar">
         <div className="schedule__flexContainer dateBarInput">
           <ThemedButton
-            theme={theme}
+            theme={authTheme}
             onClick={handleDateDecrement}
             className="schedule__buttonIncDec"
           >
@@ -127,7 +127,7 @@ function Schedule({ mobile, isActive }) {
             ></input>
           </button>
           <ThemedButton
-            theme={theme}
+            theme={authTheme}
             onClick={handleDateIncrement}
             className="schedule__buttonIncDec"
           >
@@ -143,7 +143,7 @@ function Schedule({ mobile, isActive }) {
         >
           <div className="schedule__flexContainer schedule__dateBtnCol">
             <ThemedButton
-              theme={theme}
+              theme={authTheme}
               className="schedule__dateBtn"
               onClick={handleMonthDropdownActive}
             >
@@ -165,7 +165,7 @@ function Schedule({ mobile, isActive }) {
           </div>
           <div className="schedule__flexContainer schedule__dateBtnCol">
             <ThemedButton
-              theme={theme}
+              theme={authTheme}
               className="schedule__dateBtn"
               onClick={handleYearDropdownActive}
             >

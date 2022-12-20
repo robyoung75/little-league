@@ -12,17 +12,17 @@ function PlayerCard({
   number,
   image
 }) {
-  const [{ theme }] = useStateValue();
+  const [{ authTheme, authTeam }] = useStateValue();
   return (
     <div className="playerCard__container">
-      <ThemedDiv theme={theme} className="playerCard">
+      <ThemedDiv theme={authTheme} className="playerCard">
         <img src={logo} alt="team logo" className="playerCard__cardLogo" />
         <img
           src={offenseImage ? offenseImage : defenseImage ? defenseImage : image ? image : null}
           alt="player"
           className="playerCard__playerImg"
         />
-        <ThemedDiv theme={theme} className="figCaption__container">
+        <ThemedDiv theme={authTheme} className="figCaption__container">
           <figcaption>
             <p>
               {firstName} {lastName}

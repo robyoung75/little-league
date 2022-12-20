@@ -21,7 +21,7 @@ import {
 } from "../../assets/functions";
 import { userPost } from "../../assets/requests";
 function PostInput() {
-  const [{ theme, userData, authUser }] = useStateValue();
+  const [{  userData, authUser, authTheme }] = useStateValue();
   const [post, setPost] = useState(null);
   const [hovering_2, setHovering_2] = useState(false);
   const [postImgPreview, setPostImgPreview] = useState(null);
@@ -107,7 +107,7 @@ function PostInput() {
     <div className="postInput">
 
         <form onSubmit={handleSubmit(formSubmit)}>
-        <ThemedHeader theme={theme} className="postInput__header">
+        <ThemedHeader theme={authTheme} className="postInput__header">
           <input
             className="postInput__input"
             type="text"
@@ -151,7 +151,7 @@ function PostInput() {
             <div className="postInput__btn">
               <ThemedButton
                 className="btn"
-                theme={theme}
+                theme={authTheme}
                 hovering={hovering_2}
                 onMouseOver={handleHovering_2}
                 onMouseOut={handleNotHovering_2}

@@ -26,7 +26,7 @@ function AdminForm({
   setSignedIn,
   setAuthenticated,
 }) {
-  const [{ theme, authUser }, dispatch] = useStateValue();
+  const [{ authTheme, authUser }, dispatch] = useStateValue();
   const [checked, setChecked] = useState(false);
   const [mouseOver, setMouseOver] = useState(false);
   const [mouseOverNext, setMouseOverNext] = useState(false);
@@ -168,7 +168,7 @@ function AdminForm({
         <div className="formPreview__btns">
           <ThemedButton
             className="formPreview__btn"
-            theme={theme}
+            theme={authTheme}
             hovering={mouseOver}
             onMouseOver={() => handleMouseOver(setMouseOver)}
             onMouseOut={() => handleMouseOut(setMouseOver)}
@@ -181,7 +181,7 @@ function AdminForm({
         <div className="formPreview__btns">
           <ThemedButton
             className="formPreview__btn"
-            theme={theme}
+            theme={authTheme}
             hovering={mouseOverNext}
             onMouseOver={() => handleMouseOver(setMouseOverNext)}
             onMouseOut={() => handleMouseOut(setMouseOverNext)}

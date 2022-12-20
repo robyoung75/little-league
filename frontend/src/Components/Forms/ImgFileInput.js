@@ -16,12 +16,12 @@ function ImgFileInput({
   hovering,
   onMouseOver,
   onMouseOut,
-  multipleImgs
+  multipleImgs,
 }) {
-  const [{ theme }] = useStateValue();
+  const [{ authTheme }] = useStateValue();
   return (
     <ThemedDiv
-      theme={theme}
+      theme={authTheme}
       hovering={hovering}
       onMouseOver={onMouseOver}
       onMouseOut={onMouseOut}

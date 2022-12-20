@@ -1,18 +1,21 @@
 import React from "react";
-import ImgsPreview from "./PlayersImgs";
+import { useStateValue } from "../../Context/stateProvider";
+import PlayersImgs from "./PlayersImgs";
 
-function ImgsPreviewList({ playersData }) {
+function ImgsPreviewList() {
+
+  const [{ authPlayers }] = useStateValue();
   return (
     <>
-      {playersData &&
-        playersData.map((player) => (
-          <ImgsPreview
+      {authPlayers &&
+        authPlayers.players.map((player) => (
+          <PlayersImgs
             key={Math.random()}
             firstName={player.firstName}
             lastName={player.lastName}
-            playerImg={player.headshotImg}
-            playerOffenseImg={player.offenseImg}
-            playerDefenseImg={player.defenseImg}
+            playerImg={player.headshotImg.secureURL}
+            playerOffenseImg={player.offenseImg.secureURL}
+            playerDefenseImg={player.defenseImg.secureURL}
           />
         ))}
     </>

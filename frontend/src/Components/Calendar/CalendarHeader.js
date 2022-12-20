@@ -5,12 +5,12 @@ import { days } from "../../assets/functions";
 import { ThemedDiv } from "../../utils/ThemedComponents";
 
 function CalendarHeader() {
-  const [{ theme }] = useStateValue();
+  const [{ authTheme }] = useStateValue();
 
   return (
     <>
       {days.map((day) => (
-        <ThemedDiv theme={theme} className="calendar__header" key={day}>
+        <ThemedDiv theme={authTheme} className="calendar__header" key={day}>
           {day}
         </ThemedDiv>
       ))}

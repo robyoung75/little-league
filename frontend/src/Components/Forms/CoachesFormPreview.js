@@ -3,8 +3,8 @@ import { handleDelete } from "../../assets/functions";
 import { useStateValue } from "../../Context/stateProvider";
 import { ThemedButton } from "../../utils/ThemedComponents";
 
-function CoachesFormPreview({ coachesData, setCoachesData }) {
-  const [{ theme }] = useStateValue();
+function CoachesFormPreview({ setCoachesData }) {
+  const [{  authCoaches, authTheme }] = useStateValue();
   return (
     <div className="coachesFormPreview formPreview form">
       <h3>Coach data</h3>
@@ -19,8 +19,8 @@ function CoachesFormPreview({ coachesData, setCoachesData }) {
             </tr>
           </thead>
           <tbody>
-            {coachesData &&
-              coachesData.map((coach, i) => (
+            {authCoaches &&
+              authCoaches.coaches.map((coach, i) => (
                 <tr className="formPreview__tr" key={i}>
                   <td className="formPreview__td">
                     <div className="formPreview__content">
@@ -35,10 +35,10 @@ function CoachesFormPreview({ coachesData, setCoachesData }) {
                   </td>
                   <td className="formPreview__td">
                     <div className="formPreview__content">
-                      {coach.coachImg ? (
+                      {coach.headshotImg.secureURL ? (
                         <img
-                          className="imgFileInput__img"
-                          src={coach.coachImg}
+                          className="formPreview__img"
+                          src={coach.headshotImg.secureURL}
                           alt="coach"
                         />
                       ) : (
@@ -50,14 +50,9 @@ function CoachesFormPreview({ coachesData, setCoachesData }) {
                     <div className="formPreview__content">
                       <ThemedButton
                         className="formDelete"
-                        theme={theme}
+                        theme={authTheme}
                         onClick={(e) =>
-                          handleDelete(
-                            coach,
-                            coachesData,
-                            setCoachesData,
-                            "coaches data"
-                          )
+                          handleDelete(coach, setCoachesData, "coaches data")
                         }
                       >
                         Delete

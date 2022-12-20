@@ -18,7 +18,7 @@ import {
 import {adminSchedulePost} from '../../assets/requests'
 
 function ScheduleForm({ newScheduleData, setNewScheduleData }) {
-  const [{ theme }] = useStateValue();
+  const [{ authTheme }] = useStateValue();
   const [mouseOver, setMouseOver] = useState(false);
   const [mouseOverNext, setMouseOverNext] = useState(false);
   const navigate = useNavigate();
@@ -172,7 +172,7 @@ function ScheduleForm({ newScheduleData, setNewScheduleData }) {
 
         <div className="formPreview__btns">
           <ThemedButton
-            theme={theme}
+            theme={authTheme}
             hovering={mouseOver}
             onMouseOver={() => handleMouseOver(setMouseOver)}
             onMouseOut={() => handleMouseOut(setMouseOver)}
@@ -186,7 +186,7 @@ function ScheduleForm({ newScheduleData, setNewScheduleData }) {
 
         <div className="formPreview__btns">
           <ThemedButton
-            theme={theme}
+            theme={authTheme}
             hovering={mouseOverNext}
             onMouseOver={() => handleMouseOver(setMouseOverNext)}
             onMouseOut={() => handleMouseOut(setMouseOverNext)}

@@ -12,7 +12,7 @@ import {
 import { ThemedDiv } from "../../utils/ThemedComponents";
 
 function CalendarDays({ date }) {
-  const [{ theme, teamData }, dispatch] = useStateValue();
+  const [{ authTheme, teamData }, dispatch] = useStateValue();
   const [daysInTheMonth, setDaysInTheMonth] = useState();
   const [firstDayOfMonth, setFirstDayOfMonth] = useState();
   const [monthSchedule, setmonthSchedule] = useState();
@@ -54,7 +54,7 @@ function CalendarDays({ date }) {
         ) {
           let content = (
             <ThemedDiv
-              theme={theme}
+              theme={authTheme}
               className="calendarDay__content"
               key={game.id}
               onClick={(e) => handleClick(e, index)}

@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { adminUserSignIn, userSignIn } from "../../assets/requests";
 
 function SignIn({ setSignedIn, setAuthenticated }) {
-  const [{ theme, userData }, dispatch] = useStateValue();
+  const [{ authTheme }, dispatch] = useStateValue();
   const [isAdmin, setIsAdmin] = useState(false);
   const [authError, setAuthError] = useState("");
   const navigate = useNavigate();
@@ -51,10 +51,12 @@ function SignIn({ setSignedIn, setAuthenticated }) {
 
       if (isAdmin) {
         response = await adminUserSignIn(data);
+        response.data.adminAuth = true;
       }
 
       if (!isAdmin) {
         response = await userSignIn(data);
+        response.adminAuth = false;
       }
 
       if (response.data) {
@@ -64,6 +66,7 @@ function SignIn({ setSignedIn, setAuthenticated }) {
           type: "SET_AUTH_USER",
           authUser: response.data,
         });
+
         setSignedIn(true);
         setAuthenticated(true);
 
@@ -81,7 +84,7 @@ function SignIn({ setSignedIn, setAuthenticated }) {
 
   return (
     <div className="signIn">
-      <ThemedHeader theme={theme} className="signIn__header">
+      <ThemedHeader theme={authTheme} className="signIn__header">
         Sign in
       </ThemedHeader>
       <form
@@ -132,7 +135,7 @@ function SignIn({ setSignedIn, setAuthenticated }) {
         </label>
 
         <div className="formPreview__btns signIn__btn">
-          <ThemedButton theme={theme} type="submit">
+          <ThemedButton theme={authTheme} type="submit">
             Submit
           </ThemedButton>
         </div>

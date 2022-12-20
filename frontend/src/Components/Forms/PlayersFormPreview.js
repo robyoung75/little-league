@@ -4,14 +4,14 @@ import { handleDelete } from "../../assets/functions";
 import { ThemedButton } from "../../utils/ThemedComponents";
 import { useStateValue } from "../../Context/stateProvider";
 
-function PlayersFormPreview({ playersData, setPlayersData }) {
-  const [{ theme }] = useStateValue();
+function PlayersFormPreview({ setPlayersData }) {
+  const [{ authTheme, authPlayers }] = useStateValue();
 
   return (
     <div className="playersFormPreview formPreview form">
       <h3>Player data</h3>
       <div className="playersFormPreview previewContainer form">
-        <table className="formPreview__table">
+        <table className="formPreview__table ">
           <thead>
             <tr className="formPreview__tr">
               <th className="formPreview__th images">First name</th>
@@ -22,8 +22,8 @@ function PlayersFormPreview({ playersData, setPlayersData }) {
             </tr>
           </thead>
           <tbody>
-            {playersData &&
-              playersData.map((player, i) => (
+            {authPlayers &&
+              authPlayers.players.map((player, i) => (
                 <tr className="formPreview__tr" key={i}>
                   <td className="formPreview__td">
                     <div className="formPreview__content">
@@ -52,14 +52,9 @@ function PlayersFormPreview({ playersData, setPlayersData }) {
                     <div className="formPreview__content">
                       <ThemedButton
                         className="formDelete"
-                        theme={theme}
+                        theme={authTheme}
                         onClick={(e) =>
-                          handleDelete(
-                            player,
-                            playersData,
-                            setPlayersData,
-                            "players data"
-                          )
+                          handleDelete(player, setPlayersData, "players data")
                         }
                       >
                         Delete
@@ -73,9 +68,9 @@ function PlayersFormPreview({ playersData, setPlayersData }) {
       </div>
       <h3>Player data images</h3>
       <div className="playersFormPreview previewContainer form">
-        <table className="formPreview__table">
+        <table className="formPreview__table" >
           <thead>
-            <tr className="formPreview__tr">
+            <tr className="formPreview__tr" >
               <th className="formPreview__th">First name</th>
               <th className="formPreview__th">Last name</th>
               <th className="formPreview__th">Headshot</th>
@@ -83,7 +78,7 @@ function PlayersFormPreview({ playersData, setPlayersData }) {
               <th className="formPreview__th">Defense Image</th>
             </tr>
           </thead>
-          <PlayersImgsPreviewList playersData={playersData} />
+          <PlayersImgsPreviewList />
         </table>
       </div>
     </div>
