@@ -233,7 +233,7 @@ const months = [
 //  IMAGE HANDLING
 // returns a URL for an uploaded image
 const imgURL = (imageFile) => {
-  return URL.createObjectURL(imageFile.target.files[0]);
+  return URL.createObjectURL(imageFile[0]);
 };
 
 // CREATE FORMS PAGES GET LOCAL DATA
@@ -260,6 +260,32 @@ const handleDelete = (toDelete, dataArr, stateFunc, dataName) => {
     stateFunc();
   }
 };
+
+// PREPARE IMAGE FILES FOR UPLOAD, MULTIPLE IMAGES AT ONCE, CALLED ON POSTINPUT 
+const uploadMultipleImgFiles = (imgArr) => {
+ 
+  let fileObj = [];
+  let fileArray = [];
+
+  fileObj.push(imgArr);
+
+  for (let i = 0; i < fileObj[0].length; i++) {
+    fileArray.push(URL.createObjectURL(fileObj[0][i]))
+  }
+
+  return fileArray
+
+}
+
+// CREATE FILE ARRAY FROM FILELIST FOR UPLOAD.
+const convertFileListToArr = (imgFileList) => {
+  const fileList = []
+  for (var i = 0; i < imgFileList.length; i++) {
+    fileList.push(imgFileList[i])
+  }
+  console.log("convertFileListToArr_____fileList", fileList)
+  return fileList
+}
 
 // const setLocalStorage = ((localStorageName) => {
 //   const existingLocalStorageValue = localStorage.getItem(localStorageName);
@@ -292,4 +318,6 @@ export {
   checkLocalData,
   handleDelete,
   handleFirstLetterCap,
+  uploadMultipleImgFiles,
+  convertFileListToArr
 };

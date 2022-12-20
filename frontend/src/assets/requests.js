@@ -168,6 +168,24 @@ export const adminSchedulePost = async (dataObj) => {
   }
 };
 
+// create post
+export const userPost = async (teamId, dataObj) => {
+
+try {
+
+  const response = await axiosInstanceFormData.post(`/api/user/posts/${teamId}`, dataObj)
+
+  if (response) {
+    console.log("userPost >>>>> response", response);
+    return response
+  }
+  
+} catch (error) {
+  console.log({userPost_error: error})
+  return error
+}
+}
+
 // READ REQUESTS
 // get team
 export const authUserGetTeam = async (teamId) => {

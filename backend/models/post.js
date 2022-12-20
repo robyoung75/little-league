@@ -18,7 +18,7 @@ const PostSchema = new Schema({
     minlength: 2,
   },
   number: {
-    type: Number,
+    type: String,
     maxlength: 3,
     minlength: 1,
     unique: true,
@@ -35,10 +35,10 @@ const PostSchema = new Schema({
   postImages: {
     type: Array,
   },
-  assetId: {
-    type: String,
-  },
-  publicId: { type: String },
+  // assetId: {
+  //   type: String,
+  // },
+  // publicId: { type: String },
   date: {
     type: Date,
     default: Date.now,

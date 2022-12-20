@@ -12,10 +12,12 @@ const multerUploadsMultiple = multer({ storage }).fields([
   { name: "defenseImg", maxCount: 1 },
 ]);
 
-const multerUploadsPosts = multer({ storage }).fields([
-  { name: "postImages", maxCount: 5 },
+// const multerUploadsPosts = multer({ storage }).fields([
+//   { name: "postImages", maxCount: 5 },
   
-]);
+// ]);
+
+const multerUploadsPosts = multer({storage}).array('postImages', 5)
 
 // const multerUploadsMultiple = multer({ storage }).array('images');
 export {

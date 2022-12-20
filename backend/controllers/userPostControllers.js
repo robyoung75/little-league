@@ -16,18 +16,15 @@ import { sharpImgResize } from "../utilities/sharpFunctions.js";
 export const userCreatePost_post = async (req, res) => {
   console.log(
     "userCreatePost_post req.files.postImages >>>>>>>>> ",
-    req.files.postImages
+    req.files
   );
 
   try {
     if (req.error) {
       console.log({ userCreatePost_post: req.error });
       throw req.error;
-    }
-
-    if (req.files.postImages === undefined) {
-      throw new Error("No images are attached for upload, try again");
-    }
+    }  
+    
 
     const { id } = req.userId;
 
@@ -35,6 +32,7 @@ export const userCreatePost_post = async (req, res) => {
 
     const { teamUserName, teamName, firstName, lastName, number, post } =
       req.body;
+
 
     // updated postDoc
     let postDoc;
@@ -65,7 +63,7 @@ export const userCreatePost_post = async (req, res) => {
 
     // resize all images for dbase space
     await Promise.all(
-      req.files.postImages.map(async (img) => {
+      req.files.map(async (img) => {
         return postImages.push({
           teamUserName,
           imageTitle: img.originalname,

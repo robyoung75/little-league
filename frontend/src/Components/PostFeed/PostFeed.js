@@ -27,6 +27,8 @@ function PostFeed() {
     });
   }, [dispatch, testPost]);
 
+  
+
   const PostImage = ({ post, user, date }) => {
     return (
       <ThemedDiv theme={theme} className="postImage">

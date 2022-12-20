@@ -27,9 +27,13 @@ const handleImgPreview = (e, setStateFunc, imgURLFunc) => {
   setStateFunc(imgURL);
 };
 
-const handleImgCancel = (e, setStateFunc) => {
+const handleImgCancel = (e, setStateFunc, setStateFunc_2) => {
   e.preventDefault();
   setStateFunc(null);
+
+  if (setStateFunc_2) {
+    setStateFunc_2(null);
+  }
 };
 
 const handleUserAuthentication = async (
