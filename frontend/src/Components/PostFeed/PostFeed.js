@@ -11,9 +11,12 @@ import Avatar from "../Avatar/Avatar";
 import post_1 from "../../assets/images/posts/post_1.jpg";
 import post_2 from "../../assets/images/posts/post_2.jpg";
 import post_3 from "../../assets/images/posts/post_3.jpg";
+import { faRandom } from "@fortawesome/free-solid-svg-icons";
+import { number } from "yup";
 
 function PostFeed() {
-  const [{ authTheme, posts, userData }, dispatch] = useStateValue();
+  const [{ authTheme, posts, userData, authPosts, authUser }, dispatch] =
+    useStateValue();
   const [testPost] = useState([
     { user: "userName", date: new Date().toDateString(), post: post_1, id: 1 },
     { user: "userName", date: new Date().toDateString(), post: post_2, id: 2 },
@@ -27,8 +30,6 @@ function PostFeed() {
     });
   }, [dispatch, testPost]);
 
-  
-
   const PostImage = ({ post, user, date }) => {
     return (
       <ThemedDiv theme={authTheme} className="postImage">
@@ -41,8 +42,12 @@ function PostFeed() {
             <span>{date}</span>
           </div>
         </ThemedHeader>
-        <img src={post} alt="post" className="postImage__img" />
-        {userData && (
+
+        {post.map((item, index) => (
+          <img src={item} key={index} alt="post" className="postImage__img" />
+        ))}
+
+        {authUser && (
           <div className="postImage__btnContainer">
             <div className="postImage__btn">
               <ThemedButton theme={authTheme}>Delete</ThemedButton>
@@ -54,11 +59,11 @@ function PostFeed() {
   };
   return (
     <div className="postFeed">
-      {posts
-        ? posts.map((post) => (
+      {authPosts
+        ? authPosts.posts.map((post) => (
             <PostImage
-              post={post.post}
-              key={post.id}
+              post={post.postImages.map((image) => image.secureURL)}
+              key={post._id}
               user={post.user}
               date={post.date}
             />

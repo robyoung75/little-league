@@ -230,6 +230,24 @@ const months = [
   "December",
 ];
 
+// ISO_Date String converted to month/day/year string
+const ISO_DateStringToShortString = (ISO_dateString) => {
+  const date = new Date(ISO_dateString);
+  const year = date.getFullYear();
+  let month = date.getMonth() + 1;
+  let day = date.getDate();
+
+  if (day < 10) {
+    day = "0" + day;
+  }
+  if (month < 10) {
+    month = "0" + month;
+  }
+
+  const shortDate = `${month}/${day}/${year}`;
+  return shortDate;
+};
+
 //  IMAGE HANDLING
 // returns a URL for an uploaded image
 const imgURL = (imageFile) => {
@@ -261,31 +279,29 @@ const handleDelete = (toDelete, dataArr, stateFunc, dataName) => {
   }
 };
 
-// PREPARE IMAGE FILES FOR UPLOAD, MULTIPLE IMAGES AT ONCE, CALLED ON POSTINPUT 
+// PREPARE IMAGE FILES FOR UPLOAD, MULTIPLE IMAGES AT ONCE, CALLED ON POSTINPUT
 const uploadMultipleImgFiles = (imgArr) => {
- 
   let fileObj = [];
   let fileArray = [];
 
   fileObj.push(imgArr);
 
   for (let i = 0; i < fileObj[0].length; i++) {
-    fileArray.push(URL.createObjectURL(fileObj[0][i]))
+    fileArray.push(URL.createObjectURL(fileObj[0][i]));
   }
 
-  return fileArray
-
-}
+  return fileArray;
+};
 
 // CREATE FILE ARRAY FROM FILELIST FOR UPLOAD.
 const convertFileListToArr = (imgFileList) => {
-  const fileList = []
+  const fileList = [];
   for (var i = 0; i < imgFileList.length; i++) {
-    fileList.push(imgFileList[i])
+    fileList.push(imgFileList[i]);
   }
-  console.log("convertFileListToArr_____fileList", fileList)
-  return fileList
-}
+  console.log("convertFileListToArr_____fileList", fileList);
+  return fileList;
+};
 
 // const setLocalStorage = ((localStorageName) => {
 //   const existingLocalStorageValue = localStorage.getItem(localStorageName);
@@ -312,6 +328,7 @@ export {
   currentYear,
   monthlySchedule,
   findIndex,
+  ISO_DateStringToShortString,
   days,
   months,
   imgURL,
@@ -319,5 +336,5 @@ export {
   handleDelete,
   handleFirstLetterCap,
   uploadMultipleImgFiles,
-  convertFileListToArr
+  convertFileListToArr,
 };

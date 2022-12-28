@@ -20,10 +20,8 @@ function Navbar({
   authenticated,
   setAuthenticated,
 }) {
-  const [
-    {  teamData, userData, authUser, authTheme, authTeam },
-    dispatch,
-  ] = useStateValue();
+  const [{ teamData, userData, authUser, authTheme, authTeam }, dispatch] =
+    useStateValue();
   const navigate = useNavigate();
 
   // dropdown event handler
@@ -149,7 +147,7 @@ function Navbar({
                 {signedIn === true ? (
                   <span onClick={handleUserAuthentication}>Sign out</span>
                 ) : (
-                  <span>Sign in</span>
+                  <span>Sign in | Create user</span>
                 )}
               </Link>
             </li>

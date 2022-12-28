@@ -20,6 +20,20 @@ const UserSchema = new Schema({
     maxlength: 20,
     minlength: 2,
   },
+  playerFirstName: {
+    type: String,
+    // required: [true, "Please enter your first name"],
+    lowercase: true,
+    maxlength: 20,
+    minlength: 2,
+  },
+  playerLastName: {
+    type: String,
+    // required: [true, "Please enter your last name"],
+    lowercase: true,
+    maxlength: 20,
+    minlength: 2,
+  },
   email: {
     type: String,
     // required: [true, "Please enter your email"],

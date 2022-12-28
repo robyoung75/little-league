@@ -48,7 +48,15 @@ export const adminCreateUser_post = async (req, res) => {
 // new user creates user
 export const userCreateUser_post = async (req, res) => {
   try {
-    let { firstName, lastName, email, password, teamUserName } = req.body;
+    let {
+      firstName,
+      lastName,
+      playerFirstName,
+      playerLastName,
+      email,
+      password,
+      teamUserName,
+    } = req.body;
 
     let existingTeam = await findTeamByTeamUserName(teamUserName);
 
@@ -56,6 +64,8 @@ export const userCreateUser_post = async (req, res) => {
       let user = {
         firstName,
         lastName,
+        playerFirstName,
+        playerLastName,
         email,
         teamUserName,
         teamId: existingTeam.teamId,

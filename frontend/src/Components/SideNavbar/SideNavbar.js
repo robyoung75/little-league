@@ -46,6 +46,11 @@ function SideNavbar() {
             </Link>
           </p>
           <p onClick={handleActive}>
+            <Link className="sideNavbar__link" to="/forms/create_users">
+              Users
+            </Link>
+          </p>
+          <p onClick={handleActive}>
             <Link className="sideNavbar__link" to="/forms/create_schedule">
               Schedule
             </Link>

@@ -3,17 +3,45 @@ import { useStateValue } from "../../Context/stateProvider";
 import { ThemedButton, ThemedHeader } from "../../utils/ThemedComponents";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { signInSchema } from "../../Schema/FormsSchema";
+import { signInSchema, userSchema } from "../../Schema/FormsSchema";
 import "./Forms.css";
 import { useNavigate } from "react-router-dom";
 
-import { adminUserSignIn, userSignIn } from "../../assets/requests";
+import {
+  adminUserSignIn,
+  userCreateAccount,
+  userSignIn,
+} from "../../assets/requests";
+
+import { handleShowPassword } from "../../assets/eventHandlers";
 
 function SignIn({ setSignedIn, setAuthenticated }) {
   const [{ authTheme }, dispatch] = useStateValue();
   const [isAdmin, setIsAdmin] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [createAccount, setCreateAccount] = useState(false);
+  const [schema, setSchema] = useState(signInSchema);
+  const [checked, setChecked] = useState(false);
+
   const navigate = useNavigate();
+
+  const handleCreateAccount = (e) => {
+    e.preventDefault();
+    console.log("handleCreateAccount");
+
+    const user = userSchema;
+    const signIn = signInSchema;
+
+    if (createAccount === false) {
+      setCreateAccount(true);
+      setSchema(user);
+    }
+
+    if (createAccount === true) {
+      setCreateAccount(false);
+      setSchema(signIn);
+    }
+  };
 
   const handleSetAdminUser = (e) => {
     const checked = e.target.checked;
@@ -38,7 +66,7 @@ function SignIn({ setSignedIn, setAuthenticated }) {
     handleSubmit,
     reset,
     formState: { errors, isSubmitSuccessful },
-  } = useForm({ resolver: yupResolver(signInSchema) });
+  } = useForm({ resolver: yupResolver(schema) });
 
   const formSubmit = async (data) => {
     dispatch({
@@ -48,6 +76,10 @@ function SignIn({ setSignedIn, setAuthenticated }) {
     if (isSubmitSuccessful) {
       console.log({ formSubmit_signIn: data });
       let response;
+
+      if (createAccount && schema === userSchema) {
+        response = await userCreateAccount(data);
+      }
 
       if (isAdmin) {
         response = await adminUserSignIn(data);
@@ -85,23 +117,81 @@ function SignIn({ setSignedIn, setAuthenticated }) {
   return (
     <div className="signIn">
       <ThemedHeader theme={authTheme} className="signIn__header">
-        Sign in
+        {createAccount ? "Create New User" : "Sign in"}
       </ThemedHeader>
       <form
         className="signIn__form formContainer flexColumn"
         onSubmit={handleSubmit(formSubmit)}
       >
-        <label htmlFor="userName">Team Username:</label>
+        <label htmlFor="teamUserName">Team Username:</label>
         <input
           type="text"
-          id="userName"
-          name="userName"
-          aria-describedby="userLastName"
+          id="teamUserName"
+          name="teamUserName"
+          aria-describedby="team user name"
           {...register("teamUserName")}
         />
         {errors.teamUserName && (
           <span className="form__errors">{errors.teamUserName.message}</span>
         )}
+        {createAccount ? (
+          <>
+            <label htmlFor="firstName">New User First Name:</label>
+            <input
+              type="text"
+              id="firstName"
+              name="firstName"
+              aria-describedby="first name"
+              autoComplete="on"
+              {...register("firstName")}
+            />
+            {errors.firstName && (
+              <span className="form__errors">{errors.firstName.message}</span>
+            )}
+            <label htmlFor="lastName">New User Last Name:</label>
+            <input
+              type="text"
+              id="lastName"
+              name="lastname"
+              aria-describedby="last name"
+              autoComplete="on"
+              {...register("lastName")}
+            />
+            {errors.lastName && (
+              <span className="form__errors">{errors.lastName.message}</span>
+            )}
+            <label htmlFor="playerFirtName">Your Players First Name:</label>
+            <input
+              type="text"
+              id="playerFirstName"
+              name="playerFirstName"
+              aria-describedby="players first name"
+              autoComplete="on"
+              {...register("playerFirstName")}
+            />
+            {errors.playerFirstName && (
+              <span className="form__errors">
+                {errors.playerFirstName.message}
+              </span>
+            )}
+
+            <label htmlFor="playerLastName">Your Players Last Name:</label>
+            <input
+              type="text"
+              id="playersLastName"
+              name="playersLastName"
+              aria-describedby="players last name"
+              autoComplete="on"
+              {...register("playerLastName")}
+            />
+            {errors.userLastName && (
+              <span className="form__errors">
+                {errors.userLastName.message}
+              </span>
+            )}
+          </>
+        ) : null}
+
         <label htmlFor="email">Email:</label>
         <input
           type="email"
@@ -115,7 +205,7 @@ function SignIn({ setSignedIn, setAuthenticated }) {
         )}
         <label htmlFor="userPassword">Password:</label>
         <input
-          type="password"
+          type={checked ? "text" : "password"}
           id="userPassword"
           name="userPassword"
           aria-describedby="userPassword"
@@ -125,18 +215,62 @@ function SignIn({ setSignedIn, setAuthenticated }) {
         {errors.password && (
           <span className="form__errors">{errors.password.message}</span>
         )}
-        <label
-          htmlFor="admin"
-          className="signIn__adminLabel"
-          onChange={handleSetAdminUser}
-        >
-          Admin:
-          <input type="checkbox" id="admin" name="admin" value={isAdmin} />
+
+        {createAccount ? (
+          <>
+            <label htmlFor="confirmPassword">Confirm password: </label>
+            <input
+              type={checked ? "text" : "password"}
+              id="confirmPassword"
+              name="confirmPassword"
+              aria-describedby="userConfirmPassword"
+              autoComplete="on"
+              {...register("password_confirm")}
+            />
+
+            {errors.password_confirm && (
+              <span className="form__errors">
+                <p>{errors.password_confirm.message}</p>
+              </span>
+            )}
+          </>
+        ) : null}
+
+        <label htmlFor="showPassword" className="signIn__adminLabel">
+          {checked ? "Hide password" : "Show password"}
+
+          <input
+            type="checkbox"
+            id="showPassword"
+            name="showPassword"
+            checked={checked}
+            value={checked}
+            onChange={() => handleShowPassword(checked, setChecked)}
+          />
         </label>
+        {!createAccount ? (
+          <label htmlFor="admin" className="signIn__adminLabel">
+            Admin:
+            <input
+              type="checkbox"
+              id="admin"
+              name="admin"
+              value={isAdmin}
+              onChange={handleSetAdminUser}
+            />
+          </label>
+        ) : null}
 
         <div className="formPreview__btns signIn__btn">
-          <ThemedButton theme={authTheme} type="submit">
-            Submit
+          <ThemedButton theme={authTheme} type="submit" className="smallBTN">
+            Sign in
+          </ThemedButton>
+          <ThemedButton
+            theme={authTheme}
+            onClick={handleCreateAccount}
+            className="smallBTN"
+          >
+            Create New User
           </ThemedButton>
         </div>
       </form>

@@ -20,6 +20,7 @@ import CompletedForm from "./pages/CompletedForm/CompletedForm";
 import SideNavbar from "./Components/SideNavbar/SideNavbar";
 import Footer from "./Components/Footer/Footer";
 import UserSignIn from "./pages/UserSignIn/UserSignIn";
+import AdminSignUpUser from "./pages/AdminSignUpUser/AdminSignUpUser";
 import {
   authUserGetCoaches,
   authUserGetPlayers,
@@ -207,59 +208,6 @@ function App() {
     };
   }, [authenticated, authUser]);
 
-
-
-  // useEffect(() => {
-  //   //  simulate the request from database for user validation
-  //   const user = (userEmail) => {
-  //     let signedIn;
-  //     users.forEach((item) => {
-  //       if (item.email === userEmail) {
-  //         signedIn = item;
-  //         // setSignedIn(true);
-  //       }
-  //     });
-  //     return signedIn;
-  //   };
-  //   setAuth(user(userData.email));
-  // }, []);
-
-  // useEffect(() => {
-  //   if (auth) {
-  //     //  simulate the request from database for team data
-  //     const setTeam = (data) => {
-  //       data.forEach((item) => {
-  //         if (item.teamId === auth.teamId) {
-  //           data = item;
-  //         }
-  //       });
-  //       return data;
-  //     };
-  //     setUserTeam(setTeam(data));
-  //   }
-  // }, [auth]);
-
-  // useEffect(() => {
-  //   if (auth && userTeam) {
-  //     dispatch({
-  //       type: "SET_USER",
-  //       userData: auth,
-  //     });
-  //     dispatch({
-  //       type: "SET_THEME",
-  //       theme: theme,
-  //     });
-  //     dispatch({
-  //       type: "SET_TEAM",
-  //       teamData: userTeam,
-  //     });
-  //     dispatch({
-  //       type: "SET_PLAYER",
-  //       player: player,
-  //     });
-  //   }
-  // }, [auth, userTeam, dispatch, theme, player]);
-
   return (
     <div className="app">
       <Routes>
@@ -317,13 +265,15 @@ function App() {
             <Route path="create_teamName" element={<TeamSignUp />} />
             <Route path="create_players" element={<PlayersSignUp />} />
             <Route path="create_coaches" element={<CoachesSignUp />} />
+            <Route path="create_users" element={<AdminSignUpUser />} />
             <Route path="create_schedule" element={<CreateSchedule />} />
             <Route path="completed_form" element={<CompletedForm />} />
           </Route>
         </Route>
       </Routes>
-
-      <Footer />
+      <div className="appTest">
+        <Footer />
+      </div>
     </div>
   );
 }

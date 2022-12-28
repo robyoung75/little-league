@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useStateValue } from "../../../Context/stateProvider";
 
-import { monthlySchedule } from "../../../assets/functions";
+import {
+  monthlySchedule,
+  ISO_DateStringToShortString,
+} from "../../../assets/functions";
 import "./MobileCalendar.css";
 
 const GameDay = ({ date }) => {
-  const [{ teamData }] = useStateValue();
+  const [{ teamData, authSchedule }] = useStateValue();
   const [monthSchedule, setmonthSchedule] = useState();
 
   useEffect(() => {
@@ -17,26 +20,35 @@ const GameDay = ({ date }) => {
 
   return (
     <>
-      {monthSchedule
-        ? monthSchedule.map((game) => (
-            <tr key={game.id} className="gameDay__row">
-              <td className="gameDay__cell">
-                <div className="gameDay__date">{game.date}</div>
-              </td>
-              <td className="gameDay__cell">
-                <div className="gameDay__opponent">{game.opponent}</div>
-              </td>
-              <td className="gameDay__cell">
-                <div className="gameDay__time">{game.time}</div>
-              </td>
-              <td className="gameDay__cell">
-                <div className="gameDay__address">{game.address}</div>
-              </td>
-              <td className="gameDay__cell">
-                <div className="gameDay__uniform">{game.uniform}</div>
-              </td>
-            </tr>
-          ))
+      {authSchedule
+        ? authSchedule.schedule.map(
+            (game) => (
+              <tr key={game._id} className="gameDay__row">
+                <td className="gameDay__cell">
+                  <div className="gameDay__date">{game.opponent}</div>
+                </td>
+                <td className="gameDay__cell">
+                  <div className="gameDay__opponent">
+                    {ISO_DateStringToShortString(game.date)}
+                  </div>
+                </td>
+                <td className="gameDay__cell">
+                  <div className="gameDay__time">{game.gameTime}</div>
+                </td>
+                <td className="gameDay__cell">
+                  <div className="gameDay__address">{game.address}</div>
+                </td>
+                <td className="gameDay__cell">
+                  <div className="gameDay__uniform">{game.homeAway}</div>
+                </td>
+              </tr>
+            ),
+            console.log(
+              authSchedule.schedule.map((item) =>
+                console.log(new Date(item.date))
+              )
+            )
+          )
         : null}
     </>
   );

@@ -191,7 +191,6 @@ function Schedule({ mobile, isActive }) {
       </div>
 
       <Calendar date={date} />
-
       <MobileCalendar date={date} />
     </div>
   );

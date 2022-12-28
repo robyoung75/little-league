@@ -56,6 +56,21 @@ export const signInSchema = yup.object().shape({
   teamUserName: yup.string().required("Please enter a valid teamUserName"),
   email: yup.string().email().required("Please enter a valid email"),
   password: yup.string().required("Please enter a valid password"),
+
 });
 
-export const postSchema = yup.object().shape({})
+export const postSchema = yup.object().shape({});
+
+export const userSchema = yup.object().shape({
+  firstName: yup.string().min(2).required(),
+  lastName: yup.string().min(3).required(),
+  playerFirstName: yup.string().min(2).required(),
+  playerLastName: yup.string().min(3).required(),
+  teamUserName: yup.string().required("Please enter a valid teamUserName"),
+  email: yup.string().email().required("Please enter a valid email"),
+  password: yup.string().min(6).required(),
+  password_confirm: yup
+    .string()
+    .oneOf([yup.ref("password"), null], "passwords must match")
+    .required("please confirm your password"),
+});
