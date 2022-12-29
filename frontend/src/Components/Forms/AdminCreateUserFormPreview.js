@@ -17,7 +17,7 @@ const AdminCreateUserFormPreview = ({ setPlayersData }) => {
               <th className="formPreview__th">Email</th>
               <th className="formPreview__th">Player First name</th>
               <th className="formPreview__th">Player Last name</th>
-              <th className="formPreview__th">Password</th>
+              {/* <th className="formPreview__th">Password</th> */}
             </tr>
           </thead>
           <tbody>
@@ -33,12 +33,17 @@ const AdminCreateUserFormPreview = ({ setPlayersData }) => {
                   <td className="formPreview__td">
                     <div className="formPreview__content">{user.email}</div>
                   </td>
-                  <td className="formPreview__td">
+                  {/* <td className="formPreview__td">
                     <div className="formPreview__content">{user.password}</div>
+                  </td> */}
+                  <td className="formPreview__td">
+                    <div className="formPreview__content">
+                      {user.playerFirstName}
+                    </div>
                   </td>
                   <td className="formPreview__td">
                     <div className="formPreview__content">
-                      {user.playerFirstName}{" "}
+                      {user.playerLastName}
                     </div>
                   </td>
                   <td className="formPreview__td">

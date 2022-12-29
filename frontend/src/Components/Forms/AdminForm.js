@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { adminSchema } from "../../Schema/FormsSchema";
@@ -8,6 +8,7 @@ import { useStateValue } from "../../Context/stateProvider";
 import { useNavigate } from "react-router-dom";
 import {
   addSecondAdminUser,
+  adminUserGetAdminUsers,
   adminUserPost,
   authUserSignOut,
 } from "../../assets/requests";
@@ -30,6 +31,7 @@ function AdminForm({
   const [checked, setChecked] = useState(false);
   const [mouseOver, setMouseOver] = useState(false);
   const [mouseOverNext, setMouseOverNext] = useState(false);
+  const [dataSubmit, setDataSubmit] = useState(false);
 
   const navigate = useNavigate();
 
@@ -59,10 +61,40 @@ function AdminForm({
       if (authUser) {
         await addSecondAdminUser(authUser.teamId, data);
         localStorage.setItem("adminDataUser_2", JSON.stringify(data));
+
+        if (dataSubmit === true) {
+          setDataSubmit(false);
+        }
+
+        if (dataSubmit === false) {
+          setDataSubmit(true);
+        }
+
         reset();
       }
     }
   };
+
+  useEffect(() => {
+    let isSubscribed = true;
+
+    const fetchData = async () => {
+      let adminUsersData = await adminUserGetAdminUsers();
+      dispatch({
+        type: "SET_AUTH_ADMIN_USERS",
+        authAdminUsers: adminUsersData.data,
+      });
+    };
+
+    if (authUser && authUser.adminAuth) {
+      console.log("getting admin users data");
+      fetchData().catch(console.error);
+    }
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [dataSubmit]);
 
   return (
     <div className="adminForm form">

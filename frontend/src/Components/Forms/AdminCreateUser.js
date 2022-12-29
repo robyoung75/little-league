@@ -6,11 +6,12 @@ import { handleShowPassword } from "../../assets/eventHandlers";
 import { userSchema } from "../../Schema/FormsSchema";
 import { ThemedButton } from "../../utils/ThemedComponents";
 import { useStateValue } from "../../Context/stateProvider";
-import { adminCreateNewUser } from "../../assets/requests";
+import { adminCreateNewUser, adminUserGetUsers } from "../../assets/requests";
 
 function AdminCreateUser() {
   const [checked, setChecked] = useState(false);
   const [teamUserName, setTeamUserName] = useState("fluffAndPuff");
+  const [dataSubmit, setDataSubmit] = useState(false);
 
   const [{ authTheme, authUser }, dispatch] = useStateValue();
 
@@ -28,9 +29,42 @@ function AdminCreateUser() {
 
       await adminCreateNewUser(data);
 
+      setDataSubmit(true);
+
+      if (dataSubmit === true) {
+        setDataSubmit(false);
+      }
+
+      if (dataSubmit === false) {
+        setDataSubmit(true);
+      }
+
       reset();
     }
   };
+
+  useEffect(() => {
+    let isSubscribed = true;
+
+    const fetchData = async () => {
+      const usersData = await adminUserGetUsers();
+
+      dispatch({
+        type: "SET_AUTH_USERS",
+        authUsers: usersData.data,
+      });
+    };
+
+    if (authUser && authUser.adminAuth) {
+      console.log("getting new user data");
+
+      fetchData().catch(console.error);
+
+      return () => {
+        isSubscribed = false;
+      };
+    }
+  }, [dataSubmit]);
 
   return (
     <div className="usersForm form">

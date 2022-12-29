@@ -37,15 +37,25 @@ export const ThemedButton = ({
   hovering,
   onClick,
   type,
+  purpose,
 }) => {
   return (
     <button
       type={type}
-      style={hovering && theme ? theme.btn__hover : theme ? theme.style : null}
+      // style={hovering && theme ? theme.btn__hover : theme ? theme.style : null}
       className={className ? "themedButton" + " " + className : "themedButton"}
       onMouseOver={onMouseOver}
       onMouseOut={onMouseOut}
       onClick={onClick}
+      style={
+        purpose === "delete"
+          ? { background: "red" }
+          : hovering && theme && !purpose
+          ? theme.btn__hover
+          : theme
+          ? theme.style
+          : null
+      }
     >
       {children}
     </button>

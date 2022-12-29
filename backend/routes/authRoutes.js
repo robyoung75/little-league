@@ -72,7 +72,7 @@ router.param("postId", getPostById);
 
 // ADMIN ROUTES
 router.post("/api/createAdminUser", createAdminUser_post);
-router.get("/api/admin/adminUsers/:teamId", requiresAuth, getAllAdminUsers_get);
+router.get("/api/admin/adminUsers", requiresAuth, getAllAdminUsers_get);
 router.put(
   "/api/admin/updateAdminUsers/:teamId",
   requiresAuth,

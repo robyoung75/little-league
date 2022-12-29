@@ -223,7 +223,7 @@ export const userPost = async (teamId, dataObj) => {
 };
 
 // READ REQUESTS
-// get team any auth user
+// get TEAM any auth user
 export const authUserGetTeam = async (teamId) => {
   try {
     const response = await axiosInstance.get(`/api/admin/team/${teamId}`);
@@ -238,7 +238,7 @@ export const authUserGetTeam = async (teamId) => {
   }
 };
 
-// get players any auth user
+// get PLAYERS any auth user
 export const authUserGetPlayers = async (teamId) => {
   try {
     const response = await axiosInstance.get(`/api/admin/players/${teamId}`);
@@ -252,7 +252,7 @@ export const authUserGetPlayers = async (teamId) => {
   }
 };
 
-// get coaches any auth user
+// get COACHES any auth user
 export const authUserGetCoaches = async (teamId) => {
   try {
     const response = await axiosInstance.get(`/api/admin/coaches/${teamId}`);
@@ -266,7 +266,7 @@ export const authUserGetCoaches = async (teamId) => {
   }
 };
 
-// get schedule any auth user
+// get SCHEDULE any auth user
 export const authUserGetSchedule = async (teamId) => {
   try {
     const response = await axiosInstance.get(`/api/admin/schedule/${teamId}`);
@@ -280,12 +280,42 @@ export const authUserGetSchedule = async (teamId) => {
   }
 };
 
-// get posts any auth users
+// get POSTS any auth users
 export const authUserGetPosts = async (teamId) => {
   try {
     const response = await axiosInstance.get(`/api/user/posts/${teamId}`);
     if (response) {
       console.log("authUserGetPosts__Response >>>>> ", response);
+      return response;
+    }
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
+// get USERS by admin user only
+export const adminUserGetUsers = async () => {
+  try {
+    const response = await axiosInstance.get("/api/admin/users");
+
+    if (response.status === 200) {
+      console.log("adminUserGetUsers__response >>>>> ", response);
+      return response;
+    }
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
+// get ADMIN USERS by admin user only
+export const adminUserGetAdminUsers = async () => {
+  try {
+    const response = await axiosInstance.get("api/admin/adminUsers");
+
+    if (response.status === 200) {
+      console.log("adminUserGetAdminUsers__response >>>>> ", response);
       return response;
     }
   } catch (error) {
@@ -311,7 +341,25 @@ export const addSecondAdminUser = async (teamId, dataObj) => {
     }
   } catch (error) {
     console.log({ addSecondAdminUser: error });
+    return error;
   }
 };
 
 // DELETE REQUESTS
+
+// delete ADMIN USER by admin only
+export const adminDeleteAdminUser = async (dataObj) => {
+  console.log("adminDeleteAdminUser__dataObj >>>>> ", dataObj);
+
+  try {
+    const response = await axiosInstance.delete(
+      `/api/admin/updateRemoveAdminUser/${dataObj.teamId}?userId=${dataObj._id}`
+    );
+
+    console.log(response);
+    return response;
+  } catch (error) {
+    console.log("adminDeleteAdminUser__error >>>>> ", error);
+    return error;
+  }
+};

@@ -6,12 +6,14 @@ import users from "../api/users";
 
 export const initialState = {
   authUser: null,
+  authUsers: null,
+  authAdminUsers: null,
   authTeam: null,
   authPlayers: null,
   authCoaches: null,
   authSchedule: null,
   authPosts: null,
-  authTheme:  {
+  authTheme: {
     name: "razorBacks",
     id: "111112",
     style: {
@@ -29,7 +31,7 @@ export const initialState = {
     },
     btn: {
       background: "#BD3039",
-      color: "#a1aaad",  
+      color: "#a1aaad",
     },
     btn__hover: {
       background: "#a1aaad",
@@ -53,6 +55,18 @@ const reducer = (state, action) => {
       return {
         ...state,
         authUser: action.authUser,
+      };
+
+    case "SET_AUTH_USERS":
+      return {
+        ...state,
+        authUsers: action.authUsers,
+      };
+
+    case "SET_AUTH_ADMIN_USERS":
+      return {
+        ...state,
+        authAdminUsers: action.authAdminUsers,
       };
 
     case "SET_AUTH_TEAM":

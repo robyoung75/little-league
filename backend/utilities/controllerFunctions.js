@@ -128,15 +128,15 @@ export const setAdminUserTeamId = async (id) => {
   }
 };
 
-// delete and existing admin user
-export const deleteAdminUser = async (teamId, adminId) => {
+// DELETE EXISTING ADMIN USER by admin only
+export const deleteAdminUser = async (teamId, adminUserId) => {
   try {
     const adminUserDoc = await TeamAdminSchema.findOneAndUpdate(
       { teamId: teamId },
       {
         $pull: {
           admin: {
-            _id: adminId,
+            _id: adminUserId,
           },
         },
       },
